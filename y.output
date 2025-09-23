@@ -1,0 +1,1248 @@
+   0  $accept : prog $end
+
+   1  prog : ID '{' listasentencia '}'
+
+   2  listasentencia : listasentencia sentencia ';'
+   3                 | sentencia ';'
+
+   4  sentencia : asignacion
+   5            | declaracion
+   6            | control
+   7            | print
+   8            | funcion
+
+   9  declaracion : tipo listavariables
+  10              | tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' '}'
+
+  11  asignacion : ID ASIG expresion
+  12             | ID '.' ID ASIG expresion
+  13             | listavariables '=' listaexpresiones
+
+  14  control : IF '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF
+  15          | IF '(' condicion ')' THEN '{' listasentencia '}' ENDIF
+  16          | DO '{' listasentencia '}' UNTIL '(' condicion ')'
+
+  17  print : PRINT '(' expresion ')'
+  18        | PRINT '(' CADENAML ')'
+
+  19  condicion : expresion comparador expresion
+
+  20  comparador : '>'
+  21             | '<'
+  22             | MAYORIG
+  23             | MENORIG
+  24             | IGUAL
+  25             | DISTINTO
+
+  26  tipo : LONG
+
+  27  listavariables : listavariables ',' ID
+  28                 | ID
+
+  29  listaparametros : listaparametros ',' parametro
+  30                  | parametro
+
+  31  parametro : CV tipo ID
+  32            | tipo ID
+
+  33  expresion : expresion '+' termino
+  34            | expresion '-' termino
+  35            | termino
+
+  36  listaexpresiones : listaexpresiones ',' expresion
+  37                   | expresion
+
+  38  termino : termino '*' factor
+  39          | termino '/' factor
+  40          | factor
+
+  41  factor : ID
+  42         | CTE
+  43         | funcion
+
+  44  funcion : ID '(' listapinvocacion ')'
+
+  45  listapinvocacion : listapinvocacion ',' pinvocacion
+  46                   | pinvocacion
+
+  47  pinvocacion : expresion FLECHA ID
+  48              | TRUNC '(' expresion ')' FLECHA ID
+
+state 0
+	$accept : . prog $end  (0)
+
+	ID  shift 1
+	.  error
+
+	prog  goto 2
+
+
+state 1
+	prog : ID . '{' listasentencia '}'  (1)
+
+	'{'  shift 3
+	.  error
+
+
+state 2
+	$accept : prog . $end  (0)
+
+	$end  accept
+
+
+state 3
+	prog : ID '{' . listasentencia '}'  (1)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	.  error
+
+	listasentencia  goto 9
+	sentencia  goto 10
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 4
+	asignacion : ID . ASIG expresion  (11)
+	asignacion : ID . '.' ID ASIG expresion  (12)
+	listavariables : ID .  (28)
+	funcion : ID . '(' listapinvocacion ')'  (44)
+
+	ASIG  shift 18
+	'('  shift 19
+	'.'  shift 20
+	'='  reduce 28
+	','  reduce 28
+
+
+state 5
+	control : IF . '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF  (14)
+	control : IF . '(' condicion ')' THEN '{' listasentencia '}' ENDIF  (15)
+
+	'('  shift 21
+	.  error
+
+
+state 6
+	tipo : LONG .  (26)
+
+	.  reduce 26
+
+
+state 7
+	control : DO . '{' listasentencia '}' UNTIL '(' condicion ')'  (16)
+
+	'{'  shift 22
+	.  error
+
+
+state 8
+	print : PRINT . '(' expresion ')'  (17)
+	print : PRINT . '(' CADENAML ')'  (18)
+
+	'('  shift 23
+	.  error
+
+
+state 9
+	prog : ID '{' listasentencia . '}'  (1)
+	listasentencia : listasentencia . sentencia ';'  (2)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	'}'  shift 24
+	.  error
+
+	sentencia  goto 25
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 10
+	listasentencia : sentencia . ';'  (3)
+
+	';'  shift 26
+	.  error
+
+
+state 11
+	sentencia : asignacion .  (4)
+
+	.  reduce 4
+
+
+state 12
+	sentencia : declaracion .  (5)
+
+	.  reduce 5
+
+
+state 13
+	sentencia : control .  (6)
+
+	.  reduce 6
+
+
+state 14
+	sentencia : print .  (7)
+
+	.  reduce 7
+
+
+state 15
+	sentencia : funcion .  (8)
+
+	.  reduce 8
+
+
+state 16
+	declaracion : tipo . listavariables  (9)
+	declaracion : tipo . ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' '}'  (10)
+
+	ID  shift 27
+	.  error
+
+	listavariables  goto 28
+
+
+state 17
+	asignacion : listavariables . '=' listaexpresiones  (13)
+	listavariables : listavariables . ',' ID  (27)
+
+	'='  shift 29
+	','  shift 30
+	.  error
+
+
+state 18
+	asignacion : ID ASIG . expresion  (11)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 34
+	termino  goto 35
+	factor  goto 36
+
+
+state 19
+	funcion : ID '(' . listapinvocacion ')'  (44)
+
+	ID  shift 31
+	CTE  shift 32
+	TRUNC  shift 37
+	.  error
+
+	funcion  goto 33
+	expresion  goto 38
+	termino  goto 35
+	factor  goto 36
+	listapinvocacion  goto 39
+	pinvocacion  goto 40
+
+
+state 20
+	asignacion : ID '.' . ID ASIG expresion  (12)
+
+	ID  shift 41
+	.  error
+
+
+state 21
+	control : IF '(' . condicion ')' THEN '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF  (14)
+	control : IF '(' . condicion ')' THEN '{' listasentencia '}' ENDIF  (15)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 42
+	condicion  goto 43
+	termino  goto 35
+	factor  goto 36
+
+
+state 22
+	control : DO '{' . listasentencia '}' UNTIL '(' condicion ')'  (16)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	.  error
+
+	listasentencia  goto 44
+	sentencia  goto 10
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 23
+	print : PRINT '(' . expresion ')'  (17)
+	print : PRINT '(' . CADENAML ')'  (18)
+
+	ID  shift 31
+	CTE  shift 32
+	CADENAML  shift 45
+	.  error
+
+	funcion  goto 33
+	expresion  goto 46
+	termino  goto 35
+	factor  goto 36
+
+
+state 24
+	prog : ID '{' listasentencia '}' .  (1)
+
+	.  reduce 1
+
+
+state 25
+	listasentencia : listasentencia sentencia . ';'  (2)
+
+	';'  shift 47
+	.  error
+
+
+state 26
+	listasentencia : sentencia ';' .  (3)
+
+	.  reduce 3
+
+
+state 27
+	declaracion : tipo ID . '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' '}'  (10)
+	listavariables : ID .  (28)
+
+	'('  shift 48
+	';'  reduce 28
+	','  reduce 28
+
+
+state 28
+	declaracion : tipo listavariables .  (9)
+	listavariables : listavariables . ',' ID  (27)
+
+	','  shift 30
+	';'  reduce 9
+
+
+state 29
+	asignacion : listavariables '=' . listaexpresiones  (13)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 49
+	listaexpresiones  goto 50
+	termino  goto 35
+	factor  goto 36
+
+
+state 30
+	listavariables : listavariables ',' . ID  (27)
+
+	ID  shift 51
+	.  error
+
+
+state 31
+	factor : ID .  (41)
+	funcion : ID . '(' listapinvocacion ')'  (44)
+
+	'('  shift 19
+	MAYORIG  reduce 41
+	MENORIG  reduce 41
+	IGUAL  reduce 41
+	DISTINTO  reduce 41
+	FLECHA  reduce 41
+	';'  reduce 41
+	')'  reduce 41
+	'>'  reduce 41
+	'<'  reduce 41
+	','  reduce 41
+	'+'  reduce 41
+	'-'  reduce 41
+	'*'  reduce 41
+	'/'  reduce 41
+
+
+state 32
+	factor : CTE .  (42)
+
+	.  reduce 42
+
+
+state 33
+	factor : funcion .  (43)
+
+	.  reduce 43
+
+
+state 34
+	asignacion : ID ASIG expresion .  (11)
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+
+	'+'  shift 52
+	'-'  shift 53
+	';'  reduce 11
+
+
+state 35
+	expresion : termino .  (35)
+	termino : termino . '*' factor  (38)
+	termino : termino . '/' factor  (39)
+
+	'*'  shift 54
+	'/'  shift 55
+	MAYORIG  reduce 35
+	MENORIG  reduce 35
+	IGUAL  reduce 35
+	DISTINTO  reduce 35
+	FLECHA  reduce 35
+	';'  reduce 35
+	')'  reduce 35
+	'>'  reduce 35
+	'<'  reduce 35
+	','  reduce 35
+	'+'  reduce 35
+	'-'  reduce 35
+
+
+state 36
+	termino : factor .  (40)
+
+	.  reduce 40
+
+
+state 37
+	pinvocacion : TRUNC . '(' expresion ')' FLECHA ID  (48)
+
+	'('  shift 56
+	.  error
+
+
+state 38
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+	pinvocacion : expresion . FLECHA ID  (47)
+
+	FLECHA  shift 57
+	'+'  shift 52
+	'-'  shift 53
+	.  error
+
+
+state 39
+	funcion : ID '(' listapinvocacion . ')'  (44)
+	listapinvocacion : listapinvocacion . ',' pinvocacion  (45)
+
+	')'  shift 58
+	','  shift 59
+	.  error
+
+
+state 40
+	listapinvocacion : pinvocacion .  (46)
+
+	.  reduce 46
+
+
+state 41
+	asignacion : ID '.' ID . ASIG expresion  (12)
+
+	ASIG  shift 60
+	.  error
+
+
+state 42
+	condicion : expresion . comparador expresion  (19)
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+
+	MAYORIG  shift 61
+	MENORIG  shift 62
+	IGUAL  shift 63
+	DISTINTO  shift 64
+	'>'  shift 65
+	'<'  shift 66
+	'+'  shift 52
+	'-'  shift 53
+	.  error
+
+	comparador  goto 67
+
+
+state 43
+	control : IF '(' condicion . ')' THEN '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF  (14)
+	control : IF '(' condicion . ')' THEN '{' listasentencia '}' ENDIF  (15)
+
+	')'  shift 68
+	.  error
+
+
+state 44
+	listasentencia : listasentencia . sentencia ';'  (2)
+	control : DO '{' listasentencia . '}' UNTIL '(' condicion ')'  (16)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	'}'  shift 69
+	.  error
+
+	sentencia  goto 25
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 45
+	print : PRINT '(' CADENAML . ')'  (18)
+
+	')'  shift 70
+	.  error
+
+
+state 46
+	print : PRINT '(' expresion . ')'  (17)
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+
+	')'  shift 71
+	'+'  shift 52
+	'-'  shift 53
+	.  error
+
+
+state 47
+	listasentencia : listasentencia sentencia ';' .  (2)
+
+	.  reduce 2
+
+
+state 48
+	declaracion : tipo ID '(' . listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' '}'  (10)
+
+	LONG  shift 6
+	CV  shift 72
+	.  error
+
+	tipo  goto 73
+	listaparametros  goto 74
+	parametro  goto 75
+
+
+state 49
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+	listaexpresiones : expresion .  (37)
+
+	'+'  shift 52
+	'-'  shift 53
+	';'  reduce 37
+	','  reduce 37
+
+
+state 50
+	asignacion : listavariables '=' listaexpresiones .  (13)
+	listaexpresiones : listaexpresiones . ',' expresion  (36)
+
+	','  shift 76
+	';'  reduce 13
+
+
+state 51
+	listavariables : listavariables ',' ID .  (27)
+
+	.  reduce 27
+
+
+state 52
+	expresion : expresion '+' . termino  (33)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	termino  goto 77
+	factor  goto 36
+
+
+state 53
+	expresion : expresion '-' . termino  (34)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	termino  goto 78
+	factor  goto 36
+
+
+state 54
+	termino : termino '*' . factor  (38)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	factor  goto 79
+
+
+state 55
+	termino : termino '/' . factor  (39)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	factor  goto 80
+
+
+state 56
+	pinvocacion : TRUNC '(' . expresion ')' FLECHA ID  (48)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 81
+	termino  goto 35
+	factor  goto 36
+
+
+state 57
+	pinvocacion : expresion FLECHA . ID  (47)
+
+	ID  shift 82
+	.  error
+
+
+state 58
+	funcion : ID '(' listapinvocacion ')' .  (44)
+
+	.  reduce 44
+
+
+state 59
+	listapinvocacion : listapinvocacion ',' . pinvocacion  (45)
+
+	ID  shift 31
+	CTE  shift 32
+	TRUNC  shift 37
+	.  error
+
+	funcion  goto 33
+	expresion  goto 38
+	termino  goto 35
+	factor  goto 36
+	pinvocacion  goto 83
+
+
+state 60
+	asignacion : ID '.' ID ASIG . expresion  (12)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 84
+	termino  goto 35
+	factor  goto 36
+
+
+state 61
+	comparador : MAYORIG .  (22)
+
+	.  reduce 22
+
+
+state 62
+	comparador : MENORIG .  (23)
+
+	.  reduce 23
+
+
+state 63
+	comparador : IGUAL .  (24)
+
+	.  reduce 24
+
+
+state 64
+	comparador : DISTINTO .  (25)
+
+	.  reduce 25
+
+
+state 65
+	comparador : '>' .  (20)
+
+	.  reduce 20
+
+
+state 66
+	comparador : '<' .  (21)
+
+	.  reduce 21
+
+
+state 67
+	condicion : expresion comparador . expresion  (19)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 85
+	termino  goto 35
+	factor  goto 36
+
+
+state 68
+	control : IF '(' condicion ')' . THEN '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF  (14)
+	control : IF '(' condicion ')' . THEN '{' listasentencia '}' ENDIF  (15)
+
+	THEN  shift 86
+	.  error
+
+
+state 69
+	control : DO '{' listasentencia '}' . UNTIL '(' condicion ')'  (16)
+
+	UNTIL  shift 87
+	.  error
+
+
+state 70
+	print : PRINT '(' CADENAML ')' .  (18)
+
+	.  reduce 18
+
+
+state 71
+	print : PRINT '(' expresion ')' .  (17)
+
+	.  reduce 17
+
+
+state 72
+	parametro : CV . tipo ID  (31)
+
+	LONG  shift 6
+	.  error
+
+	tipo  goto 88
+
+
+state 73
+	parametro : tipo . ID  (32)
+
+	ID  shift 89
+	.  error
+
+
+state 74
+	declaracion : tipo ID '(' listaparametros . ')' '{' listasentencia RETURN '(' expresion ')' ';' '}'  (10)
+	listaparametros : listaparametros . ',' parametro  (29)
+
+	')'  shift 90
+	','  shift 91
+	.  error
+
+
+state 75
+	listaparametros : parametro .  (30)
+
+	.  reduce 30
+
+
+state 76
+	listaexpresiones : listaexpresiones ',' . expresion  (36)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 92
+	termino  goto 35
+	factor  goto 36
+
+
+state 77
+	expresion : expresion '+' termino .  (33)
+	termino : termino . '*' factor  (38)
+	termino : termino . '/' factor  (39)
+
+	'*'  shift 54
+	'/'  shift 55
+	MAYORIG  reduce 33
+	MENORIG  reduce 33
+	IGUAL  reduce 33
+	DISTINTO  reduce 33
+	FLECHA  reduce 33
+	';'  reduce 33
+	')'  reduce 33
+	'>'  reduce 33
+	'<'  reduce 33
+	','  reduce 33
+	'+'  reduce 33
+	'-'  reduce 33
+
+
+state 78
+	expresion : expresion '-' termino .  (34)
+	termino : termino . '*' factor  (38)
+	termino : termino . '/' factor  (39)
+
+	'*'  shift 54
+	'/'  shift 55
+	MAYORIG  reduce 34
+	MENORIG  reduce 34
+	IGUAL  reduce 34
+	DISTINTO  reduce 34
+	FLECHA  reduce 34
+	';'  reduce 34
+	')'  reduce 34
+	'>'  reduce 34
+	'<'  reduce 34
+	','  reduce 34
+	'+'  reduce 34
+	'-'  reduce 34
+
+
+state 79
+	termino : termino '*' factor .  (38)
+
+	.  reduce 38
+
+
+state 80
+	termino : termino '/' factor .  (39)
+
+	.  reduce 39
+
+
+state 81
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+	pinvocacion : TRUNC '(' expresion . ')' FLECHA ID  (48)
+
+	')'  shift 93
+	'+'  shift 52
+	'-'  shift 53
+	.  error
+
+
+state 82
+	pinvocacion : expresion FLECHA ID .  (47)
+
+	.  reduce 47
+
+
+state 83
+	listapinvocacion : listapinvocacion ',' pinvocacion .  (45)
+
+	.  reduce 45
+
+
+state 84
+	asignacion : ID '.' ID ASIG expresion .  (12)
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+
+	'+'  shift 52
+	'-'  shift 53
+	';'  reduce 12
+
+
+state 85
+	condicion : expresion comparador expresion .  (19)
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+
+	'+'  shift 52
+	'-'  shift 53
+	')'  reduce 19
+
+
+state 86
+	control : IF '(' condicion ')' THEN . '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF  (14)
+	control : IF '(' condicion ')' THEN . '{' listasentencia '}' ENDIF  (15)
+
+	'{'  shift 94
+	.  error
+
+
+state 87
+	control : DO '{' listasentencia '}' UNTIL . '(' condicion ')'  (16)
+
+	'('  shift 95
+	.  error
+
+
+state 88
+	parametro : CV tipo . ID  (31)
+
+	ID  shift 96
+	.  error
+
+
+state 89
+	parametro : tipo ID .  (32)
+
+	.  reduce 32
+
+
+state 90
+	declaracion : tipo ID '(' listaparametros ')' . '{' listasentencia RETURN '(' expresion ')' ';' '}'  (10)
+
+	'{'  shift 97
+	.  error
+
+
+state 91
+	listaparametros : listaparametros ',' . parametro  (29)
+
+	LONG  shift 6
+	CV  shift 72
+	.  error
+
+	tipo  goto 73
+	parametro  goto 98
+
+
+state 92
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+	listaexpresiones : listaexpresiones ',' expresion .  (36)
+
+	'+'  shift 52
+	'-'  shift 53
+	';'  reduce 36
+	','  reduce 36
+
+
+state 93
+	pinvocacion : TRUNC '(' expresion ')' . FLECHA ID  (48)
+
+	FLECHA  shift 99
+	.  error
+
+
+state 94
+	control : IF '(' condicion ')' THEN '{' . listasentencia '}' ELSE '{' listasentencia '}' ENDIF  (14)
+	control : IF '(' condicion ')' THEN '{' . listasentencia '}' ENDIF  (15)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	.  error
+
+	listasentencia  goto 100
+	sentencia  goto 10
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 95
+	control : DO '{' listasentencia '}' UNTIL '(' . condicion ')'  (16)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 42
+	condicion  goto 101
+	termino  goto 35
+	factor  goto 36
+
+
+state 96
+	parametro : CV tipo ID .  (31)
+
+	.  reduce 31
+
+
+state 97
+	declaracion : tipo ID '(' listaparametros ')' '{' . listasentencia RETURN '(' expresion ')' ';' '}'  (10)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	.  error
+
+	listasentencia  goto 102
+	sentencia  goto 10
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 98
+	listaparametros : listaparametros ',' parametro .  (29)
+
+	.  reduce 29
+
+
+state 99
+	pinvocacion : TRUNC '(' expresion ')' FLECHA . ID  (48)
+
+	ID  shift 103
+	.  error
+
+
+state 100
+	listasentencia : listasentencia . sentencia ';'  (2)
+	control : IF '(' condicion ')' THEN '{' listasentencia . '}' ELSE '{' listasentencia '}' ENDIF  (14)
+	control : IF '(' condicion ')' THEN '{' listasentencia . '}' ENDIF  (15)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	'}'  shift 104
+	.  error
+
+	sentencia  goto 25
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 101
+	control : DO '{' listasentencia '}' UNTIL '(' condicion . ')'  (16)
+
+	')'  shift 105
+	.  error
+
+
+state 102
+	listasentencia : listasentencia . sentencia ';'  (2)
+	declaracion : tipo ID '(' listaparametros ')' '{' listasentencia . RETURN '(' expresion ')' ';' '}'  (10)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	RETURN  shift 106
+	DO  shift 7
+	PRINT  shift 8
+	.  error
+
+	sentencia  goto 25
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 103
+	pinvocacion : TRUNC '(' expresion ')' FLECHA ID .  (48)
+
+	.  reduce 48
+
+
+state 104
+	control : IF '(' condicion ')' THEN '{' listasentencia '}' . ELSE '{' listasentencia '}' ENDIF  (14)
+	control : IF '(' condicion ')' THEN '{' listasentencia '}' . ENDIF  (15)
+
+	ELSE  shift 107
+	ENDIF  shift 108
+	.  error
+
+
+state 105
+	control : DO '{' listasentencia '}' UNTIL '(' condicion ')' .  (16)
+
+	.  reduce 16
+
+
+state 106
+	declaracion : tipo ID '(' listaparametros ')' '{' listasentencia RETURN . '(' expresion ')' ';' '}'  (10)
+
+	'('  shift 109
+	.  error
+
+
+state 107
+	control : IF '(' condicion ')' THEN '{' listasentencia '}' ELSE . '{' listasentencia '}' ENDIF  (14)
+
+	'{'  shift 110
+	.  error
+
+
+state 108
+	control : IF '(' condicion ')' THEN '{' listasentencia '}' ENDIF .  (15)
+
+	.  reduce 15
+
+
+state 109
+	declaracion : tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' . expresion ')' ';' '}'  (10)
+
+	ID  shift 31
+	CTE  shift 32
+	.  error
+
+	funcion  goto 33
+	expresion  goto 111
+	termino  goto 35
+	factor  goto 36
+
+
+state 110
+	control : IF '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' . listasentencia '}' ENDIF  (14)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	.  error
+
+	listasentencia  goto 112
+	sentencia  goto 10
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 111
+	declaracion : tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion . ')' ';' '}'  (10)
+	expresion : expresion . '+' termino  (33)
+	expresion : expresion . '-' termino  (34)
+
+	')'  shift 113
+	'+'  shift 52
+	'-'  shift 53
+	.  error
+
+
+state 112
+	listasentencia : listasentencia . sentencia ';'  (2)
+	control : IF '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' listasentencia . '}' ENDIF  (14)
+
+	ID  shift 4
+	IF  shift 5
+	LONG  shift 6
+	DO  shift 7
+	PRINT  shift 8
+	'}'  shift 114
+	.  error
+
+	sentencia  goto 25
+	asignacion  goto 11
+	declaracion  goto 12
+	control  goto 13
+	print  goto 14
+	funcion  goto 15
+	tipo  goto 16
+	listavariables  goto 17
+
+
+state 113
+	declaracion : tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' . ';' '}'  (10)
+
+	';'  shift 115
+	.  error
+
+
+state 114
+	control : IF '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' listasentencia '}' . ENDIF  (14)
+
+	ENDIF  shift 116
+	.  error
+
+
+state 115
+	declaracion : tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' . '}'  (10)
+
+	'}'  shift 117
+	.  error
+
+
+state 116
+	control : IF '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF .  (14)
+
+	.  reduce 14
+
+
+state 117
+	declaracion : tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' '}' .  (10)
+
+	.  reduce 10
+
+
+36 terminals, 21 nonterminals
+49 grammar rules, 118 states
