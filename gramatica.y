@@ -3,7 +3,7 @@
     import Lex.Lex;
 %}
 
-%token ID CTE ASIG IF THEN ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC
+%token ID CTE ASIG IF THEN ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA
 
 %%
 prog                : ID '{' listasentencia '}'
@@ -65,6 +65,7 @@ comparador          : '>'
                     ;
 
 tipo                : LONG
+                    | LAMBDA
                     ;
 
 listavariables      : listavariables ',' ID
@@ -99,6 +100,8 @@ factor              : ID
                     ;
 
 funcion             : ID '(' listapinvocacion ')'
+                    | ID '(' ID ')'         // hay que verificar que se trate de una función Lambda
+                    | ID '(' CTE ')'        // hay que verificar que se trate de una función Lambda
                     ;
 
 listapinvocacion    : listapinvocacion ',' pinvocacion 
@@ -107,4 +110,5 @@ listapinvocacion    : listapinvocacion ',' pinvocacion
 
 pinvocacion         : expresion FLECHA ID
                     | TRUNC '(' expresion ')' FLECHA ID
+                    | '(' tipo ID ')' '{' listasentencia '}'
                     ; 

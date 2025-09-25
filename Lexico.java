@@ -94,12 +94,29 @@ public class Lexico {
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -2, -2, 7, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 8, -2, -2, -1, -2, -2 },
-            { -1, -1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1 },
             { -2, -2, -2, -2, -2, 10, 10, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 },
             { -2, -2, 11, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 },
             { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, -1, 12, 12, 12, 12 },
             { -1, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
+        };
+
+        this.matrizIndicesAS = new int[][] {
+            {0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 9, 9, 9, 0, 100, 4, 0, 0, 100, 0, 0, 100},
+            {0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1},
+            {101, 101, 101, 101, 101, 101, 101, 7, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101},
+            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4},
+            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {102, 102, 1, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 0, 102, 102, 2, 102, 102},
+            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 8},
+            {103, 103, 103, 103, 103, 1, 1, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103},
+            {104, 104, 0, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104},
+            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
+            {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5},
+            {7, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}
         };
 
     }
@@ -217,6 +234,46 @@ public class Lexico {
     public class AS9 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        }
+    }
+
+    // AS100: Error: caractér no válido
+    public class AS100 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+            System.out.println("Error en línea " + lineaActual + ": caractér no valido");
+        }
+    }
+
+    //AS101: Error: Se esperaba '='
+    public class AS101 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+            System.out.println("Error en línea " + lineaActual + ": Se esperaba un '='");
+        }
+    }
+
+    //AS102: Error: Se esperaba dígito, "." ó "L"
+    public class AS102 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+            System.out.println("Error en línea " + lineaActual + ": Se esperaba dígito, \".\" ó \"L\"");
+        }
+    }
+
+    //AS103: Error: Se esperaba "+" ó "-"
+    public class AS103 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+            System.out.println("Error en línea " + lineaActual + ": Se esperaba \"+\" ó \"-\"");
+        }
+    }   
+
+    //AS104: Error: Se esperaba un dígito
+    public class AS104 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+            System.out.println("Error en línea " + lineaActual + ": Se esperaba un dígito");
         }
     }
 }
