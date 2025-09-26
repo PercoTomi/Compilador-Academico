@@ -9,12 +9,14 @@ import java.util.Map;
 public class Lexico {
     private ArrayList<String> buffer; //buffer de entrada que contiene el código fuente
     private int posicionActual; // posición actual en el buffer
+    private int idToken;
     private Map<String,Simbolo> tablaDeSimbolos; // referencia a la tabla de simbolos en la clase Compilador
     private int[][] matrizDeTransiciones; // matriz que indica a qué estado ir en cada transición
     private int[][] matrizIndicesAS; // matriz que indica qué acción semántica ejecutar en cada transición
     private Map<Integer, AccionSemantica> mapaAS; // mapa que asocia cada número de acción semántica con su implementación
     private int lineaActual; // para el manejo de errores
-    private Map<String,Integer> mapaLiterales;
+    private Map<String,Integer> mapaTokens; // mapa que asocia literales y sus simbolos compuestos con sus IDs de token
+    private Map<String,Integer> mapaColumnas; // mapa que guarda el indice de las columnas segun su caracter
     private ParserVal yylval; // simbolo referenciado que se devuelve al parser
 
     public Lexico(Map<String, Simbolo> tablaDeSimbolos, ParserVal yylval) {
@@ -28,9 +30,9 @@ public class Lexico {
     }
 
     // a continuación el método cargarBuffer recibe un archivo txt como parámetro, lo convierte en array de strigs y lo asigna al buffer
-    public boolean cargarBuffer(String archivo) {
+    public boolean cargarBuffer(String path) {
         try {
-            String contenido = new String(Files.readAllBytes(Paths.get(archivo)));
+            String contenido = new String(Files.readAllBytes(Paths.get(path)));
             for (char c : contenido.toCharArray()) {
                 buffer.add(String.valueOf(c)); // cada caracter como String
             }
@@ -45,15 +47,20 @@ public class Lexico {
     public int yylex() {
         int estadoActual = 0; // resetear al estado inicial
         StringBuilder cadena = new StringBuilder("") ;
-        int idToken = -1; // id por defecto (error léxico)
-        this.yylval=null;
+        idToken = 0; // en caso de que no se lea implica EOF
+        
+        // RESETEA LOS VALORES DE YYLVAL
+        yylval.dval = 0.0;
+        yylval.sval = null;
+        yylval.obj = null;
+
         while (estadoActual >= 0 && posicionActual < buffer.size()) {
             String charLeido = buffer.get(posicionActual); // leer el caracter actual
             posicionActual++;
 
             // IDENTIFICACIÓN DE LA COLUMNA //
-            int columna = mapaLiterales.getOrDefault(charLeido, -1); // obtener la columna correspondiente
-            if (columna == 11) { // salto de línea
+            int columna = mapaColumnas.getOrDefault(charLeido, -1); // obtener la columna correspondiente
+            if (charLeido.equals("\n")) { // salto de línea
                 lineaActual++;
             } else if (columna == -1) {
                 if(Character.isUpperCase(charLeido.charAt(0))) { // mayúsculas
@@ -70,9 +77,17 @@ public class Lexico {
             }
 
             // FIN IDENTIFICACIÓN DE LA COLUMNA //
-            
-            mapaAS.get(matrizIndicesAS[estadoActual][columna]).ejecutar(cadena, charLeido, idToken);
+            mapaAS.get(matrizIndicesAS[estadoActual][columna]).ejecutar(cadena, charLeido);
+            System.out.println("Estado actual: " + estadoActual + ", Caracter leído: '" + charLeido + "', Columna: " + columna + ", Cadena: '" + cadena.toString() + "', idToken: " + idToken + ", estado siguiente: " + matrizDeTransiciones[estadoActual][columna] + ", lineaActual en Lexico: " + lineaActual);
+            System.out.println("Accion semántica a ejecutar: " + matrizIndicesAS[estadoActual][columna]);
             estadoActual = matrizDeTransiciones[estadoActual][columna];
+        }
+
+        if (yylval.obj != null) System.out.println("(Impresión desde Lexico) El lexema leido es: " + ((Simbolo)yylval.obj).getLexema());
+
+        if (idToken == 0 & !cadena.isEmpty()) {
+            idToken = 256;
+            System.out.println("Error en línea " + lineaActual + ": Se llegó a EoF y no se reconoció el token, error");
         }
         return idToken;
     }
@@ -81,66 +96,104 @@ public class Lexico {
 
         // Matriz de transiciones
         this.matrizDeTransiciones = new int[][] {
-            { 1, 13, 7, -1, -1, -1, 6, 3, 4, 5, 0, 0, 0, 2, -2, -1, 8, 12, -2, 1, 1, -2 },
-            { 1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, -1, -1, -1 },
-            { -2, -2, -2, -2, -2, -2, -2, -1, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 },
+            { 1, 13, 7, -1, -1, -1, 6, 3, 4, 5, 0, 0, 0, 2, -1, -1, 8, 12, -1, 1, 1, -1 },
+            { 1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -2, -2, 7, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, 8, -2, -2, -1, -2, -2 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, -1, -1, -1, -1, -1 },
             { -1, -1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1 },
-            { -2, -2, -2, -2, -2, 10, 10, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 },
-            { -2, -2, 11, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2, -2 },
+            { -1, -1, -1, -1, -1, 10, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, -1, 12, 12, 12, 12 },
             { -1, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
         };
 
         this.matrizIndicesAS = new int[][] {
-            {0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 9, 9, 9, 0, 100, 3, 0, 0, 100, 0, 0, 100},
-            {0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1},
-            {101, 101, 101, 101, 101, 101, 101, 7, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101},
+            {0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 11, 11, 11, 0, 100, 3, 0, 11, 100, 0, 0, 100},
+            {0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1},
+            {101, 101, 101, 101, 101, 101, 101, 6, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101},
             {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4},
             {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
             {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
             {4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-            {102, 102, 1, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 0, 102, 102, 2, 102, 102},
-            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 0, 8},
-            {103, 103, 103, 103, 103, 1, 1, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103},
+            {102, 102, 0, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 0, 102, 102, 2, 102, 102},
+            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 10, 8},
+            {103, 103, 103, 103, 103, 0, 0, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103},
             {104, 104, 0, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104},
             {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
-            {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5},
+            {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5},
             {7, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}
         };
-
     }
 
     private void cargarMapas() {
 
+        // Mapa de Columnas
+        this.mapaColumnas = new HashMap<>();
+        mapaColumnas.put("*", 3);
+        mapaColumnas.put("/", 4);
+        mapaColumnas.put("+", 5);
+        mapaColumnas.put("-", 6);
+        mapaColumnas.put("=", 7);
+        mapaColumnas.put("<", 8);
+        mapaColumnas.put(">", 9);
+        mapaColumnas.put(" ", 10);  // espacio
+        mapaColumnas.put("\r", 11); // cr: retorno de carro en Windows
+        mapaColumnas.put("\n", 11); // nl: salto de línea en Windows
+        mapaColumnas.put("\t", 12);  // tabulador
+        mapaColumnas.put(":", 13);
+        mapaColumnas.put("!", 14);
+        mapaColumnas.put(".", 16);
+        mapaColumnas.put("&", 17);
+        mapaColumnas.put("%", 18);
+        mapaColumnas.put("L", 19);
+        mapaColumnas.put("F", 20);
+
         // Mapa de Literales
-        this.mapaLiterales = new HashMap<>();
-        mapaLiterales.put("\n", 10);  // nueva línea
-        mapaLiterales.put("\t", 11);  // tabulador
-        mapaLiterales.put(" ", 32);   // espacio
-        mapaLiterales.put("!", 33);
-        mapaLiterales.put("&", 38);
-        mapaLiterales.put("(", 40);
-        mapaLiterales.put(")", 41);
-        mapaLiterales.put("*", 42);
-        mapaLiterales.put("+", 43);
-        mapaLiterales.put(",", 44);
-        mapaLiterales.put("-", 45);
-        mapaLiterales.put(".", 46);
-        mapaLiterales.put("/", 47);
-        mapaLiterales.put(":", 58);
-        mapaLiterales.put(";", 59);
-        mapaLiterales.put("<", 60);
-        mapaLiterales.put("=", 61);
-        mapaLiterales.put(">", 62);
-        mapaLiterales.put("_", 95);
-        mapaLiterales.put("{", 123);
-        mapaLiterales.put("}", 125);
+        this.mapaTokens = new HashMap<>();
+        mapaTokens.put("\n", 10);  // nueva línea
+        mapaTokens.put("\t", 11);  // tabulador
+        mapaTokens.put(" ", 32);   // espacio
+        mapaTokens.put("!", 33);
+        mapaTokens.put("&", 38);
+        mapaTokens.put("(", 40);
+        mapaTokens.put(")", 41);
+        mapaTokens.put("*", 42);
+        mapaTokens.put("+", 43);
+        mapaTokens.put(",", 44);
+        mapaTokens.put("-", 45);
+        mapaTokens.put(".", 46);
+        mapaTokens.put("/", 47);
+        mapaTokens.put(":", 58);
+        mapaTokens.put(";", 59);
+        mapaTokens.put("<", 60);
+        mapaTokens.put("=", 61);
+        mapaTokens.put(">", 62);
+        mapaTokens.put("_", 95);
+        mapaTokens.put("{", 123);
+        mapaTokens.put("}", 125);
+        mapaTokens.put(":=", 259);
+        mapaTokens.put(">=", 264);
+        mapaTokens.put("<=", 265);
+        mapaTokens.put("==", 266);
+        mapaTokens.put("=!", 267);
+        mapaTokens.put("->", 273);
+        mapaTokens.put("if",260);
+        mapaTokens.put("then",261);
+        mapaTokens.put("else",262);
+        mapaTokens.put("endif",263);
+        mapaTokens.put("long",268);
+        mapaTokens.put("return",269);
+        mapaTokens.put("do",270);
+        mapaTokens.put("until",271);
+        mapaTokens.put("cv",272);
+        mapaTokens.put("print",274);
+        mapaTokens.put("trunc",276);
+        mapaTokens.put("lambda",277);
 
         // Mapa de Acciones Semánticas
         mapaAS = new HashMap<>();
@@ -154,12 +207,15 @@ public class Lexico {
         mapaAS.put(7, new AS7());
         mapaAS.put(8, new AS8());
         mapaAS.put(9, new AS9());
+        mapaAS.put(10, new AS10());
+        mapaAS.put(11, new AS11());
         mapaAS.put(100, new AS100());
         mapaAS.put(101, new AS101());
         mapaAS.put(102, new AS102());
         mapaAS.put(103, new AS103());
         mapaAS.put(104, new AS104());
         mapaAS.put(105, new AS105());
+        mapaAS.put(106, new AS106());
     }
 
     //------------------------------------------------------------------------------------------------//
@@ -167,13 +223,13 @@ public class Lexico {
     //------------------------------------------------------------------------------------------------//
 
     public interface AccionSemantica {
-        void ejecutar(StringBuilder cadena, String charLeido, int idToken);
+        void ejecutar(StringBuilder cadena, String charLeido);
     }
 
     // AS0: Concatenar el caracter leído al string
     public class AS0 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             cadena.append(charLeido);
         }
     }
@@ -181,7 +237,7 @@ public class Lexico {
     // Chequeo de tope de caracteres de un identificador, inserción en la TS y devolución de ID del token
     public class AS1 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             if (cadena.length() > 20) {
                 cadena.setLength(20);
             }
@@ -192,10 +248,10 @@ public class Lexico {
                 // Si no está, crear un nuevo símbolo long y agregarlo a la tabla
                 Simbolo nuevoSimbolo = new SimboloLong(257, "Identificador", lexema, 0L);
                 tablaDeSimbolos.put(lexema, nuevoSimbolo);
-                yylval = new ParserVal(nuevoSimbolo); // asignar el símbolo creado a yylval
+                yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
             } else {
                 // Si ya está, simplemente asignarlo a yylval
-                yylval = new ParserVal(tablaDeSimbolos.get(lexema));
+                yylval.obj = tablaDeSimbolos.get(lexema);
             }
             yylval.ival = lineaActual;
             idToken=257;
@@ -205,23 +261,24 @@ public class Lexico {
     // Verifica que no se exceda el rango definido para Long, y si es así, devuleve el id de Token correspondiente
     public class AS2 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             String lexema = cadena.toString();
             Long cte = Long.parseLong(lexema);
+            lexema+= charLeido;
             
             if (cte > 32678) {
-                mapaAS.get(105).ejecutar(cadena, charLeido, idToken);
+                mapaAS.get(105).ejecutar(cadena, charLeido);
             }
             else{
                 // Verificar si el lexema no está en la tabla de símbolos
                 if(!tablaDeSimbolos.containsKey(lexema)) {
                     // Si no está, crear un nuevo símbolo long y agregarlo a la tabla
-                    Simbolo nuevoSimbolo = new SimboloLong(258, "Constante", lexema, 0L);
+                    Simbolo nuevoSimbolo = new SimboloLong(258, "Constante", lexema, cte);
                     tablaDeSimbolos.put(lexema, nuevoSimbolo);
-                    yylval = new ParserVal(nuevoSimbolo); // asignar el símbolo creado a yylval
+                    yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
                 } else {
                     // Si ya está, simplemente asignarlo a yylval
-                    yylval = new ParserVal(tablaDeSimbolos.get(lexema));
+                    yylval.obj = tablaDeSimbolos.get(lexema);
                 }
                 yylval.ival = lineaActual;
                 idToken=258;
@@ -232,107 +289,190 @@ public class Lexico {
     // Reconocer caracter y entregar id de Token correspondiente
     public class AS3 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
-            idToken = mapaLiterales.get(charLeido);
-            yylval = new ParserVal(charLeido); // SE USA PARA ESTO?
-            yylval.ival = lineaActual;
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            idToken = mapaTokens.get(charLeido);
+            yylval.sval = charLeido; // SE USA PARA ESTO?
+            yylval.ival = lineaActual; // CHUSMEAR POR QUE EN EL CODIGO ACTUAL NO SE LEE LINEA 2 LUEGO DE ESTA ACTUALIZACION DEL YYLVAL
         }
     }
 
     // Retornar el último carácter leído. Reconocer caracter y entregar id de Token correspondiente
     public class AS4 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             posicionActual--;
-            mapaAS.get(3).ejecutar(cadena, cadena.toString(), idToken); // reutiliza AS3
+            mapaAS.get(3).ejecutar(cadena, cadena.toString()); // reutiliza AS3
         }
     }
 
     // Si el caracter es new line, ignorarlo, sino, concatenarlo al string
     public class AS5 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             if (!charLeido.equals("\n")) {
                 cadena.append(charLeido);
             }
         }
     }
-    
+
     // Concatenar el carácter leído a la cadena y entregar el token.
     public class AS6 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
-            // No hace nada
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            cadena.append(charLeido);
+            idToken = mapaTokens.get(cadena.toString());
+            yylval.sval = cadena.toString(); // SE USA PARA ESTO?
+            yylval.ival = lineaActual;
         }
     }
 
     // Retornar el último caracter leido. Revisar si el string matchea con alguna palabra reservada. Si lo hace, devolver id correspondiente.
     public class AS7 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
-            // No hace nada
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            posicionActual--;
+            idToken = mapaTokens.getOrDefault(cadena.toString(), 256); // si no se encuentra en el mapa entonces es un error
+            if (idToken == 256) {
+                mapaAS.get(106).ejecutar(cadena, cadena.toString()); // se ejecuta el error "palabra reservada no válida"
+            }
+            else {
+                yylval.sval = cadena.toString();
+                yylval.ival = lineaActual;
+            }
         }
     }
 
-    // Retornar el último caracter leido. Verificar que no se supere el rango definido para punto flotante. Si no lo hace, devolver id corrrespondiente.
+    // Retornar el último caracter leido. Distingue si es un punto o una Cte. Verificar que no se supere el rango definido para punto flotante. Si no lo hace, devolver id corrrespondiente.
     public class AS8 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
-            // No hace nada
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            String lexema = cadena.toString();
+            Float cte = Float.parseFloat(lexema);
+            lexema+= charLeido;
+            posicionActual--;
+
+            if (lexema != ".") {
+                // sin cte es mayor a 3.40282347E38 o menor a 1.17549435E-38 error
+                if (cte > 3.40282347E+38 || cte < 1.17549435E-38) {
+                    mapaAS.get(105).ejecutar(cadena, charLeido);
+                }
+                else{
+                    // Verificar si el lexema no está en la tabla de símbolos
+                    if(!tablaDeSimbolos.containsKey(lexema)) {
+                        // Si no está, crear un nuevo símbolo float y agregarlo a la tabla
+                        Simbolo nuevoSimbolo = new SimboloCteFloat(258, "Constante", lexema, cte);
+                        tablaDeSimbolos.put(lexema, nuevoSimbolo);
+                        yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
+                    } else {
+                        // Si ya está, simplemente asignarlo a yylval
+                        yylval.obj = tablaDeSimbolos.get(lexema);
+                    }
+                    idToken=258; // El Token es una constante
+                }
+            } else idToken = 46; // El Token es un punto
+            yylval.ival = lineaActual;
         }
     }
-     
-    // No hace nada
+
+    // Verificar si la cadena se encuentra en la tabla de simbolos. Si no está, darlo de alta. Devolver id correspondiente.
     public class AS9 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            String lexema = cadena.toString();
+            // Verificar si el lexema no está en la tabla de símbolos
+            if(!tablaDeSimbolos.containsKey(lexema)) {
+                    // Si no está, crear un nuevo símbolo float y agregarlo a la tabla
+                    Simbolo nuevoSimbolo = new SimboloCteString(275, "CadenaML", lexema, lexema);
+                    tablaDeSimbolos.put(lexema, nuevoSimbolo);
+                    yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
+                } else {
+                    // Si ya está, simplemente asignarlo a yylval
+                    yylval.obj = tablaDeSimbolos.get(lexema);
+                }
+                yylval.ival = lineaActual;
+                idToken=275;
+        }
+    }
+
+    // Añade una "E" a la cadena
+    public class AS10 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            cadena.append("E");
+        }
+    }
+
+    // No hace nada
+    public class AS11 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido) {
         }
     }
 
     // AS100: Error: caractér no válido
     public class AS100 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             System.out.println("Error en línea " + lineaActual + ": caractér no valido");
+            idToken = 256;
         }
     }
 
     //AS101: Error: Se esperaba '='
     public class AS101 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             System.out.println("Error en línea " + lineaActual + ": Se esperaba un '='");
+            idToken = 256;
+            posicionActual--;
         }
     }
 
     //AS102: Error: Se esperaba dígito, "." ó "L"
     public class AS102 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            posicionActual--;
             System.out.println("Error en línea " + lineaActual + ": Se esperaba dígito, \".\" ó \"L\"");
+            idToken = 256;
         }
     }
 
     //AS103: Error: Se esperaba "+" ó "-"
     public class AS103 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             System.out.println("Error en línea " + lineaActual + ": Se esperaba \"+\" ó \"-\"");
+            idToken = 256;
+            posicionActual--;
         }
-    }   
+    }
 
     //AS104: Error: Se esperaba un dígito
     public class AS104 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             System.out.println("Error en línea " + lineaActual + ": Se esperaba un dígito");
+            idToken = 256;
+            posicionActual--;
         }
     }
 
+    // AS105: Error: Constante fuera de rango
     public class AS105 implements AccionSemantica {
         @Override
-        public void ejecutar(StringBuilder cadena, String charLeido, int idToken) {
+        public void ejecutar(StringBuilder cadena, String charLeido) {
             System.out.println("Error en línea " + lineaActual + ": Constante fuera de rango");
+            idToken = 256;
+        }
+    }
+
+    // AS106: Error: Palabra reservada no válida
+    public class AS106 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            System.out.println("Error en línea " + lineaActual + ": Palabra reservada no válida");
+            idToken = 256;
         }
     }
 }
