@@ -6,7 +6,12 @@
 
 //#line 2 ".\gramatica.y"
     import java.io.*;
-    import Lex.Lex;
+    //import Lex.Lex;
+
+    import java.util.HashMap;
+    import java.util.Map;
+    import Simbolos.*;
+
 //#line 20 "Parser.java"
 
 
@@ -19,6 +24,10 @@ boolean yydebug;        //do I want debug output?
 int yynerrs;            //number of errors so far
 int yyerrflag;          //was there an error?
 int yychar;             //the current working character
+
+Lexico lexer;
+Map<String, Simbolo> tablaSimbolos;
+String path;
 
 //########## MESSAGES ##########
 //###############################################################
@@ -424,8 +433,14 @@ String yys;    //current token string
 //###############################################################
 int yyparse()
 {
-boolean doaction;
+  boolean doaction;
   init_stacks();
+
+  // INICIALIZACIÓN DEL LÉXICO Y CARGA DEL CÓDIGO //
+  this.lexer = new Lexico(this.tablaSimbolos, yylval);
+  lexer.cargarBuffer(path);
+  // FIN //
+  
   yynerrs = 0;
   yyerrflag = 0;
   yychar = -1;          //impossible char forces a read
@@ -442,7 +457,7 @@ boolean doaction;
       if (yydebug) debug("yyn:"+yyn+"  state:"+yystate+"  yychar:"+yychar);
       if (yychar < 0)      //we want a char?
         {
-        yychar = yylex();  //get next token
+        yychar = lexer.yylex();  //get next token
         if (yydebug) debug(" next yychar:"+yychar);
         //#### ERROR CHECK ####
         if (yychar < 0)    //it it didn't work/error
@@ -563,7 +578,7 @@ boolean doaction;
       val_push(yyval);           //also save the semantic value of parsing
       if (yychar < 0)            //we want another character?
         {
-        yychar = yylex();        //get next character
+        yychar = lexer.yylex();        //get next character
         if (yychar<0) yychar=0;  //clean, if necessary
         if (yydebug)
           yylexdebug(yystate,yychar);
@@ -602,16 +617,21 @@ public void run()
 }
 //## end of method run() ########################################
 
-
+// DECLARACIÓN DE YYERROR //
+void yyerror(String mensaje) {
+    System.err.println("Error sintáctico: " + mensaje);
+}
+// FIN DECLARACION DE YYERROR //
 
 //## Constructors ###############################################
 /**
  * Default constructor.  Turn off with -Jnoconstruct .
 
  */
-public Parser()
+public Parser(Map<String, Simbolo> tablaSimbolos, String path)
 {
-  //nothing to do
+  this.tablaSimbolos = tablaSimbolos;
+  this.path = path;
 }
 
 
@@ -625,7 +645,6 @@ public Parser(boolean debugMe)
 }
 //###############################################################
 
-
+//################### END OF CLASS ##############################
 
 }
-//################### END OF CLASS ##############################
