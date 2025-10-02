@@ -38,17 +38,6 @@ control             : IF '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' 
                     | DO '{' listasentencia '}' UNTIL '(' condicion ')'
                     ;
 
-/*
-sentencia_matched   : IF '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' listasentencia '}'
-                    | otras_sentencias_matched
-                    ;
-
-sentencia_unmatched : IF '(' condicion ')' THEN '{' listasentencia '}'
-                    | IF '(' condicion ')' THEN '{' listasentencia '}' ELSE '{' sentencia_unmatched '}'
-                    | otras_sentencias_unmatched
-                    ;
-*/
-
 print               : PRINT '(' expresion ')'
                     | PRINT '(' CADENAML ')'
                     ;   
@@ -69,7 +58,9 @@ tipo                : LONG
                     ;
 
 listavariables      : listavariables ',' ID
+                    | listavariables ',' ID '.' ID
                     | ID
+                    | ID '.' ID
                     ;
 
 listaparametros     : listaparametros ',' parametro
@@ -95,6 +86,7 @@ termino             : termino '*' factor
                     ;
 
 factor              : ID
+                    | ID'.'ID
                     | CTE
                     | funcion
                     ;

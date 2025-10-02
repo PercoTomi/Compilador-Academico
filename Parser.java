@@ -5,12 +5,8 @@
 
 
 //#line 2 ".\gramatica.y"
-    import java.io.*;
-    //import Lex.Lex;
-
-    import java.util.HashMap;
-    import java.util.Map;
     import Simbolos.*;
+    import java.util.Map;
 
 //#line 20 "Parser.java"
 
