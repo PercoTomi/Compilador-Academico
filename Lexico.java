@@ -14,19 +14,18 @@ public class Lexico {
     private int[][] matrizDeTransiciones; // matriz que indica a qué estado ir en cada transición
     private int[][] matrizIndicesAS; // matriz que indica qué acción semántica ejecutar en cada transición
     private Map<Integer, AccionSemantica> mapaAS; // mapa que asocia cada número de acción semántica con su implementación
-    private int lineaActual; // para el manejo de errores
+    private int lineaActual; // contador de línea
     private Map<String,Integer> mapaTokens; // mapa que asocia literales y sus simbolos compuestos con sus IDs de token
     private Map<String,Integer> mapaColumnas; // mapa que guarda el indice de las columnas segun su caracter
     private ParserVal yylval; // simbolo referenciado que se devuelve al parser
 
-    public Lexico(Map<String, Simbolo> tablaDeSimbolos, ParserVal yylval) {
+    public Lexico(Map<String, Simbolo> tablaDeSimbolos) {
         this.buffer = new ArrayList<>();
         this.posicionActual = 0;
         this.tablaDeSimbolos = tablaDeSimbolos;
         cargarMatrices();
         cargarMapas();
         this.lineaActual = 1; // comenzamos en la línea 1
-        this.yylval = yylval;
     }
 
     // a continuación el método cargarBuffer recibe un archivo txt como parámetro, lo convierte en array de strigs y lo asigna al buffer
@@ -44,7 +43,8 @@ public class Lexico {
         return true; // si se cargó correctamente
     }
     
-    public int yylex() {
+    public int yylex(ParserVal yylval) {
+        this.yylval = yylval; // actualizar la referencia de yylval
         int estadoActual = 0; // resetear al estado inicial
         StringBuilder cadena = new StringBuilder("") ;
         idToken = 0; // en caso de que no se lea implica EOF
@@ -177,23 +177,22 @@ public class Lexico {
         mapaTokens.put("{", 123);
         mapaTokens.put("}", 125);
         mapaTokens.put(":=", 259);
-        mapaTokens.put(">=", 264);
-        mapaTokens.put("<=", 265);
-        mapaTokens.put("==", 266);
-        mapaTokens.put("=!", 267);
-        mapaTokens.put("->", 273);
+        mapaTokens.put(">=", 263);
+        mapaTokens.put("<=", 264);
+        mapaTokens.put("==", 265);
+        mapaTokens.put("=!", 266);
+        mapaTokens.put("->", 272);
         mapaTokens.put("if",260);
-        mapaTokens.put("then",261);
-        mapaTokens.put("else",262);
-        mapaTokens.put("endif",263);
-        mapaTokens.put("long",268);
-        mapaTokens.put("return",269);
-        mapaTokens.put("do",270);
-        mapaTokens.put("until",271);
-        mapaTokens.put("cv",272);
-        mapaTokens.put("print",274);
-        mapaTokens.put("trunc",276);
-        mapaTokens.put("lambda",277);
+        mapaTokens.put("else",261);
+        mapaTokens.put("endif",262);
+        mapaTokens.put("long",267);
+        mapaTokens.put("return",268);
+        mapaTokens.put("do",269);
+        mapaTokens.put("until",270);
+        mapaTokens.put("cv",271);
+        mapaTokens.put("print",273);
+        mapaTokens.put("trunc",275);
+        mapaTokens.put("lambda",276);
 
         // Mapa de Acciones Semánticas
         mapaAS = new HashMap<>();

@@ -1,3 +1,5 @@
 PROGRAMA {
-    if (3L > 2L) then {X := 4L;} endif;
-}
+    if (3L > 2L) {X := 4L;} endif;
+    long X := 3L;
+    long Y := 4L;
+} 
