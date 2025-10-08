@@ -9,68 +9,68 @@
 
 %%
 prog                : ID '{' listasentencia '}'
-                    | '{' listasentencia '}'                {System.out.println("Error sintáctico: falta el nombre del programa");} 
-                    | ID '{' listasentencia                 {System.out.println("Error sintáctico: falta llave de cierre del cuerpo del programa");} 
-                    | ID listasentencia '}'                 {System.out.println("Error sintáctico: falta la llave de apertura del cuerpo del programa");} 
-                    | ID listasentencia                     {System.out.println("Error sintáctico: faltan llaves que encierren el cuerpo del programa");} 
+                    | '{' listasentencia '}'                {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre del programa");} 
+                    | ID '{' listasentencia                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de cierre del cuerpo del programa");} 
+                    | ID listasentencia '}'                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta la llave de apertura del cuerpo del programa");} 
+                    | ID listasentencia                     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": faltan llaves que encierren el cuerpo del programa");} 
                     ;
 
-listasentencia      : listasentencia sentencia ';'
-                    | sentencia ';'
-                    //| listasentencia sentencia error             {System.out.println("Error sintáctico: falta punto y coma al final de la sentencia");} 
-                    //| sentencia error                             {System.out.println("Error sintáctico: falta punto y coma al final de la sentencia");} 
-                    | error                                  {System.out.println("Error sintáctico: falta punto y coma al final de la sentencia");} 
+listasentencia      : listasentencia sentencia ';'          {System.out.println("Se detectó una listasentencia sentencia ;");}
+                    | sentencia ';'                         {System.out.println("Se detectó una sentencia ;");}
+                    //| listasentencia sentencia error             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");} 
+                    //| sentencia error                             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");} 
+                    | error                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");}
                     ;
 
-sentencia           : asignacion 
-                    | declaracion
-                    | control
-                    | print
-                    | funcion
+sentencia           : asignacion                            
+                    | declaracion                           
+                    | control                               
+                    | print                                 {System.out.println("Se detectó un print");}
+                    | funcion                              
                     ;
 
-declaracion         : tipo listavariables
-                    | tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' '}'
+declaracion         : tipo listavariables                   {System.out.println("Se detectó una declaración de variables");}  
+                    | tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' '}' {System.out.println("Se detectó una declaración de función");}
                     ;
 
-asignacion          : identificador ASIG expresion
-                    | listavariables '=' listaconstantes
+asignacion          : identificador ASIG expresion          {System.out.println("Se detectó una asignación simple");}
+                    | listavariables '=' listaconstantes    {System.out.println("Se detectó una asignación múltiple");}
                     ;
 
 listaconstantes     : listaconstantes ',' CTE
                     | CTE
-                    | listaconstantes CTE                  {System.out.println("Error sintáctico: falta coma entre constantes");}
+                    | listaconstantes CTE                   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta coma entre constantes");}
                     ;
 
-control             : IF '(' condicion ')' '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF
-                    | IF '(' condicion ')' '{' listasentencia '}' ENDIF
-                    | DO '{' listasentencia '}' UNTIL '(' condicion ')'
-                    | IF condicion ')' '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF     {System.out.println("Error sintáctico: falta del parentesis de cierre de la condicion del bloque IF");} 
-                    | IF '(' condicion '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF     {System.out.println("Error sintáctico: falta del parentesis de apertura de la condición del bloque IF");} 
-                    | IF condicion '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF         {System.out.println("Error sintáctico: falta de parentesis de la condicion del bloque IF");} 
-                    | IF condicion ')' '{' listasentencia '}' ENDIF                                 {System.out.println("Error sintáctico: falta del parentesis de cierre de la condicion del bloque IF");}
-                    | IF '(' condicion '{' listasentencia '}' ENDIF                                 {System.out.println("Error sintáctico: falta del parentesis de apertura de la condición del bloque IF");}
-                    | IF condicion '{' listasentencia '}' ENDIF                                     {System.out.println("Error sintáctico: falta de parentesis de la condicion del bloque IF");}
-                    | IF '(' condicion ')' '{' listasentencia '}' ELSE '{' listasentencia '}'       {System.out.println("Error sintáctico: falta la palabra ENDIF al final del bloque IF");}
-                    | IF '(' condicion ')' '{' listasentencia '}'                                   {System.out.println("Error sintáctico: falta la palabra ENDIF al final del bloque IF");}
-                    | IF '(' condicion ')' '{' listasentencia '}' ELSE '{''}' ENDIF                 {System.out.println("Error sintáctico: falta el cuerpo en el bloque ELSE");}
-                    | IF '(' condicion ')' '{''}' ELSE '{' listasentencia '}' ENDIF                 {System.out.println("Error sintáctico: falta el cuerpo en el bloque IF");}
-                    | IF '(' condicion ')' '{''}' ENDIF                                             {System.out.println("Error sintáctico: falta el cuerpo en el bloque IF");}
-                    | IF '(' condicion ')' '{''}' ELSE '{''}' ENDIF                                 {System.out.println("Error sintáctico: falta el cuerpo en los bloques IF y ELSE");}
-                    | DO '{' listasentencia '}' UNTIL condicion ')'                                 {System.out.println("Error sintáctico: falta el parentesis de apertura de la condición del bloque DO UNTIL");}
-                    | DO '{' listasentencia '}' UNTIL '(' condicion                                 {System.out.println("Error sintáctico: falta el parentesis de apertura de la condición del bloque DO UNTIL");}
-                    | DO '{' listasentencia '}' UNTIL condicion                                     {System.out.println("Error sintáctico: falta de parentesis en la condición del bloque DO UNTIL");}
-                    | DO '{' '}' UNTIL '(' condicion ')'                                            {System.out.println("Error sintáctico: falta de cuerpo en iteracion");}
-                    | DO '{' listasentencia '}' '(' condicion ')'                                   {System.out.println("Error sintáctico: falta la palabra UNTIL en la iteracion");}
+control             : IF '(' condicion ')' '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF {System.out.println("Se detectó un bloque IF-ELSE");}
+                    | IF '(' condicion ')' '{' listasentencia '}' ENDIF                             {System.out.println("Se detectó un bloque IF");}
+                    | DO '{' listasentencia '}' UNTIL '(' condicion ')'                             {System.out.println("Se detectó un bloque DO UNTIL");}  
+                    | IF condicion ')' '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta del parentesis de cierre de la condicion del bloque IF");} 
+                    | IF '(' condicion '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta del parentesis de apertura de la condición del bloque IF");} 
+                    | IF condicion '{' listasentencia '}' ELSE '{' listasentencia '}' ENDIF         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de parentesis de la condicion del bloque IF");} 
+                    | IF condicion ')' '{' listasentencia '}' ENDIF                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta del parentesis de cierre de la condicion del bloque IF");}
+                    | IF '(' condicion '{' listasentencia '}' ENDIF                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta del parentesis de apertura de la condición del bloque IF");}
+                    | IF condicion '{' listasentencia '}' ENDIF                                     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de parentesis de la condicion del bloque IF");}
+                    | IF '(' condicion ')' '{' listasentencia '}' ELSE '{' listasentencia '}'       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta la palabra ENDIF al final del bloque IF");}
+                    | IF '(' condicion ')' '{' listasentencia '}'                                   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta la palabra ENDIF al final del bloque IF");}
+                    | IF '(' condicion ')' '{' listasentencia '}' ELSE '{''}' ENDIF                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el cuerpo en el bloque ELSE");}
+                    | IF '(' condicion ')' '{''}' ELSE '{' listasentencia '}' ENDIF                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el cuerpo en el bloque IF");}
+                    | IF '(' condicion ')' '{''}' ENDIF                                             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el cuerpo en el bloque IF");}
+                    | IF '(' condicion ')' '{''}' ELSE '{''}' ENDIF                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el cuerpo en los bloques IF y ELSE");}
+                    | DO '{' listasentencia '}' UNTIL condicion ')'                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el parentesis de apertura de la condición del bloque DO UNTIL");}
+                    | DO '{' listasentencia '}' UNTIL '(' condicion                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el parentesis de apertura de la condición del bloque DO UNTIL");}
+                    | DO '{' listasentencia '}' UNTIL condicion                                     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de parentesis en la condición del bloque DO UNTIL");}
+                    | DO '{' '}' UNTIL '(' condicion ')'                                            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de cuerpo en iteracion");}
+                    | DO '{' listasentencia '}' '(' condicion ')'                                   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta la palabra UNTIL en la iteracion");}
                     ;
 
-print               : PRINT '(' expresion ')'
+print               : PRINT '(' expresion ')'                  
                     | PRINT '(' CADENAML ')'
-                    | PRINT '(' ')'                             {System.out.println("Error sintáctico: falta de argumento en sentencia print");}
+                    | PRINT '(' ')'                             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de argumento en sentencia print");}
                     ;   
 
 condicion           : expresion comparador expresion
-                    | expresion expresion                       {System.out.println("Error sintáctico: falta el operador comparador en la condición");}
+                    | expresion expresion                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operador comparador en la condición");}
                     ;
 
 comparador          : '>'
@@ -91,8 +91,8 @@ identificador       : ID
 
 listavariables      : listavariables ',' identificador
                     | identificador
-                    | listavariables ID                                         {System.out.println("Error sintáctico: falta coma entre variables");}
-                    | listavariables identificador '.' ID                       {System.out.println("Error sintáctico: falta coma entre variables");}
+                    | listavariables ID                                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta coma entre variables");}
+                    | listavariables identificador '.' ID                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta coma entre variables");}
                     ;
 
 listaparametros     : listaparametros ',' parametro
@@ -101,34 +101,34 @@ listaparametros     : listaparametros ',' parametro
 
 parametro           : CV tipo ID // es opcional la semantica
                     | tipo ID
-                    | CV tipo                                   {System.out.println("Error sintáctico: falta el nombre del parámetro");}
-                    | tipo                                      {System.out.println("Error sintáctico: falta el nombre del parámetro");}
-                    | CV ID                                     {System.out.println("Error sintáctico: falta el tipo del parámetro");}
-                    | ID                                        {System.out.println("Error sintáctico: falta el tipo del parámetro");}
+                    | CV tipo                                   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre del parámetro");}
+                    | tipo                                      {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre del parámetro");}
+                    | CV ID                                     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el tipo del parámetro");}
+                    | ID                                        {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el tipo del parámetro");}
                     ;
 
 expresion           : expresion '+' termino 
                     | expresion '-' termino
                     | termino
-                    | expresion '+' error                       {System.out.println("Error sintáctico: falta el operando derecho de la suma");}
-                    | expresion '-' error                       {System.out.println("Error sintáctico: falta el operando derecho de la resta");}
-                    | error '+' termino                         {System.out.println("Error sintáctico: falta el operando izquierdo de la suma");}
-                    | error '-' termino                         {System.out.println("Error sintáctico: falta el operando izquierdo de la resta");}
-                    //PREGUNTAR SI SE INCLUYE| '+'                                       {System.out.println("Error sintáctico: falta ambos operandos de la suma");}
-                    //PREGUNTAR SI SE INCLUYE| '-'                                       {System.out.println("Error sintáctico: falta ambos operandos de la resta");}
-                    | expresion error termino                   {System.out.println("Error sintáctico: falta de operador");}
+                    | expresion '+' error                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la suma");}
+                    | expresion '-' error                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la resta");}
+                    | error '+' termino                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la suma");}
+                    | error '-' termino                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la resta");}
+                    //PREGUNTAR SI SE INCLUYE| '+'                                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta ambos operandos de la suma");}
+                    //PREGUNTAR SI SE INCLUYE| '-'                                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta ambos operandos de la resta");}
+                    | expresion error termino                   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de operador");}
                     ;
 
 termino             : termino '*' factor 
                     | termino '/' factor
                     | factor
-                    | termino '*' error                         {System.out.println("Error sintáctico: falta el operando derecho de la multiplicación");}
-                    | termino '/' error                         {System.out.println("Error sintáctico: falta el operando derecho de la división");} 
-                    | error '*' factor                          {System.out.println("Error sintáctico: falta el operando izquierdo de la multiplicación");}
-                    | error '/' factor                          {System.out.println("Error sintáctico: falta el operando izquierdo de la división");}
-                    //PREGUNTAR SI SE INCLUYE| '*'                                       {System.out.println("Error sintáctico: falta ambos operandos de la multiplicación");}
-                    //PREGUNTAR SI SE INCLUYE| '/'                                       {System.out.println("Error sintáctico: falta ambos operandos de la división");}
-                    //PREGUNTAR SI ES NECESARIO (Lo contemplamos en expresion?)| termino factor                            {System.out.println("Error sintáctico: falta de operador");}              
+                    | termino '*' error                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la multiplicación");}
+                    | termino '/' error                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la división");} 
+                    | error '*' factor                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la multiplicación");}
+                    | error '/' factor                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la división");}
+                    //PREGUNTAR SI SE INCLUYE| '*'                                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta ambos operandos de la multiplicación");}
+                    //PREGUNTAR SI SE INCLUYE| '/'                                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta ambos operandos de la división");}
+                    //PREGUNTAR SI ES NECESARIO (Lo contemplamos en expresion?)| termino factor                            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de operador");}              
                     ;
 
 factor              : identificador
@@ -136,27 +136,29 @@ factor              : identificador
                     | funcion
                     ;
 
-funcion             : ID '(' listapinvocacion ')'
-                    | ID '(' identificador ')'         
-                    | ID '(' CTE ')'
-                    | error '(' listapinvocacion ')'            {System.out.println("Error sintáctico: falta el nombre de la funcion");}
+funcion             : ID '(' listapinvocacion ')'                {System.out.println("Se detectó una función invocada correctamente");}
+                    | ID '(' identificador ')'                   {System.out.println("Se detectó una función invocada correctamente");}
+                    | ID '(' CTE ')'                             {System.out.println("Se detectó una función invocada correctamente");}
+                    | error '(' listapinvocacion ')'             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre de la funcion");}
+                    | error '(' identificador ')'                {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre de la funcion");}
+                    | error '(' CTE ')'                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre de la funcion");}
                     ;
 
 listapinvocacion    : listapinvocacion ',' pinvocacion 
                     | pinvocacion
                     ;
 
-pinvocacion         : expresion FLECHA ID
+pinvocacion         : expresion FLECHA ID                       
                     | TRUNC '(' expresion ')' FLECHA ID
-                    | TRUNC '(' expresion FLECHA ID             {System.out.println("Error sintáctico: falta el paréntesis de cierre de la función TRUNC");}
-                    | TRUNC expresion ')' FLECHA ID             {System.out.println("Error sintáctico: falta el paréntesis de apertura de la función TRUNC");}
-                    | TRUNC expresion FLECHA ID                 {System.out.println("Error sintáctico: faltan ambos paréntesis de la función TRUNC");}
+                    | TRUNC '(' expresion FLECHA ID             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el paréntesis de cierre de la función TRUNC");}
+                    | TRUNC expresion ')' FLECHA ID             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el paréntesis de apertura de la función TRUNC");}
+                    | TRUNC expresion FLECHA ID                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": faltan ambos paréntesis de la función TRUNC");}
                     | '(' tipo ID ')' '{' listasentencia '}'
-                    | '(' tipo ID ')' '{' listasentencia        {System.out.println("Error sintáctico: falta llave de cierre del cuerpo de la función Lambda");}
-                    | '(' tipo ID ')' listasentencia '}'        {System.out.println("Error sintáctico: falta llave de apertura del cuerpo de la función Lambda");}
-                    | '(' tipo ID ')' listasentencia            {System.out.println("Error sintáctico: faltan ambas llaves del cuerpo de la función Lambda");}
-                    | expresion FLECHA                          {System.out.println("Error sintáctico: No se especifica el parametro formal al que corresponde el parámetro real");}
-                    | TRUNC '(' expresion ')' FLECHA            {System.out.println("Error sintáctico: No se especifica el parametro formal al que corresponde el parámetro real");}
+                    | '(' tipo ID ')' '{' listasentencia        {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de cierre del cuerpo de la función Lambda");}
+                    | '(' tipo ID ')' listasentencia '}'        {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de apertura del cuerpo de la función Lambda");}
+                    | '(' tipo ID ')' listasentencia            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": faltan ambas llaves del cuerpo de la función Lambda");}
+                    | expresion FLECHA                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
+                    | TRUNC '(' expresion ')' FLECHA            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
                     ;
 
 
