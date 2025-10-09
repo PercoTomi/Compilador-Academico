@@ -1,5 +1,6 @@
-PROGRAMA {
-    X(4L)
-    Y(5L)
-    ZZ(3L);
+ID {
+    X:= 4L
+    X:= 4L
+    X:= 4L
+    X:= 4L
 }

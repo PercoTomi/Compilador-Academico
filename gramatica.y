@@ -15,19 +15,28 @@ prog                : ID '{' listasentencia '}'
                     | ID listasentencia                     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": faltan llaves que encierren el cuerpo del programa");} 
                     ;
 
-listasentencia      : listasentencia sentencia ';'          {System.out.println("Se detectó una listasentencia sentencia ;");}
-                    | sentencia ';'                         {System.out.println("Se detectó una sentencia ;");}
+listasentencia      : listasentencia sentencia          {System.out.println("Se detectó una listasentencia sentencia ;");}
+                    | sentencia                         {System.out.println("Se detectó una sentencia ;");}
+                    |
                     //| listasentencia sentencia error             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");} 
                     //| sentencia error                             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");} 
-                    | error                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");}
+                    //| error                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");}
                     ;
 
-sentencia           : asignacion                            
-                    | declaracion                           
-                    | control                               
-                    | print                                 {System.out.println("Se detectó un print");}
-                    | funcion                              
+sentencia           : asignacion ';'                               
+                    | declaracion  ';'                         
+                    | control ';'                               
+                    | print ';'                                 {System.out.println("Se detectó un print");}
+                    | funcion ';'                               {System.out.println("Se obtuvo una sentencia desde una invocación a función");}
+                    //| sentencia_error   
                     ;
+
+/*sentencia_error     : asignacion                        {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");}
+                    | declaracion                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");}
+                    | control                           {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");}
+                    | print                             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");}
+                    | funcion                           {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta punto y coma al final de la sentencia");}                          
+                    ;*/
 
 declaracion         : tipo listavariables                   {System.out.println("Se detectó una declaración de variables");}  
                     | tipo ID '(' listaparametros ')' '{' listasentencia RETURN '(' expresion ')' ';' '}' {System.out.println("Se detectó una declaración de función");}
@@ -70,7 +79,7 @@ print               : PRINT '(' expresion ')'
                     ;   
 
 condicion           : expresion comparador expresion
-                    | expresion expresion                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operador comparador en la condición");}
+                    //| expresion expresion                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operador comparador en la condición");}
                     ;
 
 comparador          : '>'
@@ -85,8 +94,8 @@ tipo                : LONG
                     | LAMBDA
                     ;
 
-identificador       : ID
-                    | identificador '.' ID
+identificador       : ID                                        {System.out.println("Se detectó un IDENTIFICADOR");}
+                    | identificador '.' ID                      {System.out.println("Se detectó un IDENTIFICADOR compuesto");}
                     ;
 
 listavariables      : listavariables ',' identificador
@@ -107,21 +116,21 @@ parametro           : CV tipo ID // es opcional la semantica
                     | ID                                        {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el tipo del parámetro");}
                     ;
 
-expresion           : expresion '+' termino 
-                    | expresion '-' termino
-                    | termino
+expresion           : expresion '+' termino                     {System.out.println("Se detectó una expresión desde una suma");}  
+                    | expresion '-' termino                     {System.out.println("Se detectó una expresión desde una resta");}
+                    | termino                                   {System.out.println("Se detectó una expresión desde un término");}
                     | expresion '+' error                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la suma");}
                     | expresion '-' error                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la resta");}
                     | error '+' termino                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la suma");}
                     | error '-' termino                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la resta");}
                     //PREGUNTAR SI SE INCLUYE| '+'                                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta ambos operandos de la suma");}
                     //PREGUNTAR SI SE INCLUYE| '-'                                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta ambos operandos de la resta");}
-                    | expresion error termino                   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de operador");}
+                    //| expresion error termino                   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de operador");}
                     ;
 
 termino             : termino '*' factor 
                     | termino '/' factor
-                    | factor
+                    | factor                                    {System.out.println("Se detecto un TERMINO desde un FACTOR");}
                     | termino '*' error                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la multiplicación");}
                     | termino '/' error                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la división");} 
                     | error '*' factor                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la multiplicación");}
@@ -131,9 +140,10 @@ termino             : termino '*' factor
                     //PREGUNTAR SI ES NECESARIO (Lo contemplamos en expresion?)| termino factor                            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de operador");}              
                     ;
 
-factor              : identificador
-                    | CTE
-                    | funcion
+factor              : identificador                             {System.out.println("Se detectó un FACTOR IDENTIFICADOR");}
+                    | CTE                                       {System.out.println("Se detectó un FACTOR CTE");}
+                    | funcion                                   {System.out.println("Se detectó un FACTOR FUNCIÓN");} 
+                    //| identificador identificador              {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operador entre factores");}
                     ;
 
 funcion             : ID '(' listapinvocacion ')'                {System.out.println("Se detectó una función invocada correctamente");}
