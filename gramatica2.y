@@ -104,6 +104,8 @@ identificador       : ID
 
 listavariables      : listavariables ',' identificador
                     | identificador
+                    //| listavariables ID                                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta coma entre variables");}
+                    //| listavariables identificador '.' ID                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta coma entre variables");}
                     ;
 
 listaparametros     : listaparametros ',' parametro
@@ -121,12 +123,16 @@ expresion           : expresion '+' termino
                     | expresion '-' error                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la resta");}
                     | error '+' termino                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la suma");}
                     | error '-' termino                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la resta");}
-                    //| expresion error termino                     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operador entre términos");}
+                    //| expresion  termino                     {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operador entre términos");}
                     ;
 
 termino             : termino '*' factor
                     | termino '/' factor
                     | factor
+                    | termino '*' error                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la multiplicación");}
+                    | termino '/' error                         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho de la división");} 
+                    | error '*' factor                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la multiplicación");}
+                    | error '/' factor                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando izquierdo de la división");}
                     ;
 
 factor              : identificador
