@@ -1,4 +1,3 @@
 ID {
-    X:= +4L
-    X:=3L+
+    if (X Y) {long X} else {long X} endif;
 }
