@@ -5,24 +5,24 @@
     import java.util.HashMap;
 %}
 
-%token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA
+%token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
 
 %%
-prog                : ID '{' listasentencias '}'
-                    | '{' listasentencias '}'                   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre del programa");} 
-                    | ID '{' listasentencias                    {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de cierre del cuerpo del programa");} 
-                    | ID listasentencias '}'                    {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta la llave de apertura del cuerpo del programa");} 
-                    | ID '{' listasentencias error '}'          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": la última sentencia del programa es inválida");}
-                    | ID '{' error '}'                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": no hay una sentencia válida dentro del cuerpo del programa");} 
-                    | ID '{' listasentencias error              {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": el programa terminó de forma inválida");}
-                    | ID '{' error                              {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": no hay una sentencia válida dentro del cuerpo del programa");}
+prog                : ID '{' listasentencias '}' EOF
+                    | '{' listasentencias '}' EOF               {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre del programa");} 
+                    | ID '{' listasentencias EOF                {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de cierre del cuerpo del programa");} 
+                    | ID listasentencias '}' EOF                {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta la llave de apertura del cuerpo del programa");} 
+                    | ID listasentencias EOF                    {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta la llave de apertura y la llave de cierre del cuerpo del programa");}
+                    | ID '{' listasentencias error  EOF         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": el programa terminó de forma inválida");}'}'
+                    | ID '{' error EOF                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": no hay una sentencia válida dentro del cuerpo del programa");}'}'
+                    | ID '{' listasentencias error '}' EOF      {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": el programa terminó de forma inválida");}
+                    | ID '{' error '}' EOF                      {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": no hay una sentencia válida dentro del cuerpo del programa");}
                     ;
 
 listasentencias     : listasentencias sentencia                 {System.out.println("Se detectó una listasentencias sentencia ;");}
                     | sentencia                                 {System.out.println("Se detectó una sentencia ;");}
-                    | listasentencias error ';'               {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": no hay una sentencia válida antes del punto y coma");}
-                    | error ';'                            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": no hay una sentencia válida antes del punto y coma");}
-                    //| error '}'                            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": el programa terminó de forma inválida");}
+                    | listasentencias error ';'                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de punto y coma en una sentencia anterior o sentencia no válida antes del punto y coma.");}
+                    | error ';'                                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta de punto y coma en una sentencia anterior o sentencia no válida antes del punto y coma.");}
                     ;
 
 sentencia           : sentenciaejecutable ';'                   {System.out.println("Se detectó una sentenciaejecutable ;");}              
@@ -44,6 +44,7 @@ declaracion         : tipo listavariables                       {System.out.prin
                     ;
 
 asignacion          : identificador ASIG expresion              {System.out.println("Se detectó una asignación simple");}
+                    //| identificador ASIG expresion error         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operando derecho en la asignación");}
                     | listavariables '=' listaconstantes        {System.out.println("Se detectó una asignación múltiple");}
                     ;
 
@@ -181,4 +182,5 @@ public Parser(Map<String, Simbolo> tablaSimbolos, String path)
   this.tablaSimbolos = tablaSimbolos;
   this.lexer = new Lexico(tablaSimbolos);
   this.lexer.cargarBuffer(path);
+  this.yydebug = true;
 }

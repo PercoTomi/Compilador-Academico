@@ -18,6 +18,7 @@ public class Lexico {
     private Map<String,Integer> mapaTokens; // mapa que asocia literales y sus simbolos compuestos con sus IDs de token
     private Map<String,Integer> mapaColumnas; // mapa que guarda el indice de las columnas segun su caracter
     private ParserVal yylval; // simbolo referenciado que se devuelve al parser
+    private boolean eof = false; // indica si se ha llegado al final del archivo
 
     public Lexico(Map<String, Simbolo> tablaDeSimbolos) {
         this.buffer = new ArrayList<>();
@@ -78,16 +79,21 @@ public class Lexico {
 
             // FIN IDENTIFICACIÓN DE LA COLUMNA //
             mapaAS.get(matrizIndicesAS[estadoActual][columna]).ejecutar(cadena, charLeido);
-            //####System.out.println("Estado actual: " + estadoActual + ", Caracter leído: '" + charLeido + "', Columna: " + columna + ", Cadena: '" + cadena.toString() + "', idToken: " + idToken + ", estado siguiente: " + matrizDeTransiciones[estadoActual][columna] + ", lineaActual en Lexico: " + lineaActual);
-            //####System.out.println("Accion semántica a ejecutar: " + matrizIndicesAS[estadoActual][columna]);
             estadoActual = matrizDeTransiciones[estadoActual][columna];
         }
 
-        //####if (yylval.obj != null) System.out.println("(Impresión desde Lexico) El lexema leido es: " + ((Simbolo)yylval.obj).getLexema());
 
         if (idToken == 0 & !cadena.isEmpty()) {
             idToken = 256;
-           //####System.out.println("Error en línea " + lineaActual + ": Se llegó a EoF y no se reconoció el token, error");
+        }
+        if (posicionActual >= buffer.size() && idToken == 0) {
+            if (eof) {
+                idToken = 0; // EOF
+            }
+            else {
+                idToken = 277;
+                eof = true;
+            }
         }
         return idToken;
     }
