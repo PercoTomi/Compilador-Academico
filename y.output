@@ -133,12 +133,13 @@
  103              | TRUNC '(' expresion FLECHA ID
  104              | TRUNC expresion ')' FLECHA ID
  105              | TRUNC expresion FLECHA ID
- 106              | '(' tipo ID ')' '{' listasentenciasejecutables '}'
- 107              | '(' tipo ID ')' '{' listasentenciasejecutables
- 108              | '(' tipo ID ')' listasentenciasejecutables '}'
- 109              | '(' tipo ID ')' listasentenciasejecutables
- 110              | expresion FLECHA
- 111              | TRUNC '(' expresion ')' FLECHA
+ 106              | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA ID
+ 107              | '(' tipo ID ')' '{' listasentenciasejecutables FLECHA ID
+ 108              | '(' tipo ID ')' listasentenciasejecutables '}' FLECHA ID
+ 109              | '(' tipo ID ')' listasentenciasejecutables FLECHA ID
+ 110              | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA
+ 111              | expresion FLECHA
+ 112              | TRUNC '(' expresion ')' FLECHA
 
 state 0
 	$accept : . prog $end  (0)
@@ -980,7 +981,7 @@ state 60
 	pinvocacion : TRUNC . '(' expresion FLECHA ID  (103)
 	pinvocacion : TRUNC . expresion ')' FLECHA ID  (104)
 	pinvocacion : TRUNC . expresion FLECHA ID  (105)
-	pinvocacion : TRUNC . '(' expresion ')' FLECHA  (111)
+	pinvocacion : TRUNC . '(' expresion ')' FLECHA  (112)
 
 	error  shift 27
 	ID  shift 5
@@ -996,10 +997,11 @@ state 60
 
 
 state 61
-	pinvocacion : '(' . tipo ID ')' '{' listasentenciasejecutables '}'  (106)
-	pinvocacion : '(' . tipo ID ')' '{' listasentenciasejecutables  (107)
-	pinvocacion : '(' . tipo ID ')' listasentenciasejecutables '}'  (108)
-	pinvocacion : '(' . tipo ID ')' listasentenciasejecutables  (109)
+	pinvocacion : '(' . tipo ID ')' '{' listasentenciasejecutables '}' FLECHA ID  (106)
+	pinvocacion : '(' . tipo ID ')' '{' listasentenciasejecutables FLECHA ID  (107)
+	pinvocacion : '(' . tipo ID ')' listasentenciasejecutables '}' FLECHA ID  (108)
+	pinvocacion : '(' . tipo ID ')' listasentenciasejecutables FLECHA ID  (109)
+	pinvocacion : '(' . tipo ID ')' '{' listasentenciasejecutables '}' FLECHA  (110)
 
 	LONG  shift 7
 	LAMBDA  shift 10
@@ -1015,7 +1017,7 @@ state 62
 	expresion : expresion . '-' error  (79)
 	expresion : expresion . error termino  (82)
 	pinvocacion : expresion . FLECHA ID  (101)
-	pinvocacion : expresion . FLECHA  (110)
+	pinvocacion : expresion . FLECHA  (111)
 
 	error  shift 121
 	FLECHA  shift 122
@@ -1591,7 +1593,7 @@ state 117
 state 118
 	pinvocacion : TRUNC '(' . expresion ')' FLECHA ID  (102)
 	pinvocacion : TRUNC '(' . expresion FLECHA ID  (103)
-	pinvocacion : TRUNC '(' . expresion ')' FLECHA  (111)
+	pinvocacion : TRUNC '(' . expresion ')' FLECHA  (112)
 
 	error  shift 27
 	ID  shift 5
@@ -1623,10 +1625,11 @@ state 119
 
 
 state 120
-	pinvocacion : '(' tipo . ID ')' '{' listasentenciasejecutables '}'  (106)
-	pinvocacion : '(' tipo . ID ')' '{' listasentenciasejecutables  (107)
-	pinvocacion : '(' tipo . ID ')' listasentenciasejecutables '}'  (108)
-	pinvocacion : '(' tipo . ID ')' listasentenciasejecutables  (109)
+	pinvocacion : '(' tipo . ID ')' '{' listasentenciasejecutables '}' FLECHA ID  (106)
+	pinvocacion : '(' tipo . ID ')' '{' listasentenciasejecutables FLECHA ID  (107)
+	pinvocacion : '(' tipo . ID ')' listasentenciasejecutables '}' FLECHA ID  (108)
+	pinvocacion : '(' tipo . ID ')' listasentenciasejecutables FLECHA ID  (109)
+	pinvocacion : '(' tipo . ID ')' '{' listasentenciasejecutables '}' FLECHA  (110)
 
 	ID  shift 171
 	.  error
@@ -1648,11 +1651,11 @@ state 121
 
 state 122
 	pinvocacion : expresion FLECHA . ID  (101)
-	pinvocacion : expresion FLECHA .  (110)
+	pinvocacion : expresion FLECHA .  (111)
 
 	ID  shift 172
-	')'  reduce 110
-	','  reduce 110
+	')'  reduce 111
+	','  reduce 111
 
 
 state 123
@@ -2198,7 +2201,7 @@ state 168
 	expresion : expresion . error termino  (82)
 	pinvocacion : TRUNC '(' expresion . ')' FLECHA ID  (102)
 	pinvocacion : TRUNC '(' expresion . FLECHA ID  (103)
-	pinvocacion : TRUNC '(' expresion . ')' FLECHA  (111)
+	pinvocacion : TRUNC '(' expresion . ')' FLECHA  (112)
 
 	error  shift 121
 	FLECHA  shift 187
@@ -2223,10 +2226,11 @@ state 170
 
 
 state 171
-	pinvocacion : '(' tipo ID . ')' '{' listasentenciasejecutables '}'  (106)
-	pinvocacion : '(' tipo ID . ')' '{' listasentenciasejecutables  (107)
-	pinvocacion : '(' tipo ID . ')' listasentenciasejecutables '}'  (108)
-	pinvocacion : '(' tipo ID . ')' listasentenciasejecutables  (109)
+	pinvocacion : '(' tipo ID . ')' '{' listasentenciasejecutables '}' FLECHA ID  (106)
+	pinvocacion : '(' tipo ID . ')' '{' listasentenciasejecutables FLECHA ID  (107)
+	pinvocacion : '(' tipo ID . ')' listasentenciasejecutables '}' FLECHA ID  (108)
+	pinvocacion : '(' tipo ID . ')' listasentenciasejecutables FLECHA ID  (109)
+	pinvocacion : '(' tipo ID . ')' '{' listasentenciasejecutables '}' FLECHA  (110)
 
 	')'  shift 191
 	.  error
@@ -2345,7 +2349,7 @@ state 187
 
 state 188
 	pinvocacion : TRUNC '(' expresion ')' . FLECHA ID  (102)
-	pinvocacion : TRUNC '(' expresion ')' . FLECHA  (111)
+	pinvocacion : TRUNC '(' expresion ')' . FLECHA  (112)
 
 	FLECHA  shift 198
 	.  error
@@ -2365,10 +2369,11 @@ state 190
 
 
 state 191
-	pinvocacion : '(' tipo ID ')' . '{' listasentenciasejecutables '}'  (106)
-	pinvocacion : '(' tipo ID ')' . '{' listasentenciasejecutables  (107)
-	pinvocacion : '(' tipo ID ')' . listasentenciasejecutables '}'  (108)
-	pinvocacion : '(' tipo ID ')' . listasentenciasejecutables  (109)
+	pinvocacion : '(' tipo ID ')' . '{' listasentenciasejecutables '}' FLECHA ID  (106)
+	pinvocacion : '(' tipo ID ')' . '{' listasentenciasejecutables FLECHA ID  (107)
+	pinvocacion : '(' tipo ID ')' . listasentenciasejecutables '}' FLECHA ID  (108)
+	pinvocacion : '(' tipo ID ')' . listasentenciasejecutables FLECHA ID  (109)
+	pinvocacion : '(' tipo ID ')' . '{' listasentenciasejecutables '}' FLECHA  (110)
 
 	error  shift 92
 	ID  shift 5
@@ -2445,11 +2450,11 @@ state 197
 
 state 198
 	pinvocacion : TRUNC '(' expresion ')' FLECHA . ID  (102)
-	pinvocacion : TRUNC '(' expresion ')' FLECHA .  (111)
+	pinvocacion : TRUNC '(' expresion ')' FLECHA .  (112)
 
 	ID  shift 203
-	')'  reduce 111
-	','  reduce 111
+	')'  reduce 112
+	','  reduce 112
 
 
 state 199
@@ -2459,8 +2464,9 @@ state 199
 
 
 state 200
-	pinvocacion : '(' tipo ID ')' '{' . listasentenciasejecutables '}'  (106)
-	pinvocacion : '(' tipo ID ')' '{' . listasentenciasejecutables  (107)
+	pinvocacion : '(' tipo ID ')' '{' . listasentenciasejecutables '}' FLECHA ID  (106)
+	pinvocacion : '(' tipo ID ')' '{' . listasentenciasejecutables FLECHA ID  (107)
+	pinvocacion : '(' tipo ID ')' '{' . listasentenciasejecutables '}' FLECHA  (110)
 
 	error  shift 92
 	ID  shift 5
@@ -2481,17 +2487,17 @@ state 200
 
 state 201
 	listasentenciasejecutables : listasentenciasejecutables . sentenciaejecutable ';'  (18)
-	pinvocacion : '(' tipo ID ')' listasentenciasejecutables . '}'  (108)
-	pinvocacion : '(' tipo ID ')' listasentenciasejecutables .  (109)
+	pinvocacion : '(' tipo ID ')' listasentenciasejecutables . '}' FLECHA ID  (108)
+	pinvocacion : '(' tipo ID ')' listasentenciasejecutables . FLECHA ID  (109)
 
 	error  shift 92
 	ID  shift 5
 	IF  shift 6
 	DO  shift 8
+	FLECHA  shift 205
 	PRINT  shift 9
-	'}'  shift 205
-	')'  reduce 109
-	','  reduce 109
+	'}'  shift 206
+	.  error
 
 	sentenciaejecutable  goto 151
 	asignacion  goto 16
@@ -2511,7 +2517,7 @@ state 202
 	ID  shift 5
 	IF  shift 6
 	LONG  shift 7
-	RETURN  shift 206
+	RETURN  shift 207
 	DO  shift 8
 	PRINT  shift 9
 	LAMBDA  shift 10
@@ -2537,17 +2543,18 @@ state 203
 
 state 204
 	listasentenciasejecutables : listasentenciasejecutables . sentenciaejecutable ';'  (18)
-	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables . '}'  (106)
-	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables .  (107)
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables . '}' FLECHA ID  (106)
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables . FLECHA ID  (107)
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables . '}' FLECHA  (110)
 
 	error  shift 92
 	ID  shift 5
 	IF  shift 6
 	DO  shift 8
+	FLECHA  shift 208
 	PRINT  shift 9
-	'}'  shift 207
-	')'  reduce 107
-	','  reduce 107
+	'}'  shift 209
+	.  error
 
 	sentenciaejecutable  goto 151
 	asignacion  goto 16
@@ -2559,25 +2566,55 @@ state 204
 
 
 state 205
-	pinvocacion : '(' tipo ID ')' listasentenciasejecutables '}' .  (108)
+	pinvocacion : '(' tipo ID ')' listasentenciasejecutables FLECHA . ID  (109)
 
-	.  reduce 108
+	ID  shift 210
+	.  error
 
 
 state 206
-	declaracion : tipo ID '(' listaparametros ')' '{' listasentencias RETURN . '(' expresion ')' ';' '}'  (25)
+	pinvocacion : '(' tipo ID ')' listasentenciasejecutables '}' . FLECHA ID  (108)
 
-	'('  shift 208
+	FLECHA  shift 211
 	.  error
 
 
 state 207
-	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables '}' .  (106)
+	declaracion : tipo ID '(' listaparametros ')' '{' listasentencias RETURN . '(' expresion ')' ';' '}'  (25)
 
-	.  reduce 106
+	'('  shift 212
+	.  error
 
 
 state 208
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables FLECHA . ID  (107)
+
+	ID  shift 213
+	.  error
+
+
+state 209
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables '}' . FLECHA ID  (106)
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables '}' . FLECHA  (110)
+
+	FLECHA  shift 214
+	.  error
+
+
+state 210
+	pinvocacion : '(' tipo ID ')' listasentenciasejecutables FLECHA ID .  (109)
+
+	.  reduce 109
+
+
+state 211
+	pinvocacion : '(' tipo ID ')' listasentenciasejecutables '}' FLECHA . ID  (108)
+
+	ID  shift 215
+	.  error
+
+
+state 212
 	declaracion : tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' . expresion ')' ';' '}'  (25)
 
 	error  shift 27
@@ -2586,13 +2623,34 @@ state 208
 	.  error
 
 	funcion  goto 30
-	expresion  goto 209
+	expresion  goto 216
 	identificador  goto 32
 	termino  goto 35
 	factor  goto 36
 
 
-state 209
+state 213
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables FLECHA ID .  (107)
+
+	.  reduce 107
+
+
+state 214
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA . ID  (106)
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA .  (110)
+
+	ID  shift 217
+	')'  reduce 110
+	','  reduce 110
+
+
+state 215
+	pinvocacion : '(' tipo ID ')' listasentenciasejecutables '}' FLECHA ID .  (108)
+
+	.  reduce 108
+
+
+state 216
 	declaracion : tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' expresion . ')' ';' '}'  (25)
 	expresion : expresion . '+' termino  (75)
 	expresion : expresion . '-' termino  (76)
@@ -2601,31 +2659,37 @@ state 209
 	expresion : expresion . error termino  (82)
 
 	error  shift 121
-	')'  shift 210
+	')'  shift 218
 	'+'  shift 81
 	'-'  shift 82
 	.  error
 
 
-state 210
+state 217
+	pinvocacion : '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA ID .  (106)
+
+	.  reduce 106
+
+
+state 218
 	declaracion : tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' expresion ')' . ';' '}'  (25)
 
-	';'  shift 211
+	';'  shift 219
 	.  error
 
 
-state 211
+state 219
 	declaracion : tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' expresion ')' ';' . '}'  (25)
 
-	'}'  shift 212
+	'}'  shift 220
 	.  error
 
 
-state 212
+state 220
 	declaracion : tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' expresion ')' ';' '}' .  (25)
 
 	.  reduce 25
 
 
 37 terminals, 28 nonterminals
-112 grammar rules, 213 states
+113 grammar rules, 221 states

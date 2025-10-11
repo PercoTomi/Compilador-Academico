@@ -84,7 +84,7 @@ condicion           : '(' cuerpocondicion ')'                   {System.out.prin
                     ;
 
 cuerpocondicion     : expresion comparador expresion
-                    | expresion expresion                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el operador comparador en la condición");}
+                    | expresion expresion                       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el comparador en la condición");}
                     ;
 
 comparador          : '>'
@@ -162,10 +162,11 @@ pinvocacion         : expresion FLECHA ID
                     | TRUNC '(' expresion FLECHA ID             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el paréntesis de cierre de la función TRUNC");}
                     | TRUNC expresion ')' FLECHA ID             {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el paréntesis de apertura de la función TRUNC");}
                     | TRUNC expresion FLECHA ID                 {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": faltan ambos paréntesis de la función TRUNC");}
-                    | '(' tipo ID ')' '{' listasentenciasejecutables '}'
-                    | '(' tipo ID ')' '{' listasentenciasejecutables        {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de cierre del cuerpo de la función Lambda");}
-                    | '(' tipo ID ')' listasentenciasejecutables '}'        {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de apertura del cuerpo de la función Lambda");}
-                    | '(' tipo ID ')' listasentenciasejecutables            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": faltan ambas llaves del cuerpo de la función Lambda");}
+                    | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA ID
+                    | '(' tipo ID ')' '{' listasentenciasejecutables FLECHA ID       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de cierre del cuerpo de la función Lambda");}
+                    | '(' tipo ID ')' listasentenciasejecutables '}' FLECHA ID       {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta llave de apertura del cuerpo de la función Lambda");}
+                    | '(' tipo ID ')' listasentenciasejecutables FLECHA ID           {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": faltan ambas llaves del cuerpo de la función Lambda");}
+                    | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA   {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
                     | expresion FLECHA                          {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
                     | TRUNC '(' expresion ')' FLECHA            {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
                     ;
@@ -182,5 +183,4 @@ public Parser(Map<String, Simbolo> tablaSimbolos, String path)
   this.tablaSimbolos = tablaSimbolos;
   this.lexer = new Lexico(tablaSimbolos);
   this.lexer.cargarBuffer(path);
-  this.yydebug = true;
 }

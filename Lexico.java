@@ -387,7 +387,7 @@ public class Lexico {
             // Verificar si el lexema no está en la tabla de símbolos
             if(!tablaDeSimbolos.containsKey(lexema)) {
                     // Si no está, crear un nuevo símbolo float y agregarlo a la tabla
-                    Simbolo nuevoSimbolo = new SimboloCteString(275, "CadenaML", lexema, lexema);
+                    Simbolo nuevoSimbolo = new SimboloCteString(274, "CadenaML", lexema, lexema);
                     tablaDeSimbolos.put(lexema, nuevoSimbolo);
                     yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
                 } else {
@@ -395,7 +395,7 @@ public class Lexico {
                     yylval.obj = tablaDeSimbolos.get(lexema);
                 }
                 yylval.ival = lineaActual;
-                idToken=275;
+                idToken=274;
         }
     }
 
