@@ -1,3 +1,3 @@
 PROGRAMA {
-    F(trunc 4L) -> X);
+    ;
 }

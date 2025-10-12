@@ -36,7 +36,7 @@ listasentenciasejecutables: listasentenciasejecutables sentenciaejecutable ';'
 sentenciaejecutable   : asignacion                                                       
                       | control                               
                       | print                                   {System.out.println("Se detectó un print");}
-                      | funcion                                 {System.out.println("Se obtuvo una sentencia desde una invocación a función");} 
+                      //| funcion                                 {System.out.println("Se obtuvo una sentencia desde una invocación a función");} 
                       ;
 
 declaracion         : tipo listavariables                       {System.out.println("Se detectó una declaración de variables");}  
@@ -142,7 +142,7 @@ termino             : termino '*' factor
 
 factor              : identificador                             {System.out.println("Se detectó un FACTOR IDENTIFICADOR");}
                     | CTE                                       {System.out.println("Se detectó un FACTOR CTE");}
-                    | funcion                                   {System.out.println("Se detectó un FACTOR FUNCIÓN");} 
+                    | funcion                                   {System.out.println("Se detectó un FACTOR FUNCIÓN");}
                     ;
 
 funcion             : ID '(' listapinvocacion ')'               {System.out.println("Se detectó una función invocada correctamente");}
