@@ -143,6 +143,7 @@ termino             : termino '*' factor
 factor              : identificador                             {System.out.println("Se detectó un FACTOR IDENTIFICADOR");}
                     | CTE                                       {System.out.println("Se detectó un FACTOR CTE");}
                     | funcion                                   {System.out.println("Se detectó un FACTOR FUNCIÓN");}
+                    | '_'CTE
                     ;
 
 funcion             : ID '(' listapinvocacion ')'               {System.out.println("Se detectó una función invocada correctamente");}

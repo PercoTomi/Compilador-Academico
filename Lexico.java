@@ -352,11 +352,11 @@ public class Lexico {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
             String lexema = cadena.toString();
-            Float cte = Float.parseFloat(lexema);
-            lexema+= charLeido;
+            Float cte = 0f;
+            if (!lexema.equals("."))
+                cte = Float.parseFloat(lexema);
             posicionActual--;
-
-            if (lexema != ".") {
+            if (!lexema.equals(".")) {
                 // sin cte es mayor a 3.40282347E38 o menor a 1.17549435E-38 error
                 if (cte > 3.40282347E+38 || cte < 1.17549435E-38) {
                     mapaAS.get(105).ejecutar(cadena, charLeido);
