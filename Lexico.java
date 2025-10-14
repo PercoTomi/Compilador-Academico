@@ -96,6 +96,14 @@ public class Lexico {
                 eof = true;
             }
         }
+        if (idToken == 257) 
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: ID, Lexema: " + cadena.toString() + ", Línea: " + lineaActual);
+        else if (idToken == 258) 
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: CTE, Lexema: " + cadena.toString() + ", Línea: " + lineaActual);
+        else if (idToken == 0)
+            System.out.println("||---------------- ANALIZADOR LÉXICO: FIN DE ARCHIVO ALCANZADO");
+        else if (idToken != 277)
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: " + cadena.toString() + ", Línea: " + lineaActual);
         return idToken;
     }
 
@@ -297,8 +305,9 @@ public class Lexico {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
             idToken = mapaTokens.get(charLeido);
-            yylval.sval = charLeido; // SE USA PARA ESTO?
-            yylval.ival = lineaActual; // CHUSMEAR POR QUE EN EL CODIGO ACTUAL NO SE LEE LINEA 2 LUEGO DE ESTA ACTUALIZACION DEL YYLVAL
+            cadena.append(charLeido);
+            yylval.sval = charLeido;
+            yylval.ival = lineaActual;
         }
     }
 
@@ -327,7 +336,7 @@ public class Lexico {
         public void ejecutar(StringBuilder cadena, String charLeido) {
             cadena.append(charLeido);
             idToken = mapaTokens.get(cadena.toString());
-            yylval.sval = cadena.toString(); // SE USA PARA ESTO?
+            yylval.sval = cadena.toString();
             yylval.ival = lineaActual;
         }
     }
@@ -366,8 +375,10 @@ public class Lexico {
                     // Verificar si el lexema no está en la tabla de símbolos
                     if(!tablaDeSimbolos.containsKey(lexema)) {
                         // Si no está, crear un nuevo símbolo float y agregarlo a la tabla
-                        Simbolo nuevoSimbolo = new SimboloCteFloat(258, "Constante", lexema, cte);
-                        tablaDeSimbolos.put(lexema, nuevoSimbolo);
+                        // Antes de ingresar el lexema a la tabla se crea una var auxiliar en la cual se reemplaza la E por la F
+                        String lexemaAux = lexema.replace("E", "F");
+                        Simbolo nuevoSimbolo = new SimboloCteFloat(258, "Constante", lexemaAux, cte);
+                        tablaDeSimbolos.put(lexemaAux, nuevoSimbolo);
                         yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
                     } else {
                         // Si ya está, simplemente asignarlo a yylval

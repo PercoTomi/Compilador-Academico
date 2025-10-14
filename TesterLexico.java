@@ -13,7 +13,7 @@ public class TesterLexico {
         String test = "test.txt";
 
         if (lexico.cargarBuffer(test)) {
-            System.out.println("Buffer cargado correctamente");
+            System.out.println("ÉTAPA DE ANÁLISIS LÉXICO:");
             int token = 10000; // valor inicial cualquiera distinto de 0
             while (token != 0) {
                 token = lexico.yylex(parserVal);
