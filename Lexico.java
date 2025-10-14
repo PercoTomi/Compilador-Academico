@@ -316,7 +316,9 @@ public class Lexico {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
             posicionActual--;
-            mapaAS.get(3).ejecutar(cadena, cadena.toString()); // reutiliza AS3
+            idToken = mapaTokens.get(cadena.toString());
+            yylval.sval = cadena.toString();
+            yylval.ival = lineaActual;
         }
     }
 

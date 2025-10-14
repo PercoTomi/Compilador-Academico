@@ -676,6 +676,8 @@ public Parser(Map<String, Simbolo> tablaSimbolos, String path)
 }
 
 private void constanteNegativa(ParserVal valCte) {
+    if(valCte.obj == null)
+      System.out.println("LA CONSTANTE ES NULA");
     if (valCte.obj instanceof SimboloLong) {
       ((SimboloLong) valCte.obj).setValor(-(((SimboloLong) valCte.obj).getValor()));
       ((SimboloLong) valCte.obj).setLexema("-" + ((SimboloLong) valCte.obj).getLexema());
@@ -860,7 +862,7 @@ case 4:
 break;
 case 5:
 //#line 15 "gramatica.y"
-{System.out.println("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": faltaN ambas llaves en cuerpo del programa");}
+{System.out.println("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": faltan ambas llaves en cuerpo del programa");}
 break;
 case 6:
 //#line 16 "gramatica.y"
@@ -928,7 +930,7 @@ case 33:
 break;
 case 34:
 //#line 61 "gramatica.y"
-{System.out.println("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(0).ival + ": falta la palabra ENDIF al final del bloque IF");}
+{System.out.println("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(0).ival + ": falta la palabra ENDIF al final del bloque IF-ELSE");}
 break;
 case 35:
 //#line 62 "gramatica.y"
