@@ -676,8 +676,6 @@ public Parser(Map<String, Simbolo> tablaSimbolos, String path)
 }
 
 private void constanteNegativa(ParserVal valCte) {
-    if(valCte.obj == null)
-      System.out.println("LA CONSTANTE ES NULA");
     if (valCte.obj instanceof SimboloLong) {
       ((SimboloLong) valCte.obj).setValor(-(((SimboloLong) valCte.obj).getValor()));
       ((SimboloLong) valCte.obj).setLexema("-" + ((SimboloLong) valCte.obj).getLexema());
