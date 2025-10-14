@@ -418,7 +418,7 @@ public class Lexico {
     public class AS100 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            System.out.println("Error en línea " + lineaActual + ": caractér no valido");
+            System.out.println("Error léxico en linea " + lineaActual + ": caractér no valido");
             idToken = 256;
         }
     }
@@ -427,7 +427,7 @@ public class Lexico {
     public class AS101 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            System.out.println("Error en línea " + lineaActual + ": Se esperaba un '='");
+            System.out.println("Error léxico en linea " + lineaActual + ": Se esperaba un '='");
             idToken = 256;
             posicionActual--;
         }
@@ -438,7 +438,7 @@ public class Lexico {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
             posicionActual--;
-            System.out.println("Error en línea " + lineaActual + ": Se esperaba dígito, \".\" ó \"L\"");
+            System.out.println("Error léxico en linea " + lineaActual + ": Se esperaba dígito, \".\" ó \"L\"");
             idToken = 256;
         }
     }
@@ -447,7 +447,7 @@ public class Lexico {
     public class AS103 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            System.out.println("Error en línea " + lineaActual + ": Se esperaba \"+\" ó \"-\"");
+            System.out.println("Error léxico en linea " + lineaActual + ": Se esperaba \"+\" ó \"-\"");
             idToken = 256;
             posicionActual--;
         }
@@ -457,7 +457,7 @@ public class Lexico {
     public class AS104 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            System.out.println("Error en línea " + lineaActual + ": Se esperaba un dígito");
+            System.out.println("Error léxico en linea " + lineaActual + ": Se esperaba un dígito");
             idToken = 256;
             posicionActual--;
         }
@@ -467,7 +467,7 @@ public class Lexico {
     public class AS105 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            System.out.println("Error en línea " + lineaActual + ": Constante fuera de rango");
+            System.out.println("Error léxico en linea " + lineaActual + ": Constante fuera de rango");
             idToken = 256;
         }
     }
@@ -476,7 +476,7 @@ public class Lexico {
     public class AS106 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            System.out.println("Error en línea " + lineaActual + ": Palabra reservada no válida");
+            System.out.println("Error léxico en linea " + lineaActual + ": Palabra reservada no válida");
             idToken = 256;
         }
     }

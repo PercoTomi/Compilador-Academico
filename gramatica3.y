@@ -7,12 +7,6 @@
 
 %token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
 
-%left '+' '-'
-%left '*' '/'
-%right UMINUS
-//%nonassoc LOWER_THAN_FUNC
-//%nonassoc '('            // Mayor precedencia para ID seguido de '('
-
 
 %%
 prog                        : ID '{' listasentencias '}' EOF
@@ -23,6 +17,7 @@ prog                        : ID '{' listasentencias '}' EOF
                             | '{' listasentencias EOF                   {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el nombre del programa y la llave de cierre del cuerpo del programa");}
                             | listasentencias '}' EOF                   {System.out.println("Error sintáctico en línea " + $1.ival + ": falta el nombre del programa y la llave de apertura del cuerpo del programa");}
                             | listasentencias EOF                       {System.out.println("Error sintáctico en línea " + $1.ival + ": falta el nombre del programa y ambas llaves en cuerpo del programa");}
+                            | error                                     {System.out.println("Error sintáctico: el programa no es válido");}
                             ;
 
 listasentencias             : listasentencias sentencia
@@ -108,7 +103,7 @@ listavariables              : listavariables ',' identificador
                             | listavariables error identificador   { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre variables"); }
                             ;
 
-identificador               : ID //%prec LOWER_THAN_FUNC   // Menor precedencia para ID como identificador
+identificador               : ID
                             | identificador '.' ID
                             ;
 
@@ -116,12 +111,10 @@ funcion                     : ID '(' argumentos_funcion ')'   {System.out.printl
                             //| '(' argumentos_funcion ')'      {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre de la función");}
                             ;
 
-/*nombre_funcion              : ID %prec '('       
-                            ;*/
-
 argumentos_funcion          : listapinvocacion
                             | identificador  
                             | CTE
+                            | '-' CTE
                             ;
 
 listapinvocacion            : listapinvocacion ',' pinvocacion 
@@ -172,21 +165,22 @@ termino                     : termino '*' factor
                             | error '/' factor                      { System.out.println("Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '/'"); }
                             | termino '/' error                     { System.out.println("Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '/'"); }
                             | termino error factor                  { System.out.println("Error sintáctico en línea " + $1.ival + ": falta operador entre operandos o falta de comparador en condición"); }
+                            //| factor factor
                             | factor
                             ;
 
 factor                      : CTE
-                            | '-' CTE            %prec UMINUS
+                            | '-' CTE
                             | identificador
                             | funcion
                             ;
 
 listaconstantes             : listaconstantes ',' CTE
-                            | listaconstantes ',' '-' CTE            %prec UMINUS
+                            | listaconstantes ',' '-' CTE
                             | CTE
-                            | '-' CTE            %prec UMINUS
+                            | '-' CTE
                             | listaconstantes CTE          { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); }
-                            | listaconstantes '-' CTE   %prec UMINUS   { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); }
+                            | listaconstantes '-' CTE   { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); }
                             ;
 
 
