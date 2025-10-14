@@ -5,6 +5,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.math.*;
 
 public class Lexico {
     private ArrayList<String> buffer; //buffer de entrada que contiene el código fuente
@@ -271,7 +272,7 @@ public class Lexico {
             Long cte = Long.parseLong(lexema);
             lexema+= charLeido;
             
-            if (cte > 32678) {
+            if (cte > 2147483648L) {
                 mapaAS.get(105).ejecutar(cadena, charLeido);
             }
             else{

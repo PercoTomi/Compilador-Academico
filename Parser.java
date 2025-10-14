@@ -181,6 +181,7 @@ public final static short CADENAML=274;
 public final static short TRUNC=275;
 public final static short LAMBDA=276;
 public final static short EOF=277;
+public final static short I=278;
 public final static short YYERRCODE=256;
 final static short yylhs[] = {                           -1,
     0,    0,    0,    0,    0,    0,    0,    0,    0,    1,
@@ -521,7 +522,7 @@ yycheck = new short[] {                         41,
 };
 }
 final static short YYFINAL=9;
-final static short YYMAXTOKEN=277;
+final static short YYMAXTOKEN=278;
 final static String yyname[] = {
 "end-of-file",null,null,null,null,null,null,null,null,null,null,null,null,null,
 null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
@@ -541,7 +542,7 @@ null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
 null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,
 null,null,null,null,null,null,null,"ID","CTE","ASIG","IF","ELSE","ENDIF",
 "MAYORIG","MENORIG","IGUAL","DISTINTO","LONG","RETURN","DO","UNTIL","CV",
-"FLECHA","PRINT","CADENAML","TRUNC","LAMBDA","EOF",
+"FLECHA","PRINT","CADENAML","TRUNC","LAMBDA","EOF","I",
 };
 final static String yyrule[] = {
 "$accept : prog",
@@ -662,7 +663,7 @@ final static String yyrule[] = {
 "listaconstantes : listaconstantes '-' CTE",
 };
 
-//#line 188 "gramatica3.y"
+//#line 189 "gramatica3.y"
 
 private void yyerror(String s) {
     System.out.println("Error: " + s);
@@ -674,7 +675,25 @@ public Parser(Map<String, Simbolo> tablaSimbolos, String path)
   this.lexer = new Lexico(tablaSimbolos);
   this.lexer.cargarBuffer(path);
 }
-//#line 605 "Parser.java"
+
+private void constanteNegativa(ParserVal valCte) {
+    if (valCte.obj instanceof SimboloLong) {
+      ((SimboloLong) valCte.obj).setValor(-(((SimboloLong) valCte.obj).getValor()));
+      ((SimboloLong) valCte.obj).setLexema("-" + ((SimboloLong) valCte.obj).getLexema());
+    } else {
+      ((SimboloCteFloat) valCte.obj).setValor(-(((SimboloCteFloat) valCte.obj).getValor()));
+      ((SimboloCteFloat) valCte.obj).setLexema("-" + ((SimboloCteFloat) valCte.obj).getLexema());
+    }
+}
+
+private void constantePositiva(ParserVal valCte) {
+    if ( (valCte.obj instanceof SimboloLong) && ( ((SimboloLong) valCte.obj).getValor() == 2147483648L) ) {
+      ((SimboloLong) valCte.obj).setValor(2147483647L);
+      ((SimboloLong) valCte.obj).setLexema("2147483647L");
+      System.out.println("Warning en línea " + valCte.ival + ": el valor de la constante entera es mayor al máximo permitido, se asigna el valor 2147483647");
+    }
+}
+//#line 624 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -829,254 +848,286 @@ boolean doaction;
       {
 //########## USER-SUPPLIED ACTIONS ##########
 case 2:
-//#line 13 "gramatica3.y"
+//#line 14 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(3).ival + ": falta el nombre del programa");}
 break;
 case 3:
-//#line 14 "gramatica3.y"
+//#line 15 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta la llave de cierre del cuerpo del programa");}
 break;
 case 4:
-//#line 15 "gramatica3.y"
+//#line 16 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(3).ival + ": falta la llave de apertura del cuerpo del programa");}
 break;
 case 5:
-//#line 16 "gramatica3.y"
+//#line 17 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": faltaN ambas llaves en cuerpo del programa");}
 break;
 case 6:
-//#line 17 "gramatica3.y"
+//#line 18 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta el nombre del programa y la llave de cierre del cuerpo del programa");}
 break;
 case 7:
-//#line 18 "gramatica3.y"
+//#line 19 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta el nombre del programa y la llave de apertura del cuerpo del programa");}
 break;
 case 8:
-//#line 19 "gramatica3.y"
+//#line 20 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta el nombre del programa y ambas llaves en cuerpo del programa");}
 break;
 case 9:
-//#line 20 "gramatica3.y"
+//#line 21 "gramatica3.y"
 {System.out.println("Error sintáctico: el programa no es válido");}
 break;
 case 12:
-//#line 27 "gramatica3.y"
+//#line 28 "gramatica3.y"
 {System.out.println("Se detectó una sentenciaejecutable ;");}
 break;
 case 13:
-//#line 28 "gramatica3.y"
+//#line 29 "gramatica3.y"
 {System.out.println("Se detectó una declaración ;");}
 break;
 case 14:
-//#line 29 "gramatica3.y"
+//#line 30 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta ; al final de la sentencia ejecutable");}
 break;
 case 15:
-//#line 30 "gramatica3.y"
+//#line 31 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta ; al final de la declaración");}
 break;
 case 18:
-//#line 35 "gramatica3.y"
-{System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta ; al final de la sentencia ejecutable");}
-break;
-case 19:
 //#line 36 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta ; al final de la sentencia ejecutable");}
 break;
+case 19:
+//#line 37 "gramatica3.y"
+{System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta ; al final de la sentencia ejecutable");}
+break;
 case 23:
-//#line 43 "gramatica3.y"
+//#line 44 "gramatica3.y"
 {System.out.println("Se detectó un print");}
 break;
 case 24:
-//#line 46 "gramatica3.y"
+//#line 47 "gramatica3.y"
 {System.out.println("Se detectó una declaración de variables");}
 break;
 case 25:
-//#line 47 "gramatica3.y"
+//#line 48 "gramatica3.y"
 {System.out.println("Se detectó una declaración de función");}
 break;
 case 26:
-//#line 50 "gramatica3.y"
+//#line 51 "gramatica3.y"
 {System.out.println("Se detectó una asignación simple");}
 break;
 case 27:
-//#line 51 "gramatica3.y"
+//#line 52 "gramatica3.y"
 {System.out.println("Se detectó una asignación múltiple");}
 break;
 case 31:
-//#line 59 "gramatica3.y"
+//#line 60 "gramatica3.y"
 {System.out.println("Se detectó un bloque IF-ELSE");}
 break;
 case 32:
-//#line 60 "gramatica3.y"
+//#line 61 "gramatica3.y"
 {System.out.println("Se detectó un bloque IF");}
 break;
 case 33:
-//#line 61 "gramatica3.y"
+//#line 62 "gramatica3.y"
 {System.out.println("Se detectó un bloque DO UNTIL");}
 break;
 case 34:
-//#line 63 "gramatica3.y"
-{System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta la palabra ENDIF al final del bloque IF");}
-break;
-case 35:
 //#line 64 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta la palabra ENDIF al final del bloque IF");}
 break;
-case 36:
+case 35:
 //#line 65 "gramatica3.y"
+{System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta la palabra ENDIF al final del bloque IF");}
+break;
+case 36:
+//#line 66 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta el cuerpo en el bloque ELSE");}
 break;
 case 37:
-//#line 66 "gramatica3.y"
+//#line 67 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(3).ival + ": falta el cuerpo en el bloque IF");}
 break;
 case 38:
-//#line 67 "gramatica3.y"
+//#line 68 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta el cuerpo en el bloque IF");}
 break;
 case 39:
-//#line 68 "gramatica3.y"
+//#line 69 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta el cuerpo en los bloques IF y ELSE");}
 break;
 case 40:
-//#line 70 "gramatica3.y"
+//#line 71 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta de cuerpo en iteracion");}
 break;
 case 41:
-//#line 71 "gramatica3.y"
+//#line 72 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta la palabra UNTIL en la iteracion");}
 break;
 case 44:
-//#line 76 "gramatica3.y"
+//#line 77 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta de argumento en sentencia print");}
 break;
 case 45:
-//#line 79 "gramatica3.y"
+//#line 80 "gramatica3.y"
 {System.out.println("Se detectó una condición entre paréntesis");}
 break;
 case 46:
-//#line 80 "gramatica3.y"
+//#line 81 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta el paréntesis de apertura de la condición");}
 break;
 case 47:
-//#line 81 "gramatica3.y"
+//#line 82 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta el paréntesis de cierre de la condición");}
 break;
 case 48:
-//#line 82 "gramatica3.y"
+//#line 83 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": faltan ambos paréntesis de la condición");}
 break;
 case 50:
-//#line 86 "gramatica3.y"
+//#line 87 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": La condición es incompleta");}
 break;
 case 61:
-//#line 103 "gramatica3.y"
-{ System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta ',' entre variables"); }
+//#line 104 "gramatica3.y"
+{System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta ',' entre variables"); }
 break;
 case 64:
-//#line 110 "gramatica3.y"
+//#line 111 "gramatica3.y"
 {System.out.println("Se detectó una función invocada correctamente");}
 break;
+case 67:
+//#line 117 "gramatica3.y"
+{ constantePositiva(val_peek(0)); }
+break;
+case 68:
+//#line 118 "gramatica3.y"
+{ constanteNegativa(val_peek(0)); }
+break;
 case 73:
-//#line 126 "gramatica3.y"
+//#line 127 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta el paréntesis de cierre de la función TRUNC");}
 break;
 case 74:
-//#line 127 "gramatica3.y"
+//#line 128 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(4).ival + ": falta el paréntesis de apertura de la función TRUNC");}
 break;
 case 75:
-//#line 128 "gramatica3.y"
+//#line 129 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": faltan ambos paréntesis de la función TRUNC");}
 break;
 case 77:
-//#line 130 "gramatica3.y"
+//#line 131 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta llave de cierre del cuerpo de la función Lambda");}
 break;
 case 78:
-//#line 131 "gramatica3.y"
+//#line 132 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(4).ival + ": falta llave de apertura del cuerpo de la función Lambda");}
 break;
 case 79:
-//#line 132 "gramatica3.y"
+//#line 133 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(3).ival + ": faltan ambas llaves del cuerpo de la función Lambda");}
 break;
 case 80:
-//#line 133 "gramatica3.y"
-{System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
-break;
-case 81:
 //#line 134 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
 break;
-case 82:
+case 81:
 //#line 135 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
 break;
+case 82:
+//#line 136 "gramatica3.y"
+{System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
+break;
 case 87:
-//#line 144 "gramatica3.y"
+//#line 145 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta el nombre del parámetro");}
 break;
 case 88:
-//#line 145 "gramatica3.y"
+//#line 146 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta el nombre del parámetro");}
 break;
 case 89:
-//#line 146 "gramatica3.y"
+//#line 147 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta el tipo del parámetro");}
 break;
 case 90:
-//#line 147 "gramatica3.y"
+//#line 148 "gramatica3.y"
 {System.out.println("Error sintáctico en línea " + val_peek(0).ival + ": falta el tipo del parámetro");}
 break;
 case 93:
-//#line 154 "gramatica3.y"
+//#line 155 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la izquierda de '+'"); }
 break;
 case 94:
-//#line 155 "gramatica3.y"
+//#line 156 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la derecha de '+'"); }
 break;
 case 95:
-//#line 156 "gramatica3.y"
+//#line 157 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la izquierda de '-'"); }
 break;
 case 96:
-//#line 157 "gramatica3.y"
+//#line 158 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la derecha de '-'"); }
 break;
 case 100:
-//#line 163 "gramatica3.y"
+//#line 164 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la izquierda de '*'"); }
 break;
 case 101:
-//#line 164 "gramatica3.y"
+//#line 165 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la derecha de '*'"); }
 break;
 case 102:
-//#line 165 "gramatica3.y"
+//#line 166 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la izquierda de '/'"); }
 break;
 case 103:
-//#line 166 "gramatica3.y"
+//#line 167 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la derecha de '/'"); }
 break;
 case 104:
-//#line 167 "gramatica3.y"
+//#line 168 "gramatica3.y"
 { System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta operador entre operandos o falta de comparador en condición"); }
 break;
-case 114:
+case 106:
+//#line 173 "gramatica3.y"
+{ constantePositiva(val_peek(0)); }
+break;
+case 107:
+//#line 174 "gramatica3.y"
+{ constanteNegativa(val_peek(0)); }
+break;
+case 110:
+//#line 179 "gramatica3.y"
+{ constantePositiva(val_peek(0)); }
+break;
+case 111:
+//#line 180 "gramatica3.y"
+{ constanteNegativa(val_peek(0)); }
+break;
+case 112:
+//#line 181 "gramatica3.y"
+{ constantePositiva(val_peek(0)); }
+break;
+case 113:
 //#line 182 "gramatica3.y"
-{ System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta ',' entre constantes"); }
+{ constanteNegativa(val_peek(0)); }
+break;
+case 114:
+//#line 183 "gramatica3.y"
+{ System.out.println("Error sintáctico en línea " + val_peek(1).ival + ": falta ',' entre constantes"); constantePositiva(val_peek(0)); }
 break;
 case 115:
-//#line 183 "gramatica3.y"
-{ System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta ',' entre constantes"); }
+//#line 184 "gramatica3.y"
+{ System.out.println("Error sintáctico en línea " + val_peek(2).ival + ": falta ',' entre constantes"); constanteNegativa(val_peek(0)); }
 break;
-//#line 1002 "Parser.java"
+//#line 1053 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

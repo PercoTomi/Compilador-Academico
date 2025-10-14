@@ -7,7 +7,6 @@
 
 %token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
 
-
 %%
 prog                        : ID '{' listasentencias '}' EOF
                             | '{' listasentencias '}' EOF               {System.out.println("Error sintáctico en línea " + $1.ival + ": falta el nombre del programa");} 
@@ -24,31 +23,31 @@ listasentencias             : listasentencias sentencia
                             | sentencia
                             ;
 
-sentencia                   : sentenciaejecutable ';'                   {System.out.println("Se detectó una sentenciaejecutable ;");}              
-                            | declaracion ';'                           {System.out.println("Se detectó una declaración ;");}
+sentencia                   : sentenciaejecutable ';'                                 
+                            | declaracion ';'                           
                             | sentenciaejecutable                       {System.out.println("Error sintáctico en línea " + $1.ival + ": falta ; al final de la sentencia ejecutable");}
                             | declaracion                               {System.out.println("Error sintáctico en línea " + $1.ival + ": falta ; al final de la declaración");}
                             ;                           
 
 listasentenciasejecutables  : listasentenciasejecutables sentenciaejecutable ';'  
                             | sentenciaejecutable ';'
-                            | listasentenciasejecutables sentenciaejecutable {System.out.println("Error sintáctico en línea " + $2.ival + ": falta ; al final de la sentencia ejecutable");}
-                            | sentenciaejecutable                       {System.out.println("Error sintáctico en línea " + $1.ival + ": falta ; al final de la sentencia ejecutable");}
+                            | listasentenciasejecutables sentenciaejecutable  {System.out.println("Error sintáctico en línea " + $2.ival + ": falta ; al final de la sentencia ejecutable");}
+                            | sentenciaejecutable                             {System.out.println("Error sintáctico en línea " + $1.ival + ": falta ; al final de la sentencia ejecutable");}
                             ;
 
-sentenciaejecutable         : asignacion
+sentenciaejecutable         : asignacion                                      
                             | control
                             | funcion
                             //| '(' argumentos_funcion ')'  {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre de la función");}
-                            | print                                                          {System.out.println("Se detectó un print");}
+                            | print                                           {System.out.println("Linea " + $1.ival + ": Se detectó un print");}
                             ;
 
-declaracion                 : tipo listavariables                                            {System.out.println("Se detectó una declaración de variables");}
-                            | tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' expresion ')' ';' '}' {System.out.println("Se detectó una declaración de función");}
+declaracion                 : tipo listavariables                             {System.out.println("Linea " + $2.ival + ": Se detectó una declaración de variables");}
+                            | tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' expresion ')' ';' '}' {System.out.println("Linea " + $13.ival + ": Se detectó una declaración de función");}
                             ;
 
-asignacion                  : identificador ASIG expresion                                   {System.out.println("Se detectó una asignación simple");}
-                            | listavariables '=' listaconstantes                             {System.out.println("Se detectó una asignación múltiple");}
+asignacion                  : identificador ASIG expresion                                 {System.out.println("Linea " + $3.ival + ": Se detectó una asignación simple");}
+                            | listavariables '=' listaconstantes                           {System.out.println("Linea " + $3.ival + ": Se detectó una asignación múltiple");}
                             ;
 
 cuerpo_bloque               : '{' listasentenciasejecutables '}'
@@ -56,18 +55,18 @@ cuerpo_bloque               : '{' listasentenciasejecutables '}'
                             | '{''}'
                             ;
 
-control                     : IF condicion cuerpo_bloque ELSE cuerpo_bloque ENDIF            {System.out.println("Se detectó un bloque IF-ELSE");}
-                            | IF condicion cuerpo_bloque ENDIF                               {System.out.println("Se detectó un bloque IF");}
-                            | DO cuerpo_bloque UNTIL condicion                               {System.out.println("Se detectó un bloque DO UNTIL");}
+control                     : IF condicion cuerpo_bloque ELSE cuerpo_bloque ENDIF          {System.out.println("Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");}
+                            | IF condicion cuerpo_bloque ENDIF                             {System.out.println("Linea " + $4.ival + ": Se detectó un bloque IF");}
+                            | DO cuerpo_bloque UNTIL condicion                             {System.out.println("Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");}
 
-                            | IF condicion cuerpo_bloque ELSE cuerpo_bloque       {System.out.println("Error sintáctico en línea " + $5.ival + ": falta la palabra ENDIF al final del bloque IF");}
+                            | IF condicion cuerpo_bloque ELSE cuerpo_bloque                {System.out.println("Error sintáctico en línea " + $5.ival + ": falta la palabra ENDIF al final del bloque IF");}
                             | IF condicion cuerpo_bloque                                   {System.out.println("Error sintáctico en línea " + $3.ival + ": falta la palabra ENDIF al final del bloque IF");}
-                            | IF condicion cuerpo_bloque ELSE ENDIF                 {System.out.println("Error sintáctico en línea " + $4.ival + ": falta el cuerpo en el bloque ELSE");}
-                            | IF condicion ELSE cuerpo_bloque ENDIF                 {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
-                            | IF condicion ENDIF                                             {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
-                            | IF condicion ELSE ENDIF                                 {System.out.println("Error sintáctico en línea " + $3.ival + ": falta el cuerpo en los bloques IF y ELSE");}
+                            | IF condicion cuerpo_bloque ELSE ENDIF                        {System.out.println("Error sintáctico en línea " + $4.ival + ": falta el cuerpo en el bloque ELSE");}
+                            | IF condicion ELSE cuerpo_bloque ENDIF                        {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
+                            | IF condicion ENDIF                                           {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
+                            | IF condicion ELSE ENDIF                                      {System.out.println("Error sintáctico en línea " + $3.ival + ": falta el cuerpo en los bloques IF y ELSE");}
                             
-                            | DO UNTIL condicion                                            {System.out.println("Error sintáctico en línea " + $1.ival + ": falta de cuerpo en iteracion");}
+                            | DO UNTIL condicion                                           {System.out.println("Error sintáctico en línea " + $1.ival + ": falta de cuerpo en iteracion");}
                             | DO cuerpo_bloque condicion                                   {System.out.println("Error sintáctico en línea " + $2.ival + ": falta la palabra UNTIL en la iteracion");}
                             ;
                             
@@ -76,14 +75,14 @@ print                       : PRINT '(' expresion ')'
                             | PRINT '(' ')'                          {System.out.println("Error sintáctico en línea " + $3.ival + ": falta de argumento en sentencia print");}
                             ;
 
-condicion                   : '(' cuerpocondicion ')'                   {System.out.println("Se detectó una condición entre paréntesis");}
-                            | cuerpocondicion ')'                       {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el paréntesis de apertura de la condición");}
-                            | '(' cuerpocondicion                       {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el paréntesis de cierre de la condición");}
-                            | cuerpocondicion                           {System.out.println("Error sintáctico en línea " + $1.ival + ": faltan ambos paréntesis de la condición");}
+condicion                   : '(' cuerpocondicion ')'                
+                            | cuerpocondicion ')'                    {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el paréntesis de apertura de la condición");}
+                            | '(' cuerpocondicion                    {System.out.println("Error sintáctico en línea " + $2.ival + ": falta el paréntesis de cierre de la condición");}
+                            | cuerpocondicion                        {System.out.println("Error sintáctico en línea " + $1.ival + ": faltan ambos paréntesis de la condición");}
                             ;
 
 cuerpocondicion             : expresion comparador expresion
-                            | expresion {System.out.println("Error sintáctico en línea " + $1.ival + ": La condición es incompleta");}
+                            | expresion                              {System.out.println("Error sintáctico en línea " + $1.ival + ": La condición es incompleta");}
                             ;
 
 comparador                  : '>'
@@ -100,21 +99,21 @@ tipo                        : LONG
 
 listavariables              : listavariables ',' identificador
                             | identificador
-                            | listavariables error identificador   { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre variables"); }
+                            | listavariables error identificador    {System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre variables"); }
                             ;
 
 identificador               : ID
                             | identificador '.' ID
                             ;
 
-funcion                     : ID '(' argumentos_funcion ')'   {System.out.println("Se detectó una función invocada correctamente");}
-                            //| '(' argumentos_funcion ')'      {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre de la función");}
+funcion                     : ID '(' argumentos_funcion ')'        {System.out.println("Linea " + $4.ival + ": Se detectó una función invocada correctamente");}
+                            //| '(' argumentos_funcion ')'         {System.out.println("Error sintáctico en línea " + this.yylval.ival + ": falta el nombre de la función");}
                             ;
 
 argumentos_funcion          : listapinvocacion
                             | identificador  
-                            | CTE
-                            | '-' CTE
+                            | CTE                                       { constantePositiva($1); }
+                            | '-' CTE                                   { constanteNegativa($2); }
                             ;
 
 listapinvocacion            : listapinvocacion ',' pinvocacion 
@@ -130,7 +129,7 @@ pinvocacion                 : expresion FLECHA ID
                             | '(' tipo ID ')' '{' listasentenciasejecutables FLECHA ID       {System.out.println("Error sintáctico en línea " + $6.ival + ": falta llave de cierre del cuerpo de la función Lambda");}
                             | '(' tipo ID ')' listasentenciasejecutables '}' FLECHA ID       {System.out.println("Error sintáctico en línea " + $4.ival + ": falta llave de apertura del cuerpo de la función Lambda");}
                             | '(' tipo ID ')' listasentenciasejecutables FLECHA ID           {System.out.println("Error sintáctico en línea " + $4.ival + ": faltan ambas llaves del cuerpo de la función Lambda");}
-                            | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA   {System.out.println("Error sintáctico en línea " + $8.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
+                            | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA      {System.out.println("Error sintáctico en línea " + $8.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
                             | expresion FLECHA                          {System.out.println("Error sintáctico en línea " + $2.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
                             | TRUNC '(' expresion ')' FLECHA            {System.out.println("Error sintáctico en línea " + $5.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
                             ;                                                        
@@ -169,18 +168,18 @@ termino                     : termino '*' factor
                             | factor
                             ;
 
-factor                      : CTE
-                            | '-' CTE
+factor                      : CTE                                   { constantePositiva($1); }
+                            | '-' CTE                               { constanteNegativa($2); }
                             | identificador
                             | funcion
                             ;
 
-listaconstantes             : listaconstantes ',' CTE
-                            | listaconstantes ',' '-' CTE
-                            | CTE
-                            | '-' CTE
-                            | listaconstantes CTE          { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); }
-                            | listaconstantes '-' CTE   { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); }
+listaconstantes             : listaconstantes ',' CTE               { constantePositiva($3); }
+                            | listaconstantes ',' '-' CTE           { constanteNegativa($4); }
+                            | CTE                                   { constantePositiva($1); }
+                            | '-' CTE                               { constanteNegativa($2); }
+                            | listaconstantes CTE                   { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); constantePositiva($2); }
+                            | listaconstantes '-' CTE               { System.out.println("Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); constanteNegativa($3); }
                             ;
 
 
@@ -195,4 +194,22 @@ public Parser(Map<String, Simbolo> tablaSimbolos, String path)
   this.tablaSimbolos = tablaSimbolos;
   this.lexer = new Lexico(tablaSimbolos);
   this.lexer.cargarBuffer(path);
+}
+
+private void constanteNegativa(ParserVal valCte) {
+    if (valCte.obj instanceof SimboloLong) {
+      ((SimboloLong) valCte.obj).setValor(-(((SimboloLong) valCte.obj).getValor()));
+      ((SimboloLong) valCte.obj).setLexema("-" + ((SimboloLong) valCte.obj).getLexema());
+    } else {
+      ((SimboloCteFloat) valCte.obj).setValor(-(((SimboloCteFloat) valCte.obj).getValor()));
+      ((SimboloCteFloat) valCte.obj).setLexema("-" + ((SimboloCteFloat) valCte.obj).getLexema());
+    }
+}
+
+private void constantePositiva(ParserVal valCte) {
+    if ( (valCte.obj instanceof SimboloLong) && ( ((SimboloLong) valCte.obj).getValor() == 2147483648L) ) {
+      ((SimboloLong) valCte.obj).setValor(2147483647L);
+      ((SimboloLong) valCte.obj).setLexema("2147483647L");
+      System.out.println("Warning en línea " + valCte.ival + ": el valor de la constante entera es mayor al máximo permitido, se asigna el valor 2147483647");
+    }
 }

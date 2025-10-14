@@ -12,4 +12,8 @@ public class SimboloCteString extends Simbolo {
         return valor;
     }
 
+    public void setValor(String valor) {
+        this.valor = valor;
+    }
+
 }

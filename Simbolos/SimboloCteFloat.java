@@ -10,4 +10,8 @@ public class SimboloCteFloat extends Simbolo {
     public float getValor() {
         return valor;
     }
+
+    public void setValor(float valor) {
+        this.valor = valor;
+    }
 }

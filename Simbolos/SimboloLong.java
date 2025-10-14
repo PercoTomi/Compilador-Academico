@@ -1,7 +1,7 @@
 package Simbolos;
 
 public class SimboloLong extends Simbolo {
-    long valor;
+    private long valor;
 
     public SimboloLong(int id, String tipo, String lexema, long valor) {
         super(id, tipo, lexema);
@@ -10,5 +10,9 @@ public class SimboloLong extends Simbolo {
 
     public long getValor() {
         return valor;
+    }
+
+    public void setValor(long valor) {
+        this.valor = valor;
     }
 }
