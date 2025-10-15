@@ -1,6 +1,3 @@
 P{
-   F(trunc(1.2) -> C, C->V);
-   F(trunc(.2->B, C->V);
-   F(trunc1.2F-2)->V, C->V);
-   F(trunc.022->R, C->V);
+   X, Y = 2L, -.2F-4;
 }

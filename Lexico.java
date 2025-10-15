@@ -97,13 +97,13 @@ public class Lexico {
             }
         }
         if (idToken == 257) 
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: ID, Lexema: " + cadena.toString() + ", Línea: " + lineaActual);
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: ID, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
         else if (idToken == 258) 
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: CTE, Lexema: " + cadena.toString() + ", Línea: " + lineaActual);
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: CTE, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
         else if (idToken == 0)
             System.out.println("||---------------- ANALIZADOR LÉXICO: FIN DE ARCHIVO ALCANZADO");
         else if (idToken != 277)
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: " + cadena.toString() + ", Línea: " + lineaActual);
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: " + cadena.toString() + " , Línea: " + lineaActual);
         return idToken;
     }
 

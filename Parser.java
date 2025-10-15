@@ -676,19 +676,37 @@ public Parser(Map<String, Simbolo> tablaSimbolos, String path)
 }
 
 private void constanteNegativa(ParserVal valCte) {
-    if (valCte.obj instanceof SimboloLong) {
-      ((SimboloLong) valCte.obj).setValor(-(((SimboloLong) valCte.obj).getValor()));
-      ((SimboloLong) valCte.obj).setLexema("-" + ((SimboloLong) valCte.obj).getLexema());
+  if (valCte.obj instanceof SimboloLong) {
+    Simbolo simbolo;
+    if (!tablaSimbolos.containsKey("-" +((SimboloLong)valCte.obj).getLexema())) {
+      simbolo =  new SimboloLong(258, "Constante", "-" + ((SimboloLong)valCte.obj).getLexema(), -((SimboloLong)valCte.obj).getValor());
+      tablaSimbolos.put("-" +((SimboloLong)valCte.obj).getLexema(), simbolo);
     } else {
-      ((SimboloCteFloat) valCte.obj).setValor(-(((SimboloCteFloat) valCte.obj).getValor()));
-      ((SimboloCteFloat) valCte.obj).setLexema("-" + ((SimboloCteFloat) valCte.obj).getLexema());
+      simbolo = tablaSimbolos.get("-" + ((SimboloLong)valCte.obj).getLexema());
+    }
+    valCte.obj = simbolo;
+  } else {
+        Simbolo simbolo;
+        if (!tablaSimbolos.containsKey("-" +((SimboloCteFloat)valCte.obj).getLexema())) {
+          simbolo =  new SimboloCteFloat(258, "Constante", "-" + ((SimboloCteFloat)valCte.obj).getLexema(), -((SimboloCteFloat)valCte.obj).getValor());
+          tablaSimbolos.put("-" + ((SimboloCteFloat)valCte.obj).getLexema(), simbolo);
+        } else {
+          simbolo = tablaSimbolos.get("-" + ((SimboloCteFloat)valCte.obj).getLexema());
+        }
+        valCte.obj = simbolo;
     }
 }
 
 private void constantePositiva(ParserVal valCte) {
     if ( (valCte.obj instanceof SimboloLong) && ( ((SimboloLong) valCte.obj).getValor() == 2147483648L) ) {
-      ((SimboloLong) valCte.obj).setValor(2147483647L);
-      ((SimboloLong) valCte.obj).setLexema("2147483647L");
+      Simbolo simbolo;
+      if (!tablaSimbolos.containsKey("2147483647L")) {
+        simbolo =  new SimboloLong(258, "Constante", "2147483647L", 2147483647L);
+        tablaSimbolos.put("2147483647L", simbolo);
+      } else {
+        simbolo = tablaSimbolos.get("2147483647L");
+      }
+      valCte.obj = simbolo;
       System.out.println("||================ ANALIZADOR SINTÁCTICO: Warning en línea " + valCte.ival + ": el valor de la constante entera es mayor al máximo permitido, se asigna el valor 2147483647");
     }
 }
