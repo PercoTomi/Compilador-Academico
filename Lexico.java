@@ -326,7 +326,7 @@ public class Lexico {
     public class AS5 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            if (!charLeido.equals("\n")) {
+            if (!charLeido.equals("\n") && !charLeido.equals("\r")) {
                 cadena.append(charLeido);
             }
         }
