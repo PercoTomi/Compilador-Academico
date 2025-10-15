@@ -1,0 +1,3 @@
+CADENAMALESCRITA{
+   print(&cadenasincorte);
+}

@@ -1,0 +1,21 @@
+{
+   long X
+   long FUNC(cv long, Y) {Y(X) return (X);}
+
+   X := 4L+;
+   X := +4L;
+   Y := 4L 5L;
+   X, Y, Z = -4L -5L -6L;
+
+   F(4L->, trunc(3.14->Y, (long FUNCLAMBDA) X:=Y;} -> Z);
+
+   if X>Y) {Z:= 1L;};
+   if X>Y endif;
+   if (F(3L) 4L) {X:=5L;} else endif;
+   if (A>B {C:= 2L;} else {D:= -.3F+4;} endif;
+   do until F<G;
+   do X:=4L; (4L>X);
+
+   print(&Hola 
+   mundo&);
+   print();

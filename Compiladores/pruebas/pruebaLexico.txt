@@ -1,0 +1,12 @@
+PRUEBALEXICO {
+   X:= 2147483648L;
+   X:= -2147483648L;
+   Y:= 3.;
+   Y:= 3.14;
+   Y:= .14;
+   Y:= 3.14F+2;
+   Y:= 3.14F-2;
+   long Z, Z1%, TENGOMASDEVEINTECARACTERES;
+   print(&Comentario
+         multilinea&); 
+}
