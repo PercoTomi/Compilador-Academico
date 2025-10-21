@@ -1,3 +1,0 @@
-IDINVALIDO2{
-   long A4{;
-}

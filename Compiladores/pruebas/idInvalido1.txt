@@ -1,3 +1,0 @@
-IDINVALIDO1{
-   long a;
-}

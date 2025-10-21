@@ -5,7 +5,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.math.*;
 
 public class Lexico {
     private ArrayList<String> buffer; //buffer de entrada que contiene el código fuente
@@ -50,11 +49,11 @@ public class Lexico {
         int estadoActual = 0; // resetear al estado inicial
         StringBuilder cadena = new StringBuilder("") ;
         idToken = 0; // en caso de que no se lea implica EOF
-        
+
         // RESETEA LOS VALORES DE YYLVAL
-        yylval.dval = 0.0;
-        yylval.sval = null;
-        yylval.obj = null;
+        //yylval.dval = 0.0;
+        //yylval.sval = null;
+        //yylval.obj = null; 
 
         while (estadoActual >= 0 && posicionActual < buffer.size()) {
             String charLeido = buffer.get(posicionActual); // leer el caracter actual
@@ -279,7 +278,8 @@ public class Lexico {
             String lexema = cadena.toString();
             Long cte = Long.parseLong(lexema);
             lexema+= charLeido;
-            
+            cadena.append(charLeido);
+
             if (cte > 2147483648L) {
                 mapaAS.get(105).ejecutar(cadena, charLeido);
             }

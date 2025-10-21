@@ -99,7 +99,7 @@ int i;
   System.out.println("=index==state====value=     s:"+stateptr+"  v:"+valptr);
   for (i=0;i<count;i++)
     System.out.println(" "+i+"    "+statestk[i]+"      "+valstk[i]);
-  System.out.println("=====================");
+  System.out.println("======================");
 }
 
 
@@ -710,7 +710,7 @@ private void constantePositiva(ParserVal valCte) {
       System.out.println("||================ ANALIZADOR SINTÁCTICO: Warning en línea " + valCte.ival + ": el valor de la constante entera es mayor al máximo permitido, se asigna el valor 2147483647");
     }
 }
-//#line 623 "Parser.java"
+//#line 641 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -759,7 +759,7 @@ boolean doaction;
       if (yydebug) debug("yyn:"+yyn+"  state:"+yystate+"  yychar:"+yychar);
       if (yychar < 0)      //we want a char?
         {
-        yychar = lexer.yylex(yylval);  //get next token
+        yychar = lexer.yylex(this.yylval);        //get next character
         if (yydebug) debug(" next yychar:"+yychar);
         //#### ERROR CHECK ####
         if (yychar < 0)    //it it didn't work/error
@@ -1132,7 +1132,7 @@ case 115:
 //#line 177 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(2).ival + ": falta ',' entre constantes"); constanteNegativa(val_peek(0)); }
 break;
-//#line 1040 "Parser.java"
+//#line 1058 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####
