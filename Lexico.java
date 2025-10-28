@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Lexico {
-    private ArrayList<String> buffer; //buffer de entrada que contiene el código fuente
+    private String buffer; //buffer de entrada que contiene el código fuente
     private int posicionActual; // posición actual en el buffer
     private int idToken;
     private Map<String,Simbolo> tablaDeSimbolos; // referencia a la tabla de simbolos en la clase Compilador
@@ -21,7 +21,7 @@ public class Lexico {
     private boolean eof = false; // indica si se ha llegado al final del archivo
 
     public Lexico(Map<String, Simbolo> tablaDeSimbolos) {
-        this.buffer = new ArrayList<>();
+        this.buffer = new String("");
         this.posicionActual = 0;
         this.tablaDeSimbolos = tablaDeSimbolos;
         cargarMatrices();
@@ -32,10 +32,7 @@ public class Lexico {
     // a continuación el método cargarBuffer recibe un archivo txt como parámetro, lo convierte en array de strigs y lo asigna al buffer
     public boolean cargarBuffer(String path) {
         try {
-            String contenido = new String(Files.readAllBytes(Paths.get(path)));
-            for (char c : contenido.toCharArray()) {
-                buffer.add(String.valueOf(c)); // cada caracter como String
-            }
+            this.buffer = new String(Files.readAllBytes(Paths.get(path)));
             this.posicionActual = 0;
         } catch (IOException e) {
             e.printStackTrace();
@@ -50,25 +47,19 @@ public class Lexico {
         StringBuilder cadena = new StringBuilder("") ;
         idToken = 0; // en caso de que no se lea implica EOF
 
-        // RESETEA LOS VALORES DE YYLVAL
-        //yylval.dval = 0.0;
-        //yylval.sval = null;
-        //yylval.obj = null; 
-
-        while (estadoActual >= 0 && posicionActual < buffer.size()) {
-            String charLeido = buffer.get(posicionActual); // leer el caracter actual
+        while (estadoActual >= 0 && posicionActual < buffer.length()) {
+            char c = buffer.charAt(posicionActual); // leer el caracter actual directamente
+            String charLeido = String.valueOf(c);
             posicionActual++;
 
             // IDENTIFICACIÓN DE LA COLUMNA //
             int columna = mapaColumnas.getOrDefault(charLeido, -1); // obtener la columna correspondiente
-            if (charLeido.equals("\n")) { // salto de línea
-                lineaActual++;
-            } else if (columna == -1) {
-                if(Character.isUpperCase(charLeido.charAt(0))) { // mayúsculas
+            if (columna == -1) {
+                if(Character.isUpperCase(c)) { // mayúsculas
                     columna = 0;
-                } else if(Character.isLowerCase(charLeido.charAt(0))) { // minúsculas
+                } else if(Character.isLowerCase(c)) { // minúsculas
                     columna = 1;
-                } else if(Character.isDigit(charLeido.charAt(0))) { // digito
+                } else if(Character.isDigit(c)) { // digito
                     columna = 2;
                 } else if ("(){}_,;".contains(charLeido)) { // Caracter especial
                     columna = 15;
@@ -86,7 +77,7 @@ public class Lexico {
         if (idToken == 0 & !cadena.isEmpty()) {
             idToken = 256;
         }
-        if (posicionActual >= buffer.size() && idToken == 0) {
+        if (posicionActual >= buffer.length() && idToken == 0) {
             if (eof) {
                 idToken = 0; // EOF
             }
@@ -110,37 +101,39 @@ public class Lexico {
 
         // Matriz de transiciones
         this.matrizDeTransiciones = new int[][] {
-            { 1, 13, 7, -1, -1, -1, 6, 3, 4, 5, 0, 0, 0, 2, -1, -1, 8, 12, -1, 1, 1, -1 },
-            { 1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1 },
-            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -1, -1, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, -1, -1, -1, -1, -1 },
-            { -1, -1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1 },
-            { -1, -1, -1, -1, -1, 10, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
-            { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, -1, 12, 12, 12, 12 },
-            { -1, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 }
+            { 1, 13, 7, -1, -1, -1, 6, 3, 4, 5, 0, 0, 0, 2, -1, -1, 8, 12, -1, 1, 1, -1, 14 },
+            { 1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1, -1 },
+            { -1, -1, -1, -1, -1, 10, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, -1, 12, 12, 12, 12, 12 },
+            { -1, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 0, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14 }
         };
 
         this.matrizIndicesAS = new int[][] {
-            {0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 11, 11, 11, 0, 100, 3, 0, 11, 100, 0, 0, 100},
-            {0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1},
-            {101, 101, 101, 101, 101, 101, 101, 6, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101},
-            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4},
-            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-            {4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-            {102, 102, 0, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 0, 102, 102, 2, 102, 102},
-            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 10, 8},
-            {103, 103, 103, 103, 103, 0, 0, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103},
-            {104, 104, 0, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104},
-            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
-            {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5},
-            {7, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7}
+            {0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 11, 11, 11, 0, 100, 3, 0, 11, 100, 0, 0, 100,11},
+            {0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1,1},
+            {101, 101, 101, 101, 101, 101, 101, 6, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101,101},
+            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
+            {102, 102, 0, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 0, 102, 102, 2, 102, 102, 102},
+            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 10, 8, 8},
+            {103, 103, 103, 103, 103, 0, 0, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103},
+            {104, 104, 0, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104},
+            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
+            {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 5},
+            {7, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7},
+            {11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11}
         };
     }
 
@@ -155,10 +148,10 @@ public class Lexico {
         mapaColumnas.put("=", 7);
         mapaColumnas.put("<", 8);
         mapaColumnas.put(">", 9);
-        mapaColumnas.put(" ", 10);  // espacio
-        mapaColumnas.put("\r", 11); // cr: retorno de carro en Windows
-        mapaColumnas.put("\n", 11); // nl: salto de línea en Windows
-        mapaColumnas.put("\t", 12);  // tabulador
+        mapaColumnas.put(" ", 10);
+        mapaColumnas.put("\r", 11);
+        mapaColumnas.put("\n", 11);
+        mapaColumnas.put("\t", 12); 
         mapaColumnas.put(":", 13);
         mapaColumnas.put("!", 14);
         mapaColumnas.put(".", 16);
@@ -166,12 +159,13 @@ public class Lexico {
         mapaColumnas.put("%", 18);
         mapaColumnas.put("L", 19);
         mapaColumnas.put("F", 20);
+        mapaColumnas.put("@", 22);
 
         // Mapa de Literales
         this.mapaTokens = new HashMap<>();
-        mapaTokens.put("\n", 10);  // nueva línea
-        mapaTokens.put("\t", 11);  // tabulador
-        mapaTokens.put(" ", 32);   // espacio
+        mapaTokens.put("\n", 10);
+        mapaTokens.put("\t", 11);
+        mapaTokens.put(" ", 32);
         mapaTokens.put("!", 33);
         mapaTokens.put("&", 38);
         mapaTokens.put("(", 40);
@@ -322,11 +316,13 @@ public class Lexico {
         }
     }
 
-    // Si el caracter es new line, ignorarlo, sino, concatenarlo al string
+    // Si el caracter es new line, sumar a linea actual, sino, concatenarlo al string
     public class AS5 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            if (!charLeido.equals("\n") && !charLeido.equals("\r")) {
+            if (charLeido.equals("\n") || charLeido.equals("\r")) {
+                mapaAS.get(11).ejecutar(cadena, charLeido); // se ejecuta la acción semántica que aumenta el contador de línea
+            } else {
                 cadena.append(charLeido);
             }
         }
@@ -365,10 +361,9 @@ public class Lexico {
         public void ejecutar(StringBuilder cadena, String charLeido) {
             String lexema = cadena.toString();
             Float cte = 0f;
-            if (!lexema.equals("."))
-                cte = Float.parseFloat(lexema);
             posicionActual--;
             if (!lexema.equals(".")) {
+                cte = Float.parseFloat(lexema);
                 // sin cte es mayor a 3.40282347E38 o menor a 1.17549435E-38 error
                 if (cte > 3.40282347E+38 || cte < 1.17549435E-38) {
                     mapaAS.get(105).ejecutar(cadena, charLeido);
@@ -421,10 +416,13 @@ public class Lexico {
         }
     }
 
-    // No hace nada
+    // Si es un salto de línea, incrementar el contador de línea, sino, no hace nada
     public class AS11 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
+            if (charLeido.equals("\n")) {
+                lineaActual++;
+            }
         }
     }
 

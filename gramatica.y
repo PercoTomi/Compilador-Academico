@@ -42,7 +42,7 @@ sentenciaejecutable         : asignacion
                             ;
 
 declaracion                 : tipo listavariables                             {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables");}
-                            | tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' expresion ')' ';' '}' {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $13.ival + ": Se detectó una declaración de función");}
+                            | tipo ID '(' listaparametros ')' '{' listasentencias '}' {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $13.ival + ": Se detectó una declaración de función");}
                             ;
 
 asignacion                  : identificador ASIG expresion                                 {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación simple");}
