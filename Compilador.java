@@ -15,7 +15,7 @@ public class Compilador {
 
     //ELIMINACION DE SIMBOLOS CON RANGOS NO VALIDOS
 
-    tablaSimbolos.remove("2147483648L");
+    //tablaSimbolos.remove("2147483648L");
 
     for (String key : tablaSimbolos.keySet()) {
         Simbolo simbolo = tablaSimbolos.get(key);
@@ -27,5 +27,4 @@ public class Compilador {
             System.out.println("Lexema: " + key + ", Valor: " + ((SimboloLong)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
         }
     }
-
 }

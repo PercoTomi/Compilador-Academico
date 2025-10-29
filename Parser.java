@@ -708,6 +708,7 @@ private void constantePositiva(ParserVal valCte) {
       }
       valCte.obj = simbolo;
       System.out.println("||================ ANALIZADOR SINTÁCTICO: Warning en línea " + valCte.ival + ": el valor de la constante entera es mayor al máximo permitido, se asigna el valor 2147483647");
+      tablaSimbolos.remove("2147483648L");
     }
 }
 //#line 641 "Parser.java"
