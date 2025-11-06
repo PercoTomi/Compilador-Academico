@@ -3,6 +3,8 @@
     import Simbolos.*;
     import java.util.Map;
     import java.util.HashMap;
+    import java.nio.file.Path;
+    import java.nio.file.Paths;
 %}
 
 %token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
@@ -184,11 +186,11 @@ private void yyerror(String s) {
     System.out.println("||================ ANALIZADOR SINTÁCTICO: Error: " + s);
 }
 
-public Parser(Map<String, Simbolo> tablaSimbolos, String path)
+public Parser(Map<String, Simbolo> tablaSimbolos, String path, Path archivoErroresLexicos, Path archivoErroresSintacticos)
 {
   this.tablaSimbolos = tablaSimbolos;
-  this.lexer = new Lexico(tablaSimbolos);
-  this.lexer.cargarBuffer(path);
+  this.archivoErroresSintacticos = archivoErroresSintacticos;
+  this.lexer = new Lexico(tablaSimbolos,path,archivoErroresLexicos);
 }
 
 private void constanteNegativa(ParserVal valCte) {

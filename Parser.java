@@ -17,10 +17,9 @@
 
 
 //#line 2 "gramatica.y"
-    import java.io.*;
     import Simbolos.*;
+    import java.nio.file.Path;
     import java.util.Map;
-    import java.util.HashMap;
 //#line 22 "Parser.java"
 
 
@@ -35,6 +34,8 @@ int yyerrflag;          //was there an error?
 int yychar;             //the current working character
 Lexico lexer;
 Map<String, Simbolo> tablaSimbolos;
+Path archivoErroresSintacticos;
+
 //########## MESSAGES ##########
 //###############################################################
 // method: debug
@@ -668,11 +669,11 @@ private void yyerror(String s) {
     System.out.println("||================ ANALIZADOR SINTÁCTICO: Error: " + s);
 }
 
-public Parser(Map<String, Simbolo> tablaSimbolos, String path)
+public Parser(Map<String, Simbolo> tablaSimbolos, String path, Path archivoErroresLexicos, Path archivoErroresSintacticos)
 {
   this.tablaSimbolos = tablaSimbolos;
-  this.lexer = new Lexico(tablaSimbolos);
-  this.lexer.cargarBuffer(path);
+  this.archivoErroresSintacticos = archivoErroresSintacticos;
+  this.lexer = new Lexico(tablaSimbolos,path,archivoErroresLexicos);
 }
 
 private void constanteNegativa(ParserVal valCte) {
