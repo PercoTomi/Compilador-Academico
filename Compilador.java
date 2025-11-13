@@ -8,62 +8,74 @@ import java.util.Map;
 
 public class Compilador {
     public static void main(String[] args) throws Exception {
-    Map<String, Simbolo> tablaSimbolos = new HashMap<String, Simbolo>();
+        /*if (args.length == 0) {
+            System.err.println("Error: Debes proporcionar la ruta del archivo como argumento.");
+            System.err.println("Uso: java -jar Compilador.jar <ruta_archivo>");
+            System.exit(1);
+        }*/
 
-    String path = "test.txt";
+        Map<String, Simbolo> tablaSimbolos = new HashMap<>();
 
-    // TRABAJO DE ARCHIVOS
-
-    Path archivoLexico = null;
-    Path archivoSintactico = null;
-
-    try {
-        // Convertir a Path absoluto
-        Path pathAbsoluto = Paths.get(path).toAbsolutePath().normalize();
+        String path = "test.txt";
         
-        // Conseguir el directorio de salida y también el nombre del archivo
-        String directorioSalida = pathAbsoluto.getParent().toString();
-        String nombreArchivo = pathAbsoluto.getFileName().toString();
-        
-        // conseguir nombre sin extensión del archivo
-        int lastDot = nombreArchivo.lastIndexOf('.');
-        String nombreBaseArchivoFuente = (lastDot > 0) ? nombreArchivo.substring(0, lastDot) : nombreArchivo;
-        
-        System.out.println("Archivo cargado desde: " + pathAbsoluto);
-        System.out.println("Archivos de salida se guardarán en: " + directorioSalida);
-
-        // crear archivos "nombrebase-lexico.txt" y "nombrebase-sintactico.txt" en el directorio de salida
-        archivoLexico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-lexico.txt");
-         archivoSintactico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-sintactico.txt");
-
-        // Crear los archivos o sobrescribir si ya existen
-        Files.write(archivoLexico, new byte[0]);
-        Files.write(archivoSintactico, new byte[0]);
-        
-        System.out.println("Archivos creados:");
-        System.out.println("  - " + archivoLexico);
-        System.out.println("  - " + archivoSintactico);            
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-
-    Parser parser = new Parser(tablaSimbolos, path, archivoLexico, archivoSintactico);
-    System.out.println(parser.yyparse());
-
-    System.out.println("\n" + "TABLA DE SÍMBOLOS:");
-
-    //ELIMINACION DE SIMBOLOS CON RANGOS NO VALIDOS
-
-    //tablaSimbolos.remove("2147483648L");
-
-    for (String key : tablaSimbolos.keySet()) {
-        Simbolo simbolo = tablaSimbolos.get(key);
-        if (simbolo instanceof SimboloCteFloat)
-            System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteFloat)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
-        else if (simbolo instanceof SimboloCteString)
-            System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteString)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
-        else if (simbolo instanceof SimboloLong)
-            System.out.println("Lexema: " + key + ", Valor: " + ((SimboloLong)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
+        if (Files.size(Paths.get(path)) == 0) {
+            System.err.println("Error: El archivo está vacío");
+            System.exit(1);
         }
+        
+        // TRABAJO DE ARCHIVOS
+
+        // Inicialización de los archivos de errores
+        Path archivoLexico = null;
+        Path archivoSintactico = null;
+
+        try {
+            // Convertir a Path absoluto
+            Path pathAbsoluto = Paths.get(path).toAbsolutePath().normalize();
+            
+            // Conseguir el directorio de salida y también el nombre del archivo
+            String directorioSalida = pathAbsoluto.getParent().toString();
+            String nombreArchivo = pathAbsoluto.getFileName().toString();
+            
+            // conseguir nombre sin extensión del archivo
+            int lastDot = nombreArchivo.lastIndexOf('.');
+            String nombreBaseArchivoFuente = (lastDot > 0) ? nombreArchivo.substring(0, lastDot) : nombreArchivo;
+            
+            System.out.println("Archivo cargado desde: " + pathAbsoluto);
+            System.out.println("Archivos de salida se guardarán en: " + directorioSalida);
+
+            // definir rutas de salida para los archivos de análisis léxico y sintáctico
+            archivoLexico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-lexico.txt");
+            archivoSintactico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-sintactico.txt");
+
+            // Crear los archivos o sobrescribir si ya existen
+            Files.write(archivoLexico, new byte[0]);
+            Files.write(archivoSintactico, new byte[0]);
+            
+            System.out.println("Archivos creados:");
+            System.out.println("  - " + archivoLexico);
+            System.out.println("  - " + archivoSintactico);            
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        Parser parser = new Parser(tablaSimbolos, path, archivoLexico, archivoSintactico);
+        System.out.println(parser.yyparse());
+
+        System.out.println("\n" + "TABLA DE SÍMBOLOS:");
+
+        //ELIMINACION DE SIMBOLOS CON RANGOS NO VALIDOS
+
+        //tablaSimbolos.remove("2147483648L");
+
+        for (String key : tablaSimbolos.keySet()) {
+            Simbolo simbolo = tablaSimbolos.get(key);
+            if (simbolo instanceof SimboloCteFloat)
+                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteFloat)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
+            else if (simbolo instanceof SimboloCteString)
+                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteString)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
+            else if (simbolo instanceof SimboloLong)
+                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloLong)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
+            }
     }
 }

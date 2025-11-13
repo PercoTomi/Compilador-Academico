@@ -33,7 +33,7 @@ public class Lexico {
         this.cargarBuffer(path);
     }
 
-       // a continuación el método cargarBuffer recibe un archivo txt como parámetro, lo convierte en array de strigs y lo asigna al buffer
+    // a continuación el método cargarBuffer recibe un archivo txt como parámetro, lo convierte en array de strigs y lo asigna al buffer
     private boolean cargarBuffer(String path) {
         try {
             this.buffer = new String(Files.readAllBytes(Paths.get(path)));
@@ -106,7 +106,7 @@ public class Lexico {
         // Matriz de transiciones
         this.matrizDeTransiciones = new int[][] {
             { 1, 13, 7, -1, -1, -1, 6, 3, 4, 5, 0, 0, 0, 2, -1, -1, 8, 12, -1, 1, 1, -1, 14 },
-            { 1, -1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1 },
+            { 1, 1, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 1, 1, 1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
@@ -118,25 +118,25 @@ public class Lexico {
             { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, -1, 12, 12, 12, 12, 12 },
-            { -1, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { 13, 13, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 13, 13, -1, -1 },
             { 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 0, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14 }
         };
 
         this.matrizIndicesAS = new int[][] {
             {0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 11, 11, 11, 0, 100, 3, 0, 11, 100, 0, 0, 100,11},
-            {0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1,1},
+            {0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1,1},
             {101, 101, 101, 101, 101, 101, 101, 6, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101,101},
             {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4},
             {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
             {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
             {4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
-            {102, 102, 0, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 102, 0, 102, 102, 2, 102, 102, 102},
+            {2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 102, 2, 2},
             {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 10, 8, 8},
             {103, 103, 103, 103, 103, 0, 0, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103},
             {104, 104, 0, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104},
             {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
             {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 5},
-            {7, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7},
+            {0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7},
             {11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11}
         };
     }
@@ -250,11 +250,21 @@ public class Lexico {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
             if (cadena.length() > 20) {
+                String cadenaCompleta = cadena.toString();
                 cadena.setLength(20);
+                System.out.println("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + cadenaCompleta + "' excede el límite de 20 caracteres. Se truncará a: '" + cadena.toString() + "'");
             }
             posicionActual--;
+
+            String lexemaOriginal = cadena.toString();
+            
+            // Verificación y conversión de minúsculas en el ID
+            String lexema = lexemaOriginal.toUpperCase();
+            if (!lexema.equals(lexemaOriginal)) {
+                System.out.println("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + lexemaOriginal + "' contenía minúsculas y ha sido convertido a : '" + lexema + "'");
+            }
+            
             // Verificar si el lexema no está en la tabla de símbolos
-            String lexema = cadena.toString();
             if(!tablaDeSimbolos.containsKey(lexema)) {
                 // Si no está, crear un nuevo símbolo long y agregarlo a la tabla
                 Simbolo nuevoSimbolo = new SimboloLong(257, "Identificador", lexema, 0L);
@@ -269,12 +279,27 @@ public class Lexico {
         }
     }
 
+    // Contempla error por falta de sufijo, corrigiendo para que no se propague a error sintáctico.
     // Verifica que no se exceda el rango definido para Long, y si es así, devuleve el id de Token correspondiente
     public class AS2 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
             String lexema = cadena.toString();
             Long cte = Long.parseLong(lexema);
+            
+            if (!charLeido.equals("L")) {
+                posicionActual--;
+                charLeido = "L";
+                String mensaje = "Error léxico en linea " + lineaActual + ": Sufijo 'L' faltante en constante long \n";
+                System.out.print(mensaje);
+                try {
+                    Files.write(archivoErrores, mensaje.getBytes(), 
+                    java.nio.file.StandardOpenOption.APPEND);
+                } catch (IOException e) {
+                    System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
+                }
+            }
+            
             lexema+= charLeido;
             cadena.append(charLeido);
 
@@ -347,6 +372,17 @@ public class Lexico {
     public class AS7 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
+            // Verificación y conversión de mayúsculas en la palabra reservada
+            String lexema = cadena.toString();
+
+            cadena.setLength(0);
+            cadena.append(lexema.toLowerCase());
+            
+            if (!lexema.equals(cadena.toString())) {
+                System.out.println("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - La palabra reservada '" + lexema + "' contenía mayúsculas y ha sido convertido a : '" + cadena.toString() + "'");
+            }
+
+
             posicionActual--;
             idToken = mapaTokens.getOrDefault(cadena.toString(), 256); // si no se encuentra en el mapa entonces es un error
             if (idToken == 256) {
