@@ -280,12 +280,20 @@ public class Lexico {
     }
 
     // Contempla error por falta de sufijo, corrigiendo para que no se propague a error sintáctico.
-    // Verifica que no se exceda el rango definido para Long, y si es así, devuleve el id de Token correspondiente
+    // Verifica que no se exceda el rango definido para Long. Si lo hace, entrega error.
     public class AS2 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
             String lexema = cadena.toString();
-            Long cte = Long.parseLong(lexema);
+
+            // Intenta parsear el número como long. Si supera el rango de Java, guarda el valor positivo máximo posible.
+            Long cte;
+            try {
+                cte = Long.parseLong(lexema);
+            } catch (NumberFormatException e) {
+                cte = 2147483647L;
+                mapaAS.get(105).ejecutar(cadena, charLeido);
+            }
             
             if (!charLeido.equals("L")) {
                 posicionActual--;
@@ -305,21 +313,21 @@ public class Lexico {
 
             if (cte > 2147483648L) {
                 mapaAS.get(105).ejecutar(cadena, charLeido);
+                cte = 2147483647L;
             }
-            else{
-                // Verificar si el lexema no está en la tabla de símbolos
-                if(!tablaDeSimbolos.containsKey(lexema)) {
-                    // Si no está, crear un nuevo símbolo long y agregarlo a la tabla
-                    Simbolo nuevoSimbolo = new SimboloLong(258, "Constante", lexema, cte);
-                    tablaDeSimbolos.put(lexema, nuevoSimbolo);
-                    yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
-                } else {
-                    // Si ya está, simplemente asignarlo a yylval
-                    yylval.obj = tablaDeSimbolos.get(lexema);
-                }
-                yylval.ival = lineaActual;
-                idToken=258;
+            
+            // Verificar si el lexema no está en la tabla de símbolos
+            if(!tablaDeSimbolos.containsKey(lexema)) {
+                // Si no está, crear un nuevo símbolo long y agregarlo a la tabla
+                Simbolo nuevoSimbolo = new SimboloLong(258, "Constante", lexema, cte);
+                tablaDeSimbolos.put(lexema, nuevoSimbolo);
+                yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
+            } else {
+                // Si ya está, simplemente asignarlo a yylval
+                yylval.obj = tablaDeSimbolos.get(lexema);
             }
+            yylval.ival = lineaActual;
+            idToken=258;
         }
     }
 
@@ -368,6 +376,7 @@ public class Lexico {
         }
     }
 
+    // Maneja las mayúsculas insertadas en palabras reservadas, tirando error Léxico y pasándola a minúsculas.
     // Retornar el último caracter leido. Revisar si el string matchea con alguna palabra reservada. Si lo hace, devolver id correspondiente.
     public class AS7 implements AccionSemantica {
         @Override
@@ -562,7 +571,6 @@ public class Lexico {
             } catch (IOException e) {
                 System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
             }
-            idToken = 256;
         }
     }
 
