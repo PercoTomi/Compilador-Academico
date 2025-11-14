@@ -92,5 +92,6 @@ public class Compilador {
             else if (simbolo instanceof SimboloLong)
                 System.out.println("Lexema: " + key + ", Valor: " + ((SimboloLong)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
             }
-    }
+
+        }
 }
