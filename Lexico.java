@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 public class Lexico {
     private String buffer; //buffer de entrada que contiene el código fuente
@@ -19,14 +20,14 @@ public class Lexico {
     private Map<String,Integer> mapaColumnas; // mapa que guarda el indice de las columnas segun su caracter
     private ParserVal yylval; // simbolo referenciado que se devuelve al parser
     private boolean eof = false; // indica si se ha llegado al final del archivo
-    private Path archivoErrores;
+    private ArrayList<String> erroresLexicos;
 
 
-    public Lexico(Map<String, Simbolo> tablaDeSimbolos, String path, Path archivoErrores) {
+    public Lexico(Map<String, Simbolo> tablaDeSimbolos, String path, ArrayList<String> erroresLexicos) {
         this.buffer = new String("");
         this.posicionActual = 0;
         this.tablaDeSimbolos = tablaDeSimbolos;
-        this.archivoErrores = archivoErrores;
+        this.erroresLexicos = erroresLexicos;
         cargarMatrices();
         cargarMapas();
         this.lineaActual = 1; // comenzamos en la línea 1
@@ -298,14 +299,7 @@ public class Lexico {
             if (!charLeido.equals("L")) {
                 posicionActual--;
                 charLeido = "L";
-                String mensaje = "Error léxico en linea " + lineaActual + ": Sufijo 'L' faltante en constante long \n";
-                System.out.print(mensaje);
-                try {
-                    Files.write(archivoErrores, mensaje.getBytes(), 
-                    java.nio.file.StandardOpenOption.APPEND);
-                } catch (IOException e) {
-                    System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
-                }
+                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Sufijo 'L' faltante en constante long \n");
             }
             
             lexema+= charLeido;
@@ -479,14 +473,7 @@ public class Lexico {
     public class AS100 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            String mensaje = "Error léxico en linea " + lineaActual + ": caractér no valido\n";
-            System.out.print(mensaje);
-            try {
-                Files.write(archivoErrores, mensaje.getBytes(), 
-                        java.nio.file.StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
-            }
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": caractér no valido\n");
             idToken = 256;
         }
     }
@@ -495,14 +482,7 @@ public class Lexico {
     public class AS101 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            String mensaje = "Error léxico en linea " + lineaActual + ": Se esperaba un '='\n";
-            System.out.print(mensaje);
-            try {
-                Files.write(archivoErrores, mensaje.getBytes(), 
-                        java.nio.file.StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
-            }
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un '='\n");
             idToken = 256;
             posicionActual--;
         }
@@ -513,15 +493,7 @@ public class Lexico {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
             posicionActual--;
-            String mensaje = "Error léxico en linea " + lineaActual + ": Se esperaba dígito, \".\" ó \"L\"\n";
-            System.out.print(mensaje);
-            try {
-                Files.write(archivoErrores, mensaje.getBytes(), 
-                        java.nio.file.StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
-            }
-            idToken = 256;
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba dígito, \".\" ó \"L\"\n");
         }
     }
 
@@ -529,14 +501,7 @@ public class Lexico {
     public class AS103 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            String mensaje = "Error léxico en linea " + lineaActual + ": Se esperaba \"+\" ó \"-\"\n";
-            System.out.print(mensaje);
-            try {
-                Files.write(archivoErrores, mensaje.getBytes(), 
-                        java.nio.file.StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
-            }
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba \"+\" ó \"-\"\n");
             idToken = 256;
             posicionActual--;
         }
@@ -546,14 +511,7 @@ public class Lexico {
     public class AS104 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            String mensaje = "Error léxico en linea " + lineaActual + ": Se esperaba un dígito\n";
-            System.out.print(mensaje);
-            try {
-                Files.write(archivoErrores, mensaje.getBytes(), 
-                        java.nio.file.StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
-            }
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un dígito\n");
             idToken = 256;
             posicionActual--;
         }
@@ -563,14 +521,7 @@ public class Lexico {
     public class AS105 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            String mensaje = "Error léxico en linea " + lineaActual + ": Constante fuera de rango\n";
-            System.out.print(mensaje);
-            try {
-                Files.write(archivoErrores, mensaje.getBytes(), 
-                        java.nio.file.StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
-            }
+             erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango\n");
         }
     }
 
@@ -578,14 +529,7 @@ public class Lexico {
     public class AS106 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            String mensaje = "Error léxico en linea " + lineaActual + ": Palabra reservada no válida\n";
-            System.out.print(mensaje);
-            try {
-                Files.write(archivoErrores, mensaje.getBytes(), 
-                        java.nio.file.StandardOpenOption.APPEND);
-            } catch (IOException e) {
-                System.err.println("Error al escribir en archivo léxico: " + e.getMessage());
-            }
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Palabra reservada no válida\n");
             idToken = 256;
         }
     }

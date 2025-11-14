@@ -3,6 +3,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,9 @@ public class Compilador {
         Path archivoLexico = null;
         Path archivoSintactico = null;
 
+        ArrayList<String> erroresLexicos = new ArrayList<>();
+        ArrayList<String> erroresSintacticos = new ArrayList<>();
+
         try {
             // Convertir a Path absoluto
             Path pathAbsoluto = Paths.get(path).toAbsolutePath().normalize();
@@ -54,13 +58,24 @@ public class Compilador {
             
             System.out.println("Archivos creados:");
             System.out.println("  - " + archivoLexico);
-            System.out.println("  - " + archivoSintactico);            
+            System.out.println("  - " + archivoSintactico);
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        Parser parser = new Parser(tablaSimbolos, path, archivoLexico, archivoSintactico);
+        
+        Parser parser = new Parser(tablaSimbolos, path, erroresLexicos, erroresSintacticos);
         System.out.println(parser.yyparse());
+
+        // Imprimir todos los errores léxicos, luego los sintácticos y por último cargar ambos en los archivos correspondientes
+        for (String error : erroresLexicos) {
+            System.out.println("Error léxico: " + error);
+        }
+        for (String error : erroresSintacticos) {
+            System.out.println("Error sintáctico: " + error);
+        }
+        Files.write(archivoLexico, erroresLexicos);
+        Files.write(archivoSintactico, erroresSintacticos);
 
         System.out.println("\n" + "TABLA DE SÍMBOLOS:");
 
