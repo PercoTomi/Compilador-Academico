@@ -1,2 +1,0 @@
-||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea 2: falta ; al final de la sentencia ejecutable
-A

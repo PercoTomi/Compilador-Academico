@@ -14,23 +14,18 @@
 %token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
 
 %%
-prog                        : ID '{' bloque_programa '}' EOF           
+prog                        : ID '{' listasentencias '}' EOF           
                             | ID '{' '}' EOF
-                            | '{' bloque_programa '}' EOF               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa");} 
-                            | ID '{' bloque_programa EOF                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta la llave de cierre del cuerpo del programa");} 
-                            | ID bloque_programa '}' EOF                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta la llave de apertura del cuerpo del programa");} 
-                            | ID bloque_programa EOF                    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": faltan ambas llaves en cuerpo del programa");}
-                            | '{' bloque_programa EOF                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el nombre del programa y la llave de cierre del cuerpo del programa");}
-                            | bloque_programa '}' EOF                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa y la llave de apertura del cuerpo del programa");}
-                            | bloque_programa EOF                       {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa y ambas llaves en cuerpo del programa");}
-                            | ID '{' error ';' bloque_programa '}' EOF  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
-                            //| ID '{' bloque_programa error '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
-                            //| ID '{' bloque_programa error ';' bloque_programa '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
-                            ;
-
-bloque_programa             : listasentencias
-                            | listasentencias_conLambda                 {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": se intentó invocar una función Lambda fuera de una función");}
-                            | listasentencias listasentencias_conLambda {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": se intentó invocar una función Lambda fuera de una función");}
+                            | '{' listasentencias '}' EOF               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa");} 
+                            | ID '{' listasentencias EOF                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta la llave de cierre del cuerpo del programa");} 
+                            | ID listasentencias '}' EOF                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta la llave de apertura del cuerpo del programa");} 
+                            | ID listasentencias EOF                    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": faltan ambas llaves en cuerpo del programa");}
+                            | '{' listasentencias EOF                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el nombre del programa y la llave de cierre del cuerpo del programa");}
+                            | listasentencias '}' EOF                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa y la llave de apertura del cuerpo del programa");}
+                            | listasentencias EOF                       {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa y ambas llaves en cuerpo del programa");}
+                            | ID '{' error ';' listasentencias '}' EOF  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
+                            //| ID '{' listasentencias error '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
+                            //| ID '{' listasentencias error ';' listasentencias '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
                             ;
 
 listasentencias             : listasentencias sentencia
@@ -53,17 +48,11 @@ sentenciaejecutable         : asignacion
                             | control
                             | funcion
                             | print                                           {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un print");}
-                            ;
-
-listasentencias_conLambda   : listasentencias_conLambda sentencia
-                            | listasentencias_conLambda funcion_lambda ';'
-                            | funcion_lambda ';'
+                            | funcion_lambda                                  {if(funcionActiva==0) erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": Invocacion de funcion lambda fuera de una función");}
                             ;
 
 declaracion                 :  tipo listavariables                             {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables");}
-                            |  tipo ID '(' listaparametros ')' '{' listasentencias RETURN '(' expresion ')' ';' '}'  {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $13.ival + ": Se detectó una declaración de función");}
-                            |  tipo ID '(' listaparametros ')' '{' listasentencias_conLambda RETURN '(' expresion ')' ';' '}'  {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $13.ival + ": Se detectó una declaración de función");}
-                            |  tipo ID '(' listaparametros ')' '{' listasentencias listasentencias_conLambda RETURN '(' expresion ')' ';' '}'  {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $13.ival + ": Se detectó una declaración de función");}                            
+                            |  tipo ID '(' listaparametros ')' {funcionActiva++;} '{' listasentencias RETURN '(' expresion ')' ';' '}'  {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $13.ival + ": Se detectó una declaración de función"); funcionActiva--;}
                             ;
 
 asignacion                  : identificador ASIG expresion                                 {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación simple");}
@@ -73,8 +62,6 @@ asignacion                  : identificador ASIG expresion                      
 cuerpo_bloque               : '{' listasentenciasejecutables '}'
                             | sentenciaejecutable ';'
                             | '{''}'
-                            | '{' listasentenciasejecutables listasentencias_conLambda '}' {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": se intentó invocar una función Lambda fuera de una función");}
-                            | '{' listasentencias_conLambda '}'                            {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": se intentó invocar una función Lambda fuera de una función");}
                             ;
 
 control                     : IF condicion cuerpo_bloque ELSE cuerpo_bloque ENDIF          {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");}

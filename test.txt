@@ -1,3 +1,7 @@
 ASIGNACIONMULTIPLE {
-    X:= 4L
+    X:= 4L;
+    long FUNC (long X) {
+        F(4L);
+        return (4L);
+        };
 }
