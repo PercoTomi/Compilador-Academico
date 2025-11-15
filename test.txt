@@ -1,50 +1,14 @@
-ASIGNACIONMULTIPLE {
-    int enFunc
-    int nivel
-    int returns
-    Boolean huboR
-    Boolean multR
-    Boolean sinR
-
-    int retornosf
-
-    X:= 4L;
-    long FUNC (long X) { rf1
-        return
-        func
-
+P {
+    long F (long X){
         if (4L>X) {
-            n0,r1,F
-            if () { 
-                n1,r2,F
-                if () {n2,r3,F n2,r3,F} ---> sR = true
-                n1,r2, F //Se le resta si antes de salir de if huboR vale F y se resetea huboR a false
-                return 2
-                return 3 
-                return 4
-                n1,r-1, T  //////---> multR = 1
-            }; ---> si multR=1 -> r=n+1 y mulR=0
-            n0,r1,F
-            n0,r0,F
-        } n-1,r0,F else {
-            n0,r1,F
-            return
-            n0,r0,T
-        }
-    n-1,r0,      
-    }; --> resetear todas las variables usadas en declaración de funcion
-
-
-    if(){
-        if(){ 
-            if(){ } sR = true 
-        } sR = true
-        
-        return
-        n0,r0,T
-    } si n=r y T -> sR=false       o sea, misma linea que chequeo mulR me fijo si anulo sR
-
-    if(){
-        if(){} sR = true
-    }
+            X:=5L;
+            if (4L>X) {
+                return(5L);
+            } else {
+                X:=4L;
+            } endif;
+        } else {
+            return(4L);
+        } endif;
+    };
 }

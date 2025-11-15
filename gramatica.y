@@ -8,6 +8,7 @@
     import java.nio.file.Files;
     import java.nio.file.StandardOpenOption;
     import java.util.ArrayList;
+    import java.util.Stack;
 
 %}
 
@@ -56,32 +57,41 @@ declaracion                 :  tipo listavariables                             {
                             |  tipo ID '(' listaparametros ')' {enFunc++;} '{' listasentencias '}' {finFunc($8); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $8.ival + ": Se detectó una declaración de función");}
                             ;
 
-sentencia_return            : RETURN '(' expresion ')' ';'                      {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una sentencia return");}
-                            | RETURN '(' ')' ';'                                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta de argumento en sentencia return");}
+sentencia_return            : RETURN '(' expresion ')'                       {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una sentencia return");}
+                            | RETURN '(' ')'                                 {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta de argumento en sentencia return");}
                             ;
 
 asignacion                  : identificador ASIG expresion                                 {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación simple");}
                             | listavariables '=' listaconstantes                           {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación múltiple");}
                             ;
 
-bloque_control              : '{' listasentenciasejecutables '}'
+bloque_control_estructura   : '{' listasentenciasejecutables '}'
                             | sentenciaejecutable ';'
                             | '{''}'
                             ;
 
-control                     : IF condicion {inicioIf()} bloque_control {finIf($1)} ELSE {inicioIf()} bloque_control {finIf($1)} ENDIF         {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");}
-                            | IF condicion {inicioIf()} bloque_control {finIf($1)} ENDIF                                                              {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque IF");}
-                            | DO bloque_control UNTIL condicion                                                                           {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");}
+bloque_control              : {inicioIf();} bloque_control_estructura {finIf($1);}
+                            ;
 
-                            | IF condicion {inicioIf()} bloque_control {finIf($1)} ELSE {inicioIf()} bloque_control {finIf($1)}               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $5.ival + ": falta la palabra ENDIF al final del bloque IF-ELSE");}
-                            | IF condicion {inicioIf()} bloque_control {finIf($1)}                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta la palabra ENDIF al final del bloque IF");}
-                            | IF condicion {inicioIf()} bloque_control {finIf($1)} ELSE ENDIF                                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $4.ival + ": falta el cuerpo en el bloque ELSE");}
-                            | IF condicion ELSE {inicioIf()} bloque_control {finIf($1)} ENDIF                                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
+inicio_do                   : DO {enDo=true;}
+                            ;
+
+bloque_control_else         : {sinRetIf.push(sinRet);} bloque_control {if(sinRetIf.pop()) {sinRet=true;};}
+                            ;
+
+control                     : IF condicion bloque_control ELSE bloque_control_else ENDIF       {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");}
+                            | IF condicion bloque_control ENDIF                                                              {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque IF");}
+                            | inicio_do bloque_control UNTIL condicion {enDo=false;}                                                                          {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");}
+
+                            | IF condicion bloque_control ELSE bloque_control_else             {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $5.ival + ": falta la palabra ENDIF al final del bloque IF-ELSE");}
+                            | IF condicion bloque_control                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta la palabra ENDIF al final del bloque IF");}
+                            | IF condicion bloque_control ELSE ENDIF                                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $4.ival + ": falta el cuerpo en el bloque ELSE");}
+                            | IF condicion ELSE bloque_control_else ENDIF                                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
                             | IF condicion ENDIF                                                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
                             | IF condicion ELSE ENDIF                                                                                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta el cuerpo en los bloques IF y ELSE");}
                             
                             | DO UNTIL condicion                                                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta de cuerpo en iteracion");}
-                            | DO bloque_control condicion                                                                                 {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta la palabra UNTIL en la iteracion");}
+                            | inicio_do bloque_control condicion {enDo=false;}                                                                                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta la palabra UNTIL en la iteracion");}
                             ;
 
 
@@ -259,7 +269,7 @@ private void chequeoSentenciaReturn(ParserVal yyval) {
 }
 
 private void inicioIf() {
-  if(enFunc > 0){
+  if(enFunc > 0 && !enDo) {
     huboRetStack.push(false);
     nivel++;
     returnsIf++;    
@@ -267,7 +277,7 @@ private void inicioIf() {
 }
 
 private void finIf(ParserVal yyval) {
-  if (enFunc > 0) {
+  if (enFunc > 0 && !enDo) {
     
     //Detección de multiples retornos
     if (returnsIf < nivel) {
@@ -277,7 +287,6 @@ private void finIf(ParserVal yyval) {
     
     // Detección de ausencia de retorno
     if (!huboRetStack.pop()) {
-      erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + yyval.ival + ": Se ha detectado ausencia de retorno");
       sinRet = true;
       returnsIf--;
     } else if (nivel==returnsIf) { // Ausencia de retorno válida por cobertura de nivel anterior
@@ -295,5 +304,5 @@ private void finFunc(ParserVal yyval) {
     erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + yyval.ival + ": Se han detectado multiples sentencias de retorno en la función");
   }
   enFunc--;
-  returnFunc = 1;
+  returnsFunc = 1;
 }
