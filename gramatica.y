@@ -64,26 +64,24 @@ asignacion                  : identificador ASIG expresion                      
                             | listavariables '=' listaconstantes                           {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación múltiple");}
                             ;
 
-estructura_bloque_control   : '{' listasentenciasejecutables '}'
+bloque_control              : '{' listasentenciasejecutables '}'
                             | sentenciaejecutable ';'
                             | '{''}'
                             ;
 
-bloque_control_if           : {inicioIf()} estructura_bloque_control {finIf($1)}
+control                     : IF condicion {inicioIf()} bloque_control {finIf($1)} ELSE {inicioIf()} bloque_control {finIf($1)} ENDIF         {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");}
+                            | IF condicion {inicioIf()} bloque_control {finIf($1)} ENDIF                                                              {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque IF");}
+                            | DO bloque_control UNTIL condicion                                                                           {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");}
 
-control                     : IF condicion bloque_control_if ELSE bloque_control_if ENDIF         {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");}
-                            | IF condicion bloque_control_if ENDIF                                                              {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque IF");}
-                            | DO bloque_control_if UNTIL condicion                                                                           {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");}
-
-                            | IF condicion bloque_control_if ELSE bloque_control_if               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $5.ival + ": falta la palabra ENDIF al final del bloque IF-ELSE");}
-                            | IF condicion bloque_control_if                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta la palabra ENDIF al final del bloque IF");}
-                            | IF condicion bloque_control_if ELSE ENDIF                                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $4.ival + ": falta el cuerpo en el bloque ELSE");}
-                            | IF condicion ELSE bloque_control_if ENDIF                                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
+                            | IF condicion {inicioIf()} bloque_control {finIf($1)} ELSE {inicioIf()} bloque_control {finIf($1)}               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $5.ival + ": falta la palabra ENDIF al final del bloque IF-ELSE");}
+                            | IF condicion {inicioIf()} bloque_control {finIf($1)}                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta la palabra ENDIF al final del bloque IF");}
+                            | IF condicion {inicioIf()} bloque_control {finIf($1)} ELSE ENDIF                                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $4.ival + ": falta el cuerpo en el bloque ELSE");}
+                            | IF condicion ELSE {inicioIf()} bloque_control {finIf($1)} ENDIF                                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
                             | IF condicion ENDIF                                                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el cuerpo en el bloque IF");}
                             | IF condicion ELSE ENDIF                                                                                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta el cuerpo en los bloques IF y ELSE");}
                             
                             | DO UNTIL condicion                                                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta de cuerpo en iteracion");}
-                            | DO estructura_bloque_control condicion                                                                                 {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta la palabra UNTIL en la iteracion");}
+                            | DO bloque_control condicion                                                                                 {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta la palabra UNTIL en la iteracion");}
                             ;
 
 
