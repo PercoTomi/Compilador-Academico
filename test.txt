@@ -1,14 +1,4 @@
 P {
-    long F (long X){
-        if (4L>X) {
-            X:=5L;
-            if (4L>X) {
-                return(5L);
-            } else {
-                X:=4L;
-            } endif;
-        } else {
-            return(4L);
-        } endif;
-    };
+    PRECIO := X + Y * trunc(1L);
+    F(trunc(4L));
 }

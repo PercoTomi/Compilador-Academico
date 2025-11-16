@@ -12,6 +12,8 @@
 
 %}
 
+
+
 %token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
 
 %%
@@ -128,17 +130,34 @@ listavariables              : listavariables ',' identificador
                             //| listavariables error identificador    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ',' entre variables"); }
                             ;
 
-identificador               : ID
-                            | identificador '.' ID
+identificador               : ID                                      //{$$.sval = ((SimboloLong)$1.obj).getLexema();}
+                            | identificador '.' ID                    //{$$.sval = $1.sval + "." + ((SimboloLong)$3.obj).getLexema();}                       
                             ;
 
-funcion                     : ID '(' argumentos_funcion ')'        {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó una función invocada correctamente");}
+listaparametros             : listaparametros ',' parametro
+                            | parametro
+                            ;                    
+
+parametro                   : CV tipo ID                             
+                            | tipo ID                                
+                            | CV tipo                                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del parámetro");}
+                            | tipo                                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del parámetro");}
+                            | CV ID                                  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el tipo del parámetro");}
+                            | ID                                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el tipo del parámetro");}
                             ;
 
-funcion_lambda              : ID '(' identificador ')'
-                            | ID '(' CTE ')'                            { constantePositiva($3); }
-                            | ID '(' '-' CTE ')'                        { constanteNegativa($4); }
+funcion                     : cabecera_funcion argumentos_funcion ')' {enParamInvocacion = false;}        { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función");}
                             ;
+
+funcion_lambda              : cabecera_funcion identificador ')' {enParamInvocacion = false;}                 { /*chequeo_anid_lambda($1.sval, $3);*/ System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función lambda");}
+                            | cabecera_funcion CTE ')' {enParamInvocacion = false;}                           { /*chequeo_anid_lambda($1.sval, $3)*/ ; constantePositiva($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función lambda");}
+                            | cabecera_funcion '-' CTE ')' {enParamInvocacion = false;}                       { /*chequeo_anid_lambda($1.sval, $4)*/ ; constanteNegativa($3); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó la invocación de una función lambda");}
+                            | cabecera_funcion TRUNC '(' CTE ')' ')' {enParamInvocacion = false;}             { constantePositiva($4); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó la invocación de una función lambda");}
+                            | cabecera_funcion TRUNC '(' '-' CTE ')' ')' {enParamInvocacion = false;}         { constanteNegativa($5); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $7.ival + ": Se detectó la invocación de una función lambda");}
+                            ;
+
+cabecera_funcion            : ID '(' {enParamInvocacion = true;}
+                            ; 
 
 argumentos_funcion          : listapinvocacion
                             ;
@@ -148,54 +167,44 @@ listapinvocacion            : listapinvocacion ',' pinvocacion
                             ;
 
 pinvocacion                 : expresion FLECHA ID                       
-                            | TRUNC '(' expresion ')' FLECHA ID
-                            | TRUNC '(' expresion FLECHA ID             {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta el paréntesis de cierre de la función TRUNC");}
-                            | TRUNC expresion ')' FLECHA ID             {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el paréntesis de apertura de la función TRUNC");}
-                            | TRUNC expresion FLECHA ID                 {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": faltan ambos paréntesis de la función TRUNC");}
+                            //| TRUNC '(' expresion ')' FLECHA ID
+                            //| TRUNC '(' expresion FLECHA ID                                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta el paréntesis de cierre de la función TRUNC");}
+                            //| TRUNC expresion ')' FLECHA ID                                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el paréntesis de apertura de la función TRUNC");}
+                            //| TRUNC expresion FLECHA ID                                         {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": faltan ambos paréntesis de la función TRUNC");}
                             | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA ID
-                            | '(' tipo ID ')' '{' listasentenciasejecutables FLECHA ID       {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $6.ival + ": falta llave de cierre del cuerpo de la función Lambda");}
-                            | '(' tipo ID ')' listasentenciasejecutables '}' FLECHA ID       {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $4.ival + ": falta llave de apertura del cuerpo de la función Lambda");}
-                            | '(' tipo ID ')' listasentenciasejecutables FLECHA ID           {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $4.ival + ": faltan ambas llaves del cuerpo de la función Lambda");}
-                            | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $8.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
-                            | expresion FLECHA                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
-                            | TRUNC '(' expresion ')' FLECHA            {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $5.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
+                            | '(' tipo ID ')' '{' listasentenciasejecutables FLECHA ID          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $6.ival + ": falta llave de cierre del cuerpo de la función Lambda");}
+                            | '(' tipo ID ')' listasentenciasejecutables '}' FLECHA ID          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $4.ival + ": falta llave de apertura del cuerpo de la función Lambda");}
+                            | '(' tipo ID ')' listasentenciasejecutables FLECHA ID              {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $4.ival + ": faltan ambas llaves del cuerpo de la función Lambda");}
+                            | '(' tipo ID ')' '{' listasentenciasejecutables '}' FLECHA         {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $8.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
+                            | expresion FLECHA                                                  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
+                            //| TRUNC '(' expresion ')' FLECHA                                    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $5.ival + ": No se especifica el parametro formal al que corresponde el parámetro real");}
                             ;                                                        
 
-listaparametros             : listaparametros ',' parametro
-                            | parametro
-                            ;                    
-
-parametro                   : CV tipo ID
-                            | tipo ID
-                            | CV tipo                                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del parámetro");}
-                            | tipo                                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del parámetro");}
-                            | CV ID                                  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el tipo del parámetro");}
-                            | ID                                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el tipo del parámetro");}
-                            ;
-
-expresion                   : expresion '+' termino
-                            | expresion '-' termino
+expresion                   : expresion '+' termino                 {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una expresión desde una suma");}      
+                            | expresion '-' termino                 {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una expresión desde una resta");}
                             | error '+' termino                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '+'"); }
                             | expresion '+' error                   { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '+'"); }
                             | error '-' termino                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '-'"); }
                             | expresion '-' error                   { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '-'"); }
-                            | termino
+                            | termino                               {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó una expresión desde un término");}         
                             ;
 
-termino                     : termino '*' factor
-                            | termino '/' factor
+termino                     : termino '*' factor                    {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un término desde una multiplicación");}
+                            | termino '/' factor                    {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un término desde una división");}
                             | error '*' factor                      { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '*'"); }
                             | termino '*' error                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '*'"); }
                             | error '/' factor                      { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '/'"); }
                             | termino '/' error                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '/'"); }
                             | termino error factor                  { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta operador entre operandos o falta de comparador en condición"); }
-                            | factor
+                            | factor                                {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un término desde un factor");}
                             ;
 
-factor                      : CTE                                   { constantePositiva($1); }
-                            | '-' CTE                               { constanteNegativa($2); }
-                            | identificador
-                            | funcion
+factor                      : CTE                                   { constantePositiva($1); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un factor desde una constante");}
+                            | '-' CTE                               { constanteNegativa($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un factor desde una constante negativa");}
+                            | identificador                         {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un factor desde un identificador");}
+                            | funcion                               {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un factor desde una función");}
+                            | TRUNC '(' CTE ')'                     { constantePositiva($3); if (enParamInvocacion) {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó la función Trunc en uno de los parámetros reales de la invocación");} else erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": la función TRUNC solo puede utilizarse en parámetros reales de invocación de funciones");}
+                            | TRUNC '(' '-' CTE ')'                 { constanteNegativa($4); if (enParamInvocacion) {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó la función Trunc en uno de los parámetros reales de la invocación");} else erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": la función TRUNC solo puede utilizarse en parámetros reales de invocación de funciones");}
                             ;
 
 listaconstantes             : listaconstantes ',' CTE               { constantePositiva($3); }
@@ -306,3 +315,9 @@ private void finFunc(ParserVal yyval) {
   enFunc--;
   returnsFunc = 1;
 }
+
+/*private void chequeo_anid_lambda(String nombreLambda, ParserVal yyval) {
+  if (nombreLambda.contains(".")) {
+    erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + yyval.ival + ": Se ha intentado invocar una función lambda perteneciente a otro ámbito");
+  }
+}*/
