@@ -17,7 +17,7 @@ public class Compilador {
 
         Map<String, Simbolo> tablaSimbolos = new HashMap<>();
 
-        String path = "test.txt";
+        String path = "Compiladores/test.txt"; // QUITAR "COMPILADORES/"
         
         if (Files.size(Paths.get(path)) == 0) {
             System.err.println("Error: El archivo está vacío");
@@ -91,7 +91,8 @@ public class Compilador {
                 System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteString)simbolo).getValor() + ", Tipo: " + simbolo.getTipo() + ", Categoria: " + simbolo.getCategoria());
             else if (simbolo instanceof SimboloLong)
                 System.out.println("Lexema: " + key + ", Valor: " + ((SimboloLong)simbolo).getValor() + ", Tipo: " + simbolo.getTipo() + ", Categoria: " + simbolo.getCategoria());
+            else if (simbolo instanceof SimboloFuncion)
+                System.out.println("Lexema: " + key + ", Tipo de retorno: " + simbolo.getTipo() + ", Categoria: " + simbolo.getCategoria());
             }
-
         }
 }

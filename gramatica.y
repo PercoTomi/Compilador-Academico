@@ -57,7 +57,10 @@ sentenciaejecutable         : asignacion
                             ;
 
 declaracion                 :  tipo listaIDs                             {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables");}
-                            |  tipo ID {stringAmbitos.append(":"+((Simbolo)$2.obj).getLexema());} '(' listaparametros {stackParametrosActuales.push(parametrosActuales); parametrosActuales = new ArrayList<>();} ')' {enFunc++;} '{' listasentencias '}' {finFunc($11, ((Simbolo)$2.obj)); quitarAmbito(); renombrarVariable($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $11.ival + ": Se detectó una declaración de función");}
+                            |  tipo id_funcion {stringAmbitos.append(":"+((Simbolo)$2.obj).getLexema());} '(' listaparametros {stackParametrosActuales.push(parametrosActuales); parametrosActuales = new ArrayList<>();} ')' {enFunc++;} '{' listasentencias '}' {finFunc( $11, ((Simbolo)$2.obj) ); quitarAmbito(); renombrarVariable($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $11.ival + ": Se detectó una declaración de función");}
+                            ;
+
+id_funcion                  : ID                                             {$$ = new ParserVal((SimboloLong)$1.obj);}
                             ;
 
 sentencia_return            : RETURN '(' expresion ')'                       {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una sentencia return");}
@@ -323,7 +326,8 @@ private void finFunc(ParserVal yyval, Simbolo simboloID) {
 
   // Creación del símbolo de función
   tablaSimbolos.remove(simboloID.getLexema());
-  tablaSimbolos.put(simboloID.getLexema(), new SimboloFuncion(257, stackTipoFuncActual.pop(), "Funcion", simboloID.getLexema(), stackParametrosActuales.pop()));
+  Simbolo nuevoSimbolo = new SimboloFuncion(257, stackTipoFuncActual.pop(), "Funcion", simboloID.getLexema(), stackParametrosActuales.pop());
+  tablaSimbolos.put(simboloID.getLexema(), nuevoSimbolo);
 }
 
 private void quitarAmbito() {
@@ -337,6 +341,7 @@ private void quitarAmbito() {
 
 private void renombrarVariable(ParserVal yyval) {
   String lexemaViejo = ((Simbolo)yyval.obj).getLexema();
+  yyval.obj = tablaSimbolos.get(lexemaViejo);
   String lexemaNuevo = lexemaViejo + stringAmbitos.toString();
   ((Simbolo)yyval.obj).setLexema(lexemaNuevo);
   tablaSimbolos.put(lexemaNuevo, ((Simbolo)yyval.obj));

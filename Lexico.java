@@ -79,8 +79,8 @@ public class Lexico {
         }
 
 
-        if (idToken == 0 & !cadena.isEmpty()) {
-            idToken = 256;
+        if (idToken == 0 & cadena.length() != 0) { //aca tengo que cambiar el isEmpty
+            idToken = 256; 
         }
         if (posicionActual >= buffer.length() && idToken == 0) {
             if (eof) {

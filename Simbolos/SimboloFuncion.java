@@ -9,7 +9,6 @@ public class SimboloFuncion extends Simbolo {
     public SimboloFuncion(int id, String tipo, String categoria, String lexema, ArrayList<Parametro> parametros) {
         super(id, tipo, categoria, lexema);
         this.listaParametros = parametros;
-
     }
 
     public String getTipoRetorno() {
