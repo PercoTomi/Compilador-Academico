@@ -1,6 +1,7 @@
 %{
     import java.io.*;
     import Simbolos.*;
+    import Simbolos.Auxiliares.*;
     import java.util.Map;
     import java.util.HashMap;
     import java.nio.file.Path;
@@ -17,18 +18,18 @@
 %token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
 
 %%
-prog                        : ID '{' listasentencias '}' EOF           
-                            | ID '{' '}' EOF
-                            | '{' listasentencias '}' EOF               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa");} 
-                            | ID '{' listasentencias EOF                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta la llave de cierre del cuerpo del programa");} 
-                            | ID listasentencias '}' EOF                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta la llave de apertura del cuerpo del programa");} 
-                            | ID listasentencias EOF                    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": faltan ambas llaves en cuerpo del programa");}
-                            | '{' listasentencias EOF                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el nombre del programa y la llave de cierre del cuerpo del programa");}
-                            | listasentencias '}' EOF                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa y la llave de apertura del cuerpo del programa");}
-                            | listasentencias EOF                       {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa y ambas llaves en cuerpo del programa");}
-                            | ID '{' error ';' listasentencias '}' EOF  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
+prog                        : ID {stringAmbitos.append(":"+((Simbolo)$1.obj).getLexema());} bloque_sentencias {quitarAmbito();} EOF
+                            | bloque_sentencias EOF               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa");} 
+                            //| ID '{' error ';' listasentencias '}' EOF  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
                             //| ID '{' listasentencias error '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
                             //| ID '{' listasentencias error ';' listasentencias '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
+                            ;
+
+bloque_sentencias           : '{' listasentencias '}'
+                            | '{' '}'
+                            | '{' listasentencias                      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta llave de cierre del bloque de sentencias");}
+                            | listasentencias '}'                      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta llave de apertura del bloque de sentencias");}
+                            | listasentencias                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": faltan ambas llaves del bloque de sentencias");}
                             ;
 
 listasentencias             : listasentencias sentencia
@@ -55,8 +56,8 @@ sentenciaejecutable         : asignacion
                             | sentencia_return                                {chequeoSentenciaReturn($1);}
                             ;
 
-declaracion                 :  tipo listavariables                             {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables");}
-                            |  tipo ID '(' listaparametros ')' {enFunc++;} '{' listasentencias '}' {finFunc($8); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $8.ival + ": Se detectó una declaración de función");}
+declaracion                 :  tipo listaIDs                             {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables");}
+                            |  tipo ID {stringAmbitos.append(":"+((Simbolo)$2.obj).getLexema());} '(' listaparametros {stackParametrosActuales.push(parametrosActuales); parametrosActuales = new ArrayList<>();} ')' {enFunc++;} '{' listasentencias '}' {finFunc($11, ((Simbolo)$2.obj)); quitarAmbito(); renombrarVariable($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $11.ival + ": Se detectó una declaración de función");}
                             ;
 
 sentencia_return            : RETURN '(' expresion ')'                       {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una sentencia return");}
@@ -72,7 +73,7 @@ bloque_control_estructura   : '{' listasentenciasejecutables '}'
                             | '{''}'
                             ;
 
-bloque_control              : {inicioIf();} bloque_control_estructura {finIf($1);}
+bloque_control              : {inicioIf();} bloque_control_estructura {finIf($2);} //ANTES HABIA UN $1
                             ;
 
 inicio_do                   : DO {enDo=true;}
@@ -95,8 +96,6 @@ control                     : IF condicion bloque_control ELSE bloque_control_el
                             | DO UNTIL condicion                                                                                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta de cuerpo en iteracion");}
                             | inicio_do bloque_control condicion {enDo=false;}                                                                                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta la palabra UNTIL en la iteracion");}
                             ;
-
-
                             
 print                       : PRINT '(' expresion ')'
                             | PRINT '(' CADENAML ')'
@@ -121,13 +120,18 @@ comparador                  : '>'
                             | DISTINTO
                             ;  
 
-tipo                        : LONG
-                            | LAMBDA
+tipo                        : LONG                   {stackTipoFuncActual.push("Long");}
+                            | LAMBDA                 {stackTipoFuncActual.push("Lambda");} 
+                            ;
+
+listaIDs                    : listaIDs ',' ID        {renombrarVariable($3);}
+                            | ID                     {renombrarVariable($1);}
+                            // REDUCE PREMATURAMENTE | listaIDs error ID    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ',' entre variables"); }
                             ;
 
 listavariables              : listavariables ',' identificador
                             | identificador
-                            //| listavariables error identificador    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ',' entre variables"); }
+                            // REDUCE PREMATURAMENTE | listavariables error identificador    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ',' entre variables"); }
                             ;
 
 identificador               : ID                                      //{$$.sval = ((SimboloLong)$1.obj).getLexema();}
@@ -138,12 +142,12 @@ listaparametros             : listaparametros ',' parametro
                             | parametro
                             ;                    
 
-parametro                   : CV tipo ID                             
-                            | tipo ID                                
+parametro                   : CV tipo ID                             {renombrarVariable($3); parametrosActuales.add(new Parametro(((Simbolo)$3.obj), "CV"));}                          
+                            | tipo ID                                {renombrarVariable($2); parametrosActuales.add(new Parametro(((Simbolo)$2.obj), "CVR"));}
                             | CV tipo                                {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del parámetro");}
                             | tipo                                   {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del parámetro");}
-                            | CV ID                                  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el tipo del parámetro");}
-                            | ID                                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el tipo del parámetro");}
+                            | CV ID                                  {renombrarVariable($2); parametrosActuales.add(new Parametro(((Simbolo)$2.obj), "CV")); erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el tipo del parámetro");}
+                            | ID                                     {renombrarVariable($1); parametrosActuales.add(new Parametro(((Simbolo)$1.obj), "CVR")); erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el tipo del parámetro");}
                             ;
 
 funcion                     : cabecera_funcion argumentos_funcion ')' {enParamInvocacion = false;}        { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función");}
@@ -233,7 +237,7 @@ private void constanteNegativa(ParserVal valCte) {
   if (valCte.obj instanceof SimboloLong) {
     Simbolo simbolo;
     if (!tablaSimbolos.containsKey("-" +((SimboloLong)valCte.obj).getLexema())) {
-      simbolo =  new SimboloLong(258, "Constante", "-" + ((SimboloLong)valCte.obj).getLexema(), -((SimboloLong)valCte.obj).getValor());
+      simbolo =  new SimboloLong(258, "Long", "Constante", "-" + ((SimboloLong)valCte.obj).getLexema(), -((SimboloLong)valCte.obj).getValor());
       tablaSimbolos.put("-" +((SimboloLong)valCte.obj).getLexema(), simbolo);
     } else {
       simbolo = tablaSimbolos.get("-" + ((SimboloLong)valCte.obj).getLexema());
@@ -242,7 +246,7 @@ private void constanteNegativa(ParserVal valCte) {
   } else {
         Simbolo simbolo;
         if (!tablaSimbolos.containsKey("-" +((SimboloCteFloat)valCte.obj).getLexema())) {
-          simbolo =  new SimboloCteFloat(258, "Constante", "-" + ((SimboloCteFloat)valCte.obj).getLexema(), -((SimboloCteFloat)valCte.obj).getValor());
+          simbolo =  new SimboloCteFloat(258, "Float", "Constante", "-" + ((SimboloCteFloat)valCte.obj).getLexema(), -((SimboloCteFloat)valCte.obj).getValor());
           tablaSimbolos.put("-" + ((SimboloCteFloat)valCte.obj).getLexema(), simbolo);
         } else {
           simbolo = tablaSimbolos.get("-" + ((SimboloCteFloat)valCte.obj).getLexema());
@@ -255,7 +259,7 @@ private void constantePositiva(ParserVal valCte) {
     if ( (valCte.obj instanceof SimboloLong) && ( ((SimboloLong) valCte.obj).getValor() == 2147483648L) ) {
       Simbolo simbolo;
       if (!tablaSimbolos.containsKey("2147483647L")) {
-        simbolo =  new SimboloLong(258, "Constante", "2147483647L", 2147483647L);
+        simbolo =  new SimboloLong(258, "Long", "Constante", "2147483647L", 2147483647L);
         tablaSimbolos.put("2147483647L", simbolo);
       } else {
         simbolo = tablaSimbolos.get("2147483647L");
@@ -279,6 +283,7 @@ private void chequeoSentenciaReturn(ParserVal yyval) {
 
 private void inicioIf() {
   if(enFunc > 0 && !enDo) {
+    huboIfEnFunc = true;
     huboRetStack.push(false);
     nivel++;
     returnsIf++;    
@@ -306,14 +311,36 @@ private void finIf(ParserVal yyval) {
   }
 }
 
-private void finFunc(ParserVal yyval) {
-  if (returnsFunc > 0 && sinRet) {
+private void finFunc(ParserVal yyval, Simbolo simboloID) {
+  if (returnsFunc > 0 && (!huboIfEnFunc || sinRet)) { 
     erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + yyval.ival + ": La función no tiene sentencia return en todos sus caminos de ejecución");
   } else if (returnsFunc < 0) {
     erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + yyval.ival + ": Se han detectado multiples sentencias de retorno en la función");
   }
   enFunc--;
   returnsFunc = 1;
+  huboIfEnFunc = false;
+
+  // Creación del símbolo de función
+  tablaSimbolos.remove(simboloID.getLexema());
+  tablaSimbolos.put(simboloID.getLexema(), new SimboloFuncion(257, stackTipoFuncActual.pop(), "Funcion", simboloID.getLexema(), stackParametrosActuales.pop()));
+}
+
+private void quitarAmbito() {
+    int lastIndex = stringAmbitos.lastIndexOf(":");
+    if (lastIndex > 0) {
+        stringAmbitos.setLength(lastIndex);
+    } else {
+        stringAmbitos.setLength(0);
+    }
+}
+
+private void renombrarVariable(ParserVal yyval) {
+  String lexemaViejo = ((Simbolo)yyval.obj).getLexema();
+  String lexemaNuevo = lexemaViejo + stringAmbitos.toString();
+  ((Simbolo)yyval.obj).setLexema(lexemaNuevo);
+  tablaSimbolos.put(lexemaNuevo, ((Simbolo)yyval.obj));
+  tablaSimbolos.remove(lexemaViejo);
 }
 
 /*private void chequeo_anid_lambda(String nombreLambda, ParserVal yyval) {

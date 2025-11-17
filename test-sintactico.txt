@@ -1,2 +1,1 @@
-||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea 2: la función TRUNC solo puede utilizarse en parámetros reales de invocación de funciones
-||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea 3: Invocacion de funcion lambda fuera de una función
+||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea 5: La función no tiene sentencia return en todos sus caminos de ejecución

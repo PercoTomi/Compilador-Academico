@@ -86,11 +86,11 @@ public class Compilador {
         for (String key : tablaSimbolos.keySet()) {
             Simbolo simbolo = tablaSimbolos.get(key);
             if (simbolo instanceof SimboloCteFloat)
-                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteFloat)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
+                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteFloat)simbolo).getValor() + ", Tipo: " + simbolo.getTipo() + ", Categoria: " + simbolo.getCategoria());
             else if (simbolo instanceof SimboloCteString)
-                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteString)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
+                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloCteString)simbolo).getValor() + ", Tipo: " + simbolo.getTipo() + ", Categoria: " + simbolo.getCategoria());
             else if (simbolo instanceof SimboloLong)
-                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloLong)simbolo).getValor() + ", Tipo: " + simbolo.getTipo());
+                System.out.println("Lexema: " + key + ", Valor: " + ((SimboloLong)simbolo).getValor() + ", Tipo: " + simbolo.getTipo() + ", Categoria: " + simbolo.getCategoria());
             }
 
         }

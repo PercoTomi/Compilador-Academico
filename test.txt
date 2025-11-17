@@ -1,4 +1,6 @@
 P {
-    PRECIO := X + Y * trunc(1L);
-    F(trunc(4L));
+    long X;
+    long FUNC(long Y) {
+        long Z;
+    };
 }

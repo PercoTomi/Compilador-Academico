@@ -92,13 +92,13 @@ public class Lexico {
             }
         }
         if (idToken == 257) 
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: ID, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: ID, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
         else if (idToken == 258) 
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: CTE, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: CTE, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
         else if (idToken == 0)
             System.out.println("||---------------- ANALIZADOR LÉXICO: FIN DE ARCHIVO ALCANZADO");
         else if (idToken != 277)
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Tipo: " + cadena.toString() + " , Línea: " + lineaActual);
+            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: " + cadena.toString() + " , Línea: " + lineaActual);
         return idToken;
     }
 
@@ -268,7 +268,7 @@ public class Lexico {
             // Verificar si el lexema no está en la tabla de símbolos
             if(!tablaDeSimbolos.containsKey(lexema)) {
                 // Si no está, crear un nuevo símbolo long y agregarlo a la tabla
-                Simbolo nuevoSimbolo = new SimboloLong(257, "Identificador", lexema, 0L);
+                Simbolo nuevoSimbolo = new SimboloLong(257, "Long", "Identificador", lexema, 0L);
                 tablaDeSimbolos.put(lexema, nuevoSimbolo);
                 yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
             } else {
@@ -313,7 +313,7 @@ public class Lexico {
             // Verificar si el lexema no está en la tabla de símbolos
             if(!tablaDeSimbolos.containsKey(lexema)) {
                 // Si no está, crear un nuevo símbolo long y agregarlo a la tabla
-                Simbolo nuevoSimbolo = new SimboloLong(258, "Constante", lexema, cte);
+                Simbolo nuevoSimbolo = new SimboloLong(258, "Long", "Constante", lexema, cte);
                 tablaDeSimbolos.put(lexema, nuevoSimbolo);
                 yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
             } else {
@@ -417,7 +417,7 @@ public class Lexico {
                         // Si no está, crear un nuevo símbolo float y agregarlo a la tabla
                         // Antes de ingresar el lexema a la tabla se crea una var auxiliar en la cual se reemplaza la E por la F
                         String lexemaAux = lexema.replace("E", "F");
-                        Simbolo nuevoSimbolo = new SimboloCteFloat(258, "Constante", lexemaAux, cte);
+                        Simbolo nuevoSimbolo = new SimboloCteFloat(258, "Float", "Constante", lexemaAux, cte);
                         tablaDeSimbolos.put(lexemaAux, nuevoSimbolo);
                         yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
                     } else {
@@ -439,7 +439,7 @@ public class Lexico {
             // Verificar si el lexema no está en la tabla de símbolos
             if(!tablaDeSimbolos.containsKey(lexema)) {
                     // Si no está, crear un nuevo símbolo float y agregarlo a la tabla
-                    Simbolo nuevoSimbolo = new SimboloCteString(274, "CadenaML", lexema, lexema);
+                    Simbolo nuevoSimbolo = new SimboloCteString(274, "String", "CadenaML", lexema, lexema);
                     tablaDeSimbolos.put(lexema, nuevoSimbolo);
                     yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
                 } else {
