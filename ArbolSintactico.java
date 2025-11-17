@@ -23,6 +23,9 @@ public class ArbolSintactico {
     }
 
     public Simbolo getRefSimbolo() {
+        if (refSimbolo == null) {
+            throw new IllegalStateException("Este nodo no es una hoja y no tiene un símbolo asociado.");
+        }
         return refSimbolo;
     }
 

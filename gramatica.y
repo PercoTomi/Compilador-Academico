@@ -137,8 +137,8 @@ listavariables              : listavariables ',' identificador
                             // REDUCE PREMATURAMENTE | listavariables error identificador    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ',' entre variables"); }
                             ;
 
-identificador               : ID                                      //{$$.sval = ((SimboloLong)$1.obj).getLexema();}
-                            | identificador '.' ID                    //{$$.sval = $1.sval + "." + ((SimboloLong)$3.obj).getLexema();}                       
+identificador               : ID                                      {$$ = new ParserVal( ((SimboloLong)$1.obj).getLexema() );}
+                            | identificador '.' ID                    {$$ = new ParserVal( $1.sval + "." + ((SimboloLong)$3.obj).getLexema() );}                       
                             ;
 
 listaparametros             : listaparametros ',' parametro
@@ -156,14 +156,14 @@ parametro                   : CV tipo ID                             {renombrarV
 funcion                     : cabecera_funcion argumentos_funcion ')' {enParamInvocacion = false;}        { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función");}
                             ;
 
-funcion_lambda              : cabecera_funcion identificador ')' {enParamInvocacion = false;}                 { /*chequeo_anid_lambda($1.sval, $3);*/ System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función lambda");}
-                            | cabecera_funcion CTE ')' {enParamInvocacion = false;}                           { /*chequeo_anid_lambda($1.sval, $3)*/ ; constantePositiva($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función lambda");}
-                            | cabecera_funcion '-' CTE ')' {enParamInvocacion = false;}                       { /*chequeo_anid_lambda($1.sval, $4)*/ ; constanteNegativa($3); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó la invocación de una función lambda");}
+funcion_lambda              : cabecera_funcion identificador ')' {enParamInvocacion = false;}                 { chequeo_anid_lambda($1.sval, $3); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función lambda");}
+                            | cabecera_funcion CTE ')' {enParamInvocacion = false;}                           { chequeo_anid_lambda($1.sval, $3) ; constantePositiva($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función lambda");}
+                            | cabecera_funcion '-' CTE ')' {enParamInvocacion = false;}                       { chequeo_anid_lambda($1.sval, $4) ; constanteNegativa($3); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó la invocación de una función lambda");}
                             | cabecera_funcion TRUNC '(' CTE ')' ')' {enParamInvocacion = false;}             { constantePositiva($4); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó la invocación de una función lambda");}
                             | cabecera_funcion TRUNC '(' '-' CTE ')' ')' {enParamInvocacion = false;}         { constanteNegativa($5); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $7.ival + ": Se detectó la invocación de una función lambda");}
                             ;
 
-cabecera_funcion            : ID '(' {enParamInvocacion = true;}
+cabecera_funcion            : identificador '(' {enParamInvocacion = true; $$ = new ParserVal( $1.sval );} 
                             ; 
 
 argumentos_funcion          : listapinvocacion
@@ -193,21 +193,46 @@ expresion                   : expresion '+' termino                 {System.out.
                             | expresion '+' error                   { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '+'"); }
                             | error '-' termino                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '-'"); }
                             | expresion '-' error                   { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '-'"); }
-                            | termino                               {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó una expresión desde un término");}         
+                            | termino                               {
+                                                                      System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó una expresión desde un término");    
+                                                                      $$ = $1;
+                                                                      System.out.println("LE ESTOY PASANDO A EXPRESIÓN LA REFERENCIA DE MI NO TERMINAL TERMINO. CATEGORIA: " + ((ArbolSintactico)$1.obj).getValor());
+                                                                    }  
                             ;
 
-termino                     : termino '*' factor                    {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un término desde una multiplicación");}
-                            | termino '/' factor                    {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un término desde una división");}
+termino                     : termino '*' factor                    {
+                                                                      System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un término desde una multiplicación");
+                                                                      $$ = new ParserVal(new ArbolSintactico("MULT", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj));
+                                                                      System.out.println("EL VALOR DE MI PESOS PESOS ACTUAL ES : " + ((ArbolSintactico)$$.obj).getValor());
+                                                                      System.out.println("ESTOY CREANDO UNA OPERACIÓN DE MULTIPLICACIÓN. A DERECHA EL FACTOR TIENE EL VALOR : " + ((ArbolSintactico)$3.obj).getRefSimbolo().getLexema());
+                                                                    }
+                            | termino '/' factor                    {
+                                                                      System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un término desde una división");
+                                                                      $$ = new ParserVal(new ArbolSintactico("DIV", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj));
+                                                                      System.out.println("ESTOY CREANDO UNA OPERACIÓN DE DIVISIÓN. A DERECHA EL FACTOR TIENE EL VALOR : " + ((ArbolSintactico)$3.obj).getRefSimbolo().getLexema());
+                                                                    }
                             | error '*' factor                      { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '*'"); }
                             | termino '*' error                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '*'"); }
                             | error '/' factor                      { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '/'"); }
                             | termino '/' error                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '/'"); }
                             | termino error factor                  { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta operador entre operandos o falta de comparador en condición"); }
-                            | factor                                {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un término desde un factor");}
+                            | factor                                {
+                                                                      System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un término desde un factor");
+                                                                      $$ = $1;
+                                                                      System.out.println("LE ESTOY PASANDO A TERMINO LA REFERENCIA DE MI NO TERMINAL FACTOR: " + ((ArbolSintactico)$1.obj).getRefSimbolo().getLexema());
+                                                                    }
                             ;
 
-factor                      : CTE                                   { constantePositiva($1); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un factor desde una constante");}
-                            | '-' CTE                               { constanteNegativa($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un factor desde una constante negativa");}
+factor                      : CTE                                   { 
+                                                                      constantePositiva($1); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un factor desde una constante");
+                                                                      $$ = new ParserVal(new ArbolSintactico((Simbolo)$1.obj));
+                                                                    }
+                            
+                            | '-' CTE                               { 
+                                                                      constanteNegativa($2); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un factor desde una constante negativa");
+                                                                      $$ = new ParserVal(new ArbolSintactico((Simbolo)$2.obj));
+                                                                    }
+
                             | identificador                         {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un factor desde un identificador");}
                             | funcion                               {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un factor desde una función");}
                             | TRUNC '(' CTE ')'                     { constantePositiva($3); if (enParamInvocacion) {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó la función Trunc en uno de los parámetros reales de la invocación");} else erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": la función TRUNC solo puede utilizarse en parámetros reales de invocación de funciones");}
@@ -348,8 +373,8 @@ private void renombrarVariable(ParserVal yyval) {
   tablaSimbolos.remove(lexemaViejo);
 }
 
-/*private void chequeo_anid_lambda(String nombreLambda, ParserVal yyval) {
+private void chequeo_anid_lambda(String nombreLambda, ParserVal yyval) {
   if (nombreLambda.contains(".")) {
     erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + yyval.ival + ": Se ha intentado invocar una función lambda perteneciente a otro ámbito");
   }
-}*/
+}

@@ -1,6 +1,3 @@
 P {
-    long X;
-    long FUNC(long Y) {
-        long Z;
-    };
+    X := -4L*8L;
 }

@@ -1,1 +1,0 @@
-||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea 5: La función no tiene sentencia return en todos sus caminos de ejecución
