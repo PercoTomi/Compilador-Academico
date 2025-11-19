@@ -3,8 +3,8 @@ package Simbolos;
 public class SimboloLong extends Simbolo {
     private long valor;
 
-    public SimboloLong(int id, String tipo, String categoria, String lexema, long valor) {
-        super(id, tipo, categoria, lexema);
+    public SimboloLong(String tipo, String categoria, String lexema, long valor) {
+        super(tipo, categoria, lexema);
         this.valor = valor;
     }
 

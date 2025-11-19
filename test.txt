@@ -1,8 +1,9 @@
 P {
     long X;
     long Y;
-    long H;
-    long F;
-    Y := 5L*2L;
-    X := 4L+3L;
+    if (4L > X) {
+        X := 3L;
+    } else {
+        Y := 5L;
+    } endif;
 }

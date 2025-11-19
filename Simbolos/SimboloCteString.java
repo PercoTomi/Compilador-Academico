@@ -3,8 +3,8 @@ package Simbolos;
 public class SimboloCteString extends Simbolo {
     private String valor;
 
-    public SimboloCteString(int id, String tipo, String categoria, String lexema, String valor) {
-        super(id, tipo, categoria, lexema);
+    public SimboloCteString(String tipo, String categoria, String lexema, String valor) {
+        super(tipo, categoria, lexema);
         this.valor = valor;
     }
 

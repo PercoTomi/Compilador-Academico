@@ -65,8 +65,8 @@
 
   43  bloque_control_else : $$7 bloque_control
 
-  44  control : IF condicion bloque_control ELSE bloque_control_else ENDIF
-  45          | IF condicion bloque_control ENDIF
+  44  control : IF condicion bloque_control ENDIF
+  45          | IF condicion bloque_control ELSE bloque_control_else ENDIF
   46          | inicio_do bloque_control UNTIL condicion
   47          | IF condicion bloque_control ELSE bloque_control_else
   48          | IF condicion bloque_control
@@ -241,8 +241,8 @@ state 1
 
 
 state 2
-	control : IF . condicion bloque_control ELSE bloque_control_else ENDIF  (44)
-	control : IF . condicion bloque_control ENDIF  (45)
+	control : IF . condicion bloque_control ENDIF  (44)
+	control : IF . condicion bloque_control ELSE bloque_control_else ENDIF  (45)
 	control : IF . condicion bloque_control ELSE bloque_control_else  (47)
 	control : IF . condicion bloque_control  (48)
 	control : IF . condicion bloque_control ELSE ENDIF  (49)
@@ -700,8 +700,8 @@ state 35
 
 
 state 36
-	control : IF condicion . bloque_control ELSE bloque_control_else ENDIF  (44)
-	control : IF condicion . bloque_control ENDIF  (45)
+	control : IF condicion . bloque_control ENDIF  (44)
+	control : IF condicion . bloque_control ELSE bloque_control_else ENDIF  (45)
 	control : IF condicion . bloque_control ELSE bloque_control_else  (47)
 	control : IF condicion . bloque_control  (48)
 	control : IF condicion . bloque_control ELSE ENDIF  (49)
@@ -1407,8 +1407,8 @@ state 89
 
 
 state 90
-	control : IF condicion bloque_control . ELSE bloque_control_else ENDIF  (44)
-	control : IF condicion bloque_control . ENDIF  (45)
+	control : IF condicion bloque_control . ENDIF  (44)
+	control : IF condicion bloque_control . ELSE bloque_control_else ENDIF  (45)
 	control : IF condicion bloque_control . ELSE bloque_control_else  (47)
 	control : IF condicion bloque_control .  (48)
 	control : IF condicion bloque_control . ELSE ENDIF  (49)
@@ -2084,7 +2084,7 @@ state 139
 
 
 state 140
-	control : IF condicion bloque_control ELSE . bloque_control_else ENDIF  (44)
+	control : IF condicion bloque_control ELSE . bloque_control_else ENDIF  (45)
 	control : IF condicion bloque_control ELSE . bloque_control_else  (47)
 	control : IF condicion bloque_control ELSE . ENDIF  (49)
 	$$7 : .  (42)
@@ -2102,9 +2102,9 @@ state 140
 
 
 state 141
-	control : IF condicion bloque_control ENDIF .  (45)
+	control : IF condicion bloque_control ENDIF .  (44)
 
-	.  reduce 45
+	.  reduce 44
 
 
 state 142
@@ -2353,7 +2353,7 @@ state 173
 
 
 state 174
-	control : IF condicion bloque_control ELSE bloque_control_else . ENDIF  (44)
+	control : IF condicion bloque_control ELSE bloque_control_else . ENDIF  (45)
 	control : IF condicion bloque_control ELSE bloque_control_else .  (47)
 
 	ENDIF  shift 191
@@ -2523,9 +2523,9 @@ state 190
 
 
 state 191
-	control : IF condicion bloque_control ELSE bloque_control_else ENDIF .  (44)
+	control : IF condicion bloque_control ELSE bloque_control_else ENDIF .  (45)
 
-	.  reduce 44
+	.  reduce 45
 
 
 state 192

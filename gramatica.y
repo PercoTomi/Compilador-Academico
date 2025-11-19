@@ -43,14 +43,16 @@ sentencia                   : sentenciaejecutable ';'                   { $$ = $
                             | declaracion                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ; al final de la declaración");}
                             ;
 
-listasentenciasejecutables  : listasentenciasejecutables sentenciaejecutable ';'
-                            | sentenciaejecutable ';'                         
-                            | listasentenciasejecutables sentenciaejecutable  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta ; al final de la sentencia ejecutable");}
-                            | sentenciaejecutable                             {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ; al final de la sentencia ejecutable");}
+listasentenciasejecutables  : listasentenciasejecutables sentenciaejecutable ';'  { ((ArbolSintactico)$1.obj).setUltimoDerecho(new ArbolSintactico("Sentencia", ((ArbolSintactico)$2.obj) , null ));
+                                                                                    $$ = $1;
+                                                                                  }
+                            | sentenciaejecutable ';'                             { $$ = new ParserVal(new ArbolSintactico("Sentencia", ((ArbolSintactico)$1.obj), null)); }                         
+                            | listasentenciasejecutables sentenciaejecutable      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta ; al final de la sentencia ejecutable");}
+                            | sentenciaejecutable                                 {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ; al final de la sentencia ejecutable");}
                             ;
 
-sentenciaejecutable         : asignacion                                      {  $$ = $1; }
-                            | control
+sentenciaejecutable         : asignacion                                      { $$ = $1; }
+                            | control                                         { $$ = $1; }  
                             | funcion
                             | print                                           {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un print");}
                             | funcion_lambda                                  {if(enFunc==0) erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": Invocacion de funcion lambda fuera de una función");}
@@ -79,22 +81,26 @@ asignacion                  : identificador ASIG expresion                      
                             | listavariables '=' listaconstantes                          {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación múltiple");}
                             ;
 
-bloque_control_estructura   : '{' listasentenciasejecutables '}'
-                            | sentenciaejecutable ';'
-                            | '{''}'
+bloque_control_estructura   : '{' listasentenciasejecutables '}'              { $$ = $2; }
+                            | sentenciaejecutable ';'                         { $$ = $1; }
+                            | '{''}'                                          { $$.obj = null; }
                             ;
 
-bloque_control              : {inicioIf();} bloque_control_estructura {finIf($2);} //ANTES HABIA UN $1
+bloque_control              : {inicioIf();} bloque_control_estructura {finIf($2); $$ = $2; }
                             ;
 
 inicio_do                   : DO {enDo=true;}
                             ;
 
-bloque_control_else         : {sinRetIf.push(sinRet);} bloque_control {if(sinRetIf.pop()) {sinRet=true;};}
+bloque_control_else         : {sinRetIf.push(sinRet);} bloque_control {if(sinRetIf.pop()) {sinRet=true;}; $$ = $2; }
                             ;
 
-control                     : IF condicion bloque_control ELSE bloque_control_else ENDIF        {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");}
-                            | IF condicion bloque_control ENDIF                                 {System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque IF");}
+control                     : IF condicion bloque_control ENDIF                                 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque IF");
+                                                                                                  $$ = new ParserVal(new ArbolSintactico("If", (ArbolSintactico)$2.obj, new ArbolSintactico("Cuerpo",(ArbolSintactico)$3.obj, null)) );
+                                                                                                }
+                            | IF condicion bloque_control ELSE bloque_control_else ENDIF        { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");
+                                                                                                  $$ = new ParserVal(new ArbolSintactico("If", (ArbolSintactico)$2.obj, new ArbolSintactico("Cuerpo",(ArbolSintactico)$3.obj, (ArbolSintactico)$5.obj)) );  
+                                                                                                } 
                             | inicio_do bloque_control UNTIL condicion                          {  enDo=false;
                                                                                                   System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");
                                                                                                 }
@@ -117,22 +123,22 @@ print                       : PRINT '(' expresion ')'
                             | PRINT '(' ')'                          {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $3.ival + ": falta de argumento en sentencia print");}
                             ;
 
-condicion                   : '(' cuerpocondicion ')'                
+condicion                   : '(' cuerpocondicion ')'                { $$ = $2; }
                             | cuerpocondicion ')'                    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el paréntesis de apertura de la condición");}
                             | '(' cuerpocondicion                    {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta el paréntesis de cierre de la condición");}
                             | cuerpocondicion                        {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": faltan ambos paréntesis de la condición");}
                             ;
 
-cuerpocondicion             : expresion comparador expresion
-                            | expresion                              {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": La condición es incompleta");}
+cuerpocondicion             : expresion comparador expresion         { $$ = new ParserVal (new ArbolSintactico($2.sval, (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj));}
+                            | expresion                              { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": La condición es incompleta");}
                             ;
 
-comparador                  : '>'
-                            | '<'
-                            | MAYORIG
-                            | MENORIG
-                            | IGUAL
-                            | DISTINTO
+comparador                  : '>'                    { $$ = new ParserVal("MAYOR"); }
+                            | '<'                    { $$ = new ParserVal("MENOR"); }
+                            | MAYORIG                { $$ = new ParserVal("MAYORIGUAL"); }
+                            | MENORIG                { $$ = new ParserVal("MENORIGUAL"); }
+                            | IGUAL                  { $$ = new ParserVal("IGUAL"); }
+                            | DISTINTO               { $$ = new ParserVal("DISTINTO"); }
                             ;
 
 tipo                        : LONG                   {stackTipoFuncActual.push("Long");}
@@ -315,7 +321,7 @@ private void constanteNegativa(ParserVal valCte) {
   if (valCte.obj instanceof SimboloLong) {
     Simbolo simbolo;
     if (!tablaSimbolos.containsKey("-" +((SimboloLong)valCte.obj).getLexema())) {
-      simbolo =  new SimboloLong(258, "Long", "Constante", "-" + ((SimboloLong)valCte.obj).getLexema(), -((SimboloLong)valCte.obj).getValor());
+      simbolo =  new SimboloLong("Long", "Constante", "-" + ((SimboloLong)valCte.obj).getLexema(), -((SimboloLong)valCte.obj).getValor());
       tablaSimbolos.put("-" +((SimboloLong)valCte.obj).getLexema(), simbolo);
     } else {
       simbolo = tablaSimbolos.get("-" + ((SimboloLong)valCte.obj).getLexema());
@@ -324,7 +330,7 @@ private void constanteNegativa(ParserVal valCte) {
   } else {
         Simbolo simbolo;
         if (!tablaSimbolos.containsKey("-" +((SimboloCteFloat)valCte.obj).getLexema())) {
-          simbolo =  new SimboloCteFloat(258, "Float", "Constante", "-" + ((SimboloCteFloat)valCte.obj).getLexema(), -((SimboloCteFloat)valCte.obj).getValor());
+          simbolo =  new SimboloCteFloat("Float", "Constante", "-" + ((SimboloCteFloat)valCte.obj).getLexema(), -((SimboloCteFloat)valCte.obj).getValor());
           tablaSimbolos.put("-" + ((SimboloCteFloat)valCte.obj).getLexema(), simbolo);
         } else {
           simbolo = tablaSimbolos.get("-" + ((SimboloCteFloat)valCte.obj).getLexema());
@@ -337,7 +343,7 @@ private void constantePositiva(ParserVal valCte) {
     if ( (valCte.obj instanceof SimboloLong) && ( ((SimboloLong) valCte.obj).getValor() == 2147483648L) ) {
       Simbolo simbolo;
       if (!tablaSimbolos.containsKey("2147483647L")) {
-        simbolo =  new SimboloLong(258, "Long", "Constante", "2147483647L", 2147483647L);
+        simbolo =  new SimboloLong("Long", "Constante", "2147483647L", 2147483647L);
         tablaSimbolos.put("2147483647L", simbolo);
       } else {
         simbolo = tablaSimbolos.get("2147483647L");
@@ -401,7 +407,7 @@ private void finFunc(ParserVal yyval, Simbolo simboloID) {
 
   // Creación del símbolo de función
   tablaSimbolos.remove(simboloID.getLexema());
-  Simbolo nuevoSimbolo = new SimboloFuncion(257, stackTipoFuncActual.pop(), "Funcion", simboloID.getLexema(), stackParametrosActuales.pop());
+  Simbolo nuevoSimbolo = new SimboloFuncion(stackTipoFuncActual.pop(), "Funcion", simboloID.getLexema(), stackParametrosActuales.pop());
   tablaSimbolos.put(simboloID.getLexema(), nuevoSimbolo);
 }
 
