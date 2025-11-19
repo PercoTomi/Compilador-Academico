@@ -1,3 +1,8 @@
 P {
-    X := -4L*8L;
+    long X;
+    long Y;
+    long H;
+    long F;
+    Y := 5L*2L;
+    X := 4L+3L;
 }

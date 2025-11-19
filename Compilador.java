@@ -16,6 +16,7 @@ public class Compilador {
         }*/
 
         Map<String, Simbolo> tablaSimbolos = new HashMap<>();
+        ArbolSintactico arbolSintactico = null;
 
         String path = "test.txt"; // QUITAR "COMPILADORES/"
         
@@ -64,7 +65,7 @@ public class Compilador {
             e.printStackTrace();
         }
         
-        Parser parser = new Parser(tablaSimbolos, path, erroresLexicos, erroresSintacticos);
+        Parser parser = new Parser(tablaSimbolos, path, erroresLexicos, erroresSintacticos, arbolSintactico);
         System.out.println(parser.yyparse());
 
         // Imprimir todos los errores léxicos, luego los sintácticos y por último cargar ambos en los archivos correspondientes
@@ -94,5 +95,15 @@ public class Compilador {
             else if (simbolo instanceof SimboloFuncion)
                 System.out.println("Lexema: " + key + ", Tipo de retorno: " + simbolo.getTipo() + ", Categoria: " + simbolo.getCategoria());
             }
+            
+        // IMPRESION DEL ARBOL SINTACTICO
+
+        System.out.println("\n" + "ÁRBOL SINTÁCTICO:");
+
+        if (parser.arbolSintactico != null) {
+            parser.arbolSintactico.imprimirArbol();
+        } else {
+            System.out.println("No se pudo construir el árbol sintáctico debido a errores.");
         }
+    }
 }
