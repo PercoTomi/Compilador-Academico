@@ -15,4 +15,15 @@ public class SimboloFuncion extends Simbolo {
         return getTipo();
     }
 
+    public boolean existeParametro(String nombreParametro) {
+        for (Parametro parametro : listaParametros) {
+            // Obtiene el nombre del parametro (primer campo antes del primer ':') y lo compara con nombreParametro
+            String lexemaCompleto = parametro.getSimbolo().getLexema();
+            String nombreParamActual = lexemaCompleto.substring(0, lexemaCompleto.indexOf(":"));
+            if (nombreParamActual.equals(nombreParametro)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

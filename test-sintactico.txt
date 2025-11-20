@@ -1,0 +1,1 @@
+||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea 8: el parámetro formal 'Y' no existe en la función 'F'

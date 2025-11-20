@@ -105,5 +105,16 @@ public class Compilador {
         } else {
             System.out.println("No se pudo construir el árbol sintáctico debido a errores.");
         }
+
+        // IMPRESION DE TODAS LAS FUNCIONES EN mapaFunciones
+
+        System.out.println("\n" + "MAPA DE FUNCIONES:");
+
+        for (String key : parser.mapaFunciones.keySet()) {
+            System.out.println("Función: " + key);
+            System.out.println("Árbol Sintáctico de la función:");
+            // imprime el arbol de esa key
+            parser.mapaFunciones.get(key).imprimirArbol();
+        }
     }
 }

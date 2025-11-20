@@ -1,9 +1,9 @@
 P {
     long X;
     long Y;
-    if (4L > X) {
-        X := 3L;
-    } else {
-        Y := 5L;
-    } endif;
+    long F (long X) {
+        X:= 5L;
+        return (X);
+    };
+    F(5L->Y);
 }
