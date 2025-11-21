@@ -1,5 +1,6 @@
 import Simbolos.*;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,13 +22,15 @@ public class Lexico {
     private ParserVal yylval; // simbolo referenciado que se devuelve al parser
     private boolean eof = false; // indica si se ha llegado al final del archivo
     private ArrayList<String> erroresLexicos;
+    private ArrayList<String> warnings;
 
 
-    public Lexico(Map<String, Simbolo> tablaDeSimbolos, String path, ArrayList<String> erroresLexicos) {
+    public Lexico(Map<String, Simbolo> tablaDeSimbolos, String path, ArrayList<String> erroresLexicos, ArrayList<String> warnings) {
         this.buffer = new String("");
         this.posicionActual = 0;
         this.tablaDeSimbolos = tablaDeSimbolos;
         this.erroresLexicos = erroresLexicos;
+        this.warnings = warnings;
         cargarMatrices();
         cargarMapas();
         this.lineaActual = 1; // comenzamos en la línea 1
@@ -253,7 +256,7 @@ public class Lexico {
             if (cadena.length() > 20) {
                 String cadenaCompleta = cadena.toString();
                 cadena.setLength(20);
-                System.out.println("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + cadenaCompleta + "' excede el límite de 20 caracteres. Se truncará a: '" + cadena.toString() + "'");
+                warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + cadenaCompleta + "' excede el límite de 20 caracteres. Se truncará a: '" + cadena.toString() + "'");
             }
             posicionActual--;
 
@@ -262,7 +265,7 @@ public class Lexico {
             // Verificación y conversión de minúsculas en el ID
             String lexema = lexemaOriginal.toUpperCase();
             if (!lexema.equals(lexemaOriginal)) {
-                System.out.println("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + lexemaOriginal + "' contenía minúsculas y ha sido convertido a : '" + lexema + "'");
+                warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + lexemaOriginal + "' contenía minúsculas y ha sido convertido a : '" + lexema + "'");
             }
             
             // Verificar si el lexema no está en la tabla de símbolos
@@ -382,7 +385,7 @@ public class Lexico {
             cadena.append(lexema.toLowerCase());
             
             if (!lexema.equals(cadena.toString())) {
-                System.out.println("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - La palabra reservada '" + lexema + "' contenía mayúsculas y ha sido convertido a : '" + cadena.toString() + "'");
+                warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - La palabra reservada '" + lexema + "' contenía mayúsculas y ha sido convertido a : '" + cadena.toString() + "'");
             }
 
 
@@ -438,7 +441,7 @@ public class Lexico {
             String lexema = cadena.toString();
             // Verificar si el lexema no está en la tabla de símbolos
             if(!tablaDeSimbolos.containsKey(lexema)) {
-                    // Si no está, crear un nuevo símbolo float y agregarlo a la tabla
+                    // Si no está, crear un nuevo símbolo String y agregarlo a la tabla
                     Simbolo nuevoSimbolo = new SimboloCteString("String", "CadenaML", lexema, lexema);
                     tablaDeSimbolos.put(lexema, nuevoSimbolo);
                     yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval

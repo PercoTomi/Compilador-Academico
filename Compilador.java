@@ -30,9 +30,13 @@ public class Compilador {
         // Inicialización de los archivos de errores
         Path archivoLexico = null;
         Path archivoSintactico = null;
+        Path archivoSemantico = null;
+        Path archivoWarnings = null;
 
         ArrayList<String> erroresLexicos = new ArrayList<>();
         ArrayList<String> erroresSintacticos = new ArrayList<>();
+        ArrayList<String> erroresSemanticos = new ArrayList<>();
+        ArrayList<String> warnings = new ArrayList<>();
 
         try {
             // Convertir a Path absoluto
@@ -52,20 +56,26 @@ public class Compilador {
             // definir rutas de salida para los archivos de análisis léxico y sintáctico
             archivoLexico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-lexico.txt");
             archivoSintactico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-sintactico.txt");
+            archivoSemantico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-semantico.txt");
+            archivoWarnings = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-warnings.txt");
 
             // Crear los archivos o sobrescribir si ya existen
             Files.write(archivoLexico, new byte[0]);
             Files.write(archivoSintactico, new byte[0]);
+            Files.write(archivoSemantico, new byte[0]);
+            Files.write(archivoWarnings, new byte[0]);
             
             System.out.println("Archivos creados:");
             System.out.println("  - " + archivoLexico);
             System.out.println("  - " + archivoSintactico);
-            
+            System.out.println("  - " + archivoSemantico);
+            System.out.println("  - " + archivoWarnings);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
         
-        Parser parser = new Parser(tablaSimbolos, path, erroresLexicos, erroresSintacticos, arbolSintactico);
+        Parser parser = new Parser(tablaSimbolos, path, erroresLexicos, erroresSintacticos, erroresSemanticos, warnings, arbolSintactico);
         System.out.println(parser.yyparse());
 
         // Imprimir todos los errores léxicos, luego los sintácticos y por último cargar ambos en los archivos correspondientes
@@ -75,8 +85,16 @@ public class Compilador {
         for (String error : erroresSintacticos) {
             System.out.println("Error sintáctico: " + error);
         }
+        for (String error : erroresSemanticos) {
+            System.out.println("Error semántico: " + error);
+        }
+        for (String warning : warnings) {
+            System.out.println("Warning: " + warning);
+        }
         Files.write(archivoLexico, erroresLexicos);
         Files.write(archivoSintactico, erroresSintacticos);
+        Files.write(archivoSemantico, erroresSemanticos);
+        Files.write(archivoWarnings, warnings);
 
         System.out.println("\n" + "TABLA DE SÍMBOLOS:");
 
@@ -102,13 +120,15 @@ public class Compilador {
 
         if (parser.arbolSintactico != null) {
             parser.arbolSintactico.imprimirArbol();
-        } else {
+        } else if (!erroresLexicos.isEmpty() || !erroresSintacticos.isEmpty() || !erroresSemanticos.isEmpty()) {
             System.out.println("No se pudo construir el árbol sintáctico debido a errores.");
+        } else {
+            System.out.println("El árbol sintáctico está vacío.");
         }
 
         // IMPRESION DE TODAS LAS FUNCIONES EN mapaFunciones
 
-        System.out.println("\n" + "MAPA DE FUNCIONES:");
+        System.out.println("\n" + "MAPA DE FUNCIONES [RECORDAR BORRAR EN ENTREGA]:");
 
         for (String key : parser.mapaFunciones.keySet()) {
             System.out.println("Función: " + key);

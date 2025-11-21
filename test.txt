@@ -1,9 +1,4 @@
 P {
     long X;
-    long Y;
-    long F (long X) {
-        X:= 5L;
-        return (X);
-    };
-    F(5L->Y);
+    X:= 4.3+3.3;
 }
