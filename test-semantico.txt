@@ -1,2 +1,0 @@
-ERROR SEMÁNTICO EN LÍNEA 3: Uso incorrecto de constante Float por incompatibilidad de tipos
-ERROR SEMÁNTICO EN LÍNEA 3: Uso incorrecto de constante Float por incompatibilidad de tipos

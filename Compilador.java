@@ -18,7 +18,7 @@ public class Compilador {
         Map<String, Simbolo> tablaSimbolos = new HashMap<>();
         ArbolSintactico arbolSintactico = null;
 
-        String path = "test.txt"; // QUITAR "COMPILADORES/"
+        String path = "test.txt"; 
         
         if (Files.size(Paths.get(path)) == 0) {
             System.err.println("Error: El archivo está vacío");

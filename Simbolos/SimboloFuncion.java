@@ -18,12 +18,28 @@ public class SimboloFuncion extends Simbolo {
     public boolean existeParametro(String nombreParametro) {
         for (Parametro parametro : listaParametros) {
             // Obtiene el nombre del parametro (primer campo antes del primer ':') y lo compara con nombreParametro
-            String lexemaCompleto = parametro.getSimbolo().getLexema();
+            String lexemaCompleto = parametro.getLexema();
+            // X:P:F -> X
             String nombreParamActual = lexemaCompleto.substring(0, lexemaCompleto.indexOf(":"));
             if (nombreParamActual.equals(nombreParametro)) {
                 return true;
             }
         }
         return false;
+    }
+
+    public int getCantidadParametros() {
+        return listaParametros.size();
+    }
+
+    public int getPosParametro(String lexema) {
+        for (int i = 0; i < listaParametros.size(); i++) {
+            Parametro parametro = listaParametros.get(i);
+            String lexemaBaseParam = parametro.getLexema().substring(0, parametro.getLexema().indexOf(":"));
+            if (lexemaBaseParam.equals(lexema)) {
+                return i;
+            }
+        }
+        return -1; // No encontrado
     }
 }

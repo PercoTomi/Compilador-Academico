@@ -1,4 +1,7 @@
 P {
-    long X;
-    X:= 4.3+3.3;
+    long F (long X, long Y, long Z) {
+        return (5L);
+    };
+
+    F(trunc(7.0)->Z, 3L->X, 4L->Y);
 }
