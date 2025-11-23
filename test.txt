@@ -1,7 +1,4 @@
 P {
-    long F (long X, long Y, long Z) {
-        return (5L);
-    };
-
-    F(trunc(7.0)->Z, 3L->X, 4L->Y);
+    long X;
+    do X:=4L; until (X>4L);
 }
