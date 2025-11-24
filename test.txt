@@ -1,4 +1,13 @@
 P {
     long X;
-    do X:=4L; until (X>4L);
+    if (X>3L) {
+        X:= 4L;
+    } else {
+        X:= 5L;
+        if (X>4L) {
+            X:= 7L;
+        } else {
+            X:= 8L;
+        } endif;
+    } endif;
 }

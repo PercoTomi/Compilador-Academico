@@ -92,6 +92,12 @@ public class ArbolSintactico {
         }
     }
 
+    public void adoptarNodoIntermedio (ArbolSintactico nodo) {
+        this.categoria = nodo.getCategoria();
+        this.left = nodo.getLeft();
+        this.right = nodo.getRight();
+    }
+
 }
 
 

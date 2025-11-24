@@ -16,7 +16,9 @@ public class Compilador {
         }*/
 
         Map<String, Simbolo> tablaSimbolos = new HashMap<>();
-        ArbolSintactico arbolSintactico = null;
+        ArbolSintactico arbolSintactico = new ArbolSintactico("Vacio", null, null);
+        Map<String, ArbolSintactico> mapaFunciones = new HashMap<>();
+
 
         String path = "test.txt"; 
         
@@ -26,6 +28,9 @@ public class Compilador {
         }
         
         // TRABAJO DE ARCHIVOS
+
+        // Inicializacion del archivo que contendrá el código assembler
+        Path archivoAssembler = null;
 
         // Inicialización de los archivos de errores
         Path archivoLexico = null;
@@ -58,24 +63,27 @@ public class Compilador {
             archivoSintactico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-sintactico.txt");
             archivoSemantico = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-semantico.txt");
             archivoWarnings = Paths.get(directorioSalida, nombreBaseArchivoFuente + "-warnings.txt");
+            archivoAssembler = Paths.get(directorioSalida, nombreBaseArchivoFuente + ".wat");
 
             // Crear los archivos o sobrescribir si ya existen
             Files.write(archivoLexico, new byte[0]);
             Files.write(archivoSintactico, new byte[0]);
             Files.write(archivoSemantico, new byte[0]);
             Files.write(archivoWarnings, new byte[0]);
+            Files.write(archivoAssembler, new byte[0]);
             
             System.out.println("Archivos creados:");
             System.out.println("  - " + archivoLexico);
             System.out.println("  - " + archivoSintactico);
             System.out.println("  - " + archivoSemantico);
             System.out.println("  - " + archivoWarnings);
+            System.out.println("  - " + archivoAssembler);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
         
-        Parser parser = new Parser(tablaSimbolos, path, erroresLexicos, erroresSintacticos, erroresSemanticos, warnings, arbolSintactico);
+        Parser parser = new Parser(tablaSimbolos, path, erroresLexicos, erroresSintacticos, erroresSemanticos, warnings, arbolSintactico, mapaFunciones);
         System.out.println(parser.yyparse());
 
         // Imprimir todos los errores léxicos, luego los sintácticos y por último cargar ambos en los archivos correspondientes
@@ -118,8 +126,8 @@ public class Compilador {
 
         System.out.println("\n" + "ÁRBOL SINTÁCTICO:");
 
-        if (parser.arbolSintactico != null) {
-            parser.arbolSintactico.imprimirArbol();
+        if (!arbolSintactico.getCategoria().equals("Vacio")) {
+            arbolSintactico.imprimirArbol();
         } else if (!erroresLexicos.isEmpty() || !erroresSintacticos.isEmpty() || !erroresSemanticos.isEmpty()) {
             System.out.println("No se pudo construir el árbol sintáctico debido a errores.");
         } else {
@@ -130,11 +138,25 @@ public class Compilador {
 
         System.out.println("\n" + "MAPA DE FUNCIONES [RECORDAR BORRAR EN ENTREGA]:");
 
-        for (String key : parser.mapaFunciones.keySet()) {
+        for (String key : mapaFunciones.keySet()) {
             System.out.println("Función: " + key);
             System.out.println("Árbol Sintáctico de la función:");
             // imprime el arbol de esa key
-            parser.mapaFunciones.get(key).imprimirArbol();
+            mapaFunciones.get(key).imprimirArbol();
+        }
+
+
+        // GENERACION DE CÓDIGO ASSEMBLER
+        GeneradorDeCodigo generador = new GeneradorDeCodigo(tablaSimbolos, mapaFunciones, arbolSintactico, archivoAssembler);
+        String codigoAssembler;
+        
+        if (!arbolSintactico.getCategoria().equals("Vacio")) {
+            codigoAssembler = generador.generarCodigo();
+            System.out.println("\n" + "CÓDIGO ASSEMBLER GENERADO:");
+            System.out.println(codigoAssembler);
+            //Crea el archivo
+
+            Files.write(archivoAssembler, codigoAssembler.getBytes());
         }
     }
 }

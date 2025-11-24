@@ -18,7 +18,7 @@
 %token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
 
 %%
-prog                        : ID {stringAmbitos.append(":"+((Simbolo)$1.obj).getLexema());} bloque_sentencias {quitarAmbito();} EOF   {if (!error() && $3.obj != null && $3.obj instanceof ArbolSintactico) { arbolSintactico = ((ArbolSintactico)$3.obj);}}
+prog                        : ID {stringAmbitos.append(":"+((Simbolo)$1.obj).getLexema());} bloque_sentencias {quitarAmbito();} EOF   {if (!error() && $3.obj != null && $3.obj instanceof ArbolSintactico) { arbolSintactico.adoptarNodoIntermedio((ArbolSintactico)$3.obj);}}
                             | bloque_sentencias EOF                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa");} 
                             //| ID '{' error ';' listasentencias '}' EOF  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
                             //| ID '{' listasentencias error '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
@@ -112,7 +112,7 @@ sentencia_return            : RETURN '(' expresion ')'                      { Sy
                             ;
 
 asignacion                  : identificador ASIG expresion                                { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación simple");
-                                                                                            if (!error()) { $$ = new ParserVal( new ArbolSintactico("ASIG", new ArbolSintactico(checkearAlcance($1.sval, $1.ival)), (ArbolSintactico)$3.obj) ); }
+                                                                                            if (!error()) { $$ = new ParserVal( new ArbolSintactico("Asig", new ArbolSintactico(checkearAlcance($1.sval, $1.ival)), (ArbolSintactico)$3.obj) ); }
                                                                                           }
                             | listavariables '=' listaconstantes                          { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación múltiple");
                                                                                             if(((ArrayList<Simbolo>)$1.obj).size() >= ((ArrayList<Simbolo>)$3.obj).size() && !error()) {  
@@ -137,10 +137,10 @@ bloque_control_else         : {sinRetIf.push(sinRet);} bloque_control {if(sinRet
                             ;
 
 control                     : IF condicion bloque_control ENDIF                                 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque IF");
-                                                                                                  if (!error()) { $$ = new ParserVal(new ArbolSintactico("If", (ArbolSintactico)$2.obj, new ArbolSintactico("Cuerpo",(ArbolSintactico)$3.obj, null)) ); }
+                                                                                                  if (!error()) { $$ = new ParserVal(new ArbolSintactico("If", (ArbolSintactico)$2.obj, new ArbolSintactico("CuerpoIf",(ArbolSintactico)$3.obj, null)) ); }
                                                                                                 }
                             | IF condicion bloque_control ELSE bloque_control_else ENDIF        { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó un bloque IF-ELSE");
-                                                                                                  if (!error()) { $$ = new ParserVal(new ArbolSintactico("If", (ArbolSintactico)$2.obj, new ArbolSintactico("Cuerpo",(ArbolSintactico)$3.obj, (ArbolSintactico)$5.obj)) ); }  
+                                                                                                  if (!error()) { $$ = new ParserVal(new ArbolSintactico("IfElse", (ArbolSintactico)$2.obj, new ArbolSintactico("CuerpoIfElse",(ArbolSintactico)$3.obj, (ArbolSintactico)$5.obj)) ); }  
                                                                                                 } 
                             | inicio_do bloque_control UNTIL condicion                          { enDo=false;
                                                                                                   System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");
@@ -317,11 +317,11 @@ cabecera_declaracion_lambda : '(' tipo ID ')' { enFunc++;
 
 expresion                   : expresion '+' termino                 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una expresión desde una suma");
                                                                       if (!error()) {
-                                                                        $$ = new ParserVal(new ArbolSintactico("SUM", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj));
+                                                                        $$ = new ParserVal(new ArbolSintactico("Suma", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj));
                                                                       }
                                                                     }      
                             | expresion '-' termino                 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una expresión desde una resta");
-                                                                      if (!error()) { $$ = new ParserVal(new ArbolSintactico("RES", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj)); }
+                                                                      if (!error()) { $$ = new ParserVal(new ArbolSintactico("Resta", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj)); }
                                                                     }
                             | error '+' termino                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '+'"); }
                             | expresion '+' error                   { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '+'"); }
@@ -333,10 +333,10 @@ expresion                   : expresion '+' termino                 { System.out
                             ;
 
 termino                     : termino '*' factor                    { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un término desde una multiplicación");
-                                                                      if (!error()) { $$ = new ParserVal(new ArbolSintactico("MULT", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj)); }
+                                                                      if (!error()) { $$ = new ParserVal(new ArbolSintactico("Multiplicacion", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj)); }
                                                                     }
                             | termino '/' factor                    { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó un término desde una división");
-                                                                      if (!error()) { $$ = new ParserVal(new ArbolSintactico("DIV", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj)); }
+                                                                      if (!error()) { $$ = new ParserVal(new ArbolSintactico("Division", (ArbolSintactico)$1.obj, (ArbolSintactico)$3.obj)); }
                                                                     }
                             | error '*' factor                      { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la izquierda de '*'"); }
                             | termino '*' error                     { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operando a la derecha de '*'"); }
@@ -378,10 +378,10 @@ factor                      : CTE                                   { constanteP
                                                                     }
                             ;
 
-listaconstantes             : listaconstantes ',' CTE               { constantePositiva($3); restriccionCteFloat($3); $$ = $1; ((ArrayList<Simbolo>)$$.obj).add((Simbolo)$3.obj); }
-                            | listaconstantes ',' '-' CTE           { constanteNegativa($4); restriccionCteFloat($4); $$ = $1; ((ArrayList<Simbolo>)$$.obj).add((Simbolo)$4.obj);}
-                            | CTE                                   { constantePositiva($1); restriccionCteFloat($1); $$ = new ParserVal(new ArrayList<Simbolo>()); ((ArrayList<Simbolo>)$$.obj).add((Simbolo)$1.obj);}
-                            | '-' CTE                               { constanteNegativa($2); restriccionCteFloat($2); $$ = new ParserVal(new ArrayList<Simbolo>()); ((ArrayList<Simbolo>)$$.obj).add((Simbolo)$2.obj);}
+listaconstantes             : listaconstantes ',' CTE               { constantePositiva($3); restriccionCteFloat($3); $$ = $1; ((ArrayList<Simbolo>)$$.obj).add((Simbolo)$3.obj); $$.ival = $3.ival; }
+                            | listaconstantes ',' '-' CTE           { constanteNegativa($4); restriccionCteFloat($4); $$ = $1; ((ArrayList<Simbolo>)$$.obj).add((Simbolo)$4.obj); $$.ival = $4.ival; }
+                            | CTE                                   { constantePositiva($1); restriccionCteFloat($1); $$ = new ParserVal(new ArrayList<Simbolo>()); ((ArrayList<Simbolo>)$$.obj).add((Simbolo)$1.obj); $$.ival = $1.ival; }
+                            | '-' CTE                               { constanteNegativa($2); restriccionCteFloat($2); $$ = new ParserVal(new ArrayList<Simbolo>()); ((ArrayList<Simbolo>)$$.obj).add((Simbolo)$2.obj); $$.ival = $2.ival; }
                             | listaconstantes CTE                   { constantePositiva($2); restriccionCteFloat($2); erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); constantePositiva($2); restriccionCteFloat($2); }
                             | listaconstantes '-' CTE               { constanteNegativa($3); restriccionCteFloat($3); erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ',' entre constantes"); constanteNegativa($3); restriccionCteFloat($3); }
                             ;
@@ -389,7 +389,7 @@ listaconstantes             : listaconstantes ',' CTE               { constanteP
 
 %%
 
-public Parser(Map<String, Simbolo> tablaSimbolos, String path, ArrayList<String> erroresLexicos, ArrayList<String> erroresSintacticos, ArrayList<String> erroresSemanticos, ArrayList<String> warnings, ArbolSintactico arbolSintactico){
+public Parser(Map<String, Simbolo> tablaSimbolos, String path, ArrayList<String> erroresLexicos, ArrayList<String> erroresSintacticos, ArrayList<String> erroresSemanticos, ArrayList<String> warnings, ArbolSintactico arbolSintactico, Map<String, ArbolSintactico> mapaFunciones) {
   this.tablaSimbolos = tablaSimbolos;
   this.erroresLexicos = erroresLexicos;
   this.erroresSintacticos = erroresSintacticos;
@@ -397,6 +397,7 @@ public Parser(Map<String, Simbolo> tablaSimbolos, String path, ArrayList<String>
   this.warnings = warnings;
   this.lexer = new Lexico(tablaSimbolos,path, erroresLexicos, warnings);
   this.arbolSintactico = arbolSintactico;
+  this.mapaFunciones = mapaFunciones;
 }
 
 private void yyerror(String s) {
