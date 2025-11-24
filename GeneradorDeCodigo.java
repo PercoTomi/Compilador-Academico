@@ -123,6 +123,24 @@ public class GeneradorDeCodigo {
                     codigoAssembler.append(identacion + ")\n"); // Cierre del bloque else
                 }
                 break;
+            case "DoUntil":
+                contadorControl++;
+                int contadorActualDo = contadorControl;
+                codigoAssembler.append(identacion + "(block $salidaDoUntil" + contadorControl + "\n");
+                identacion += "  ";
+                codigoAssembler.append(identacion + "(loop $loopDoUntil" + contadorControl + "\n");
+                ejecutar(nodo.getRight()); // cuerpo
+                ejecutar(nodo.getLeft()); // condición
+                codigoAssembler.append(identacion + "br_if $loopDoUntil" + contadorActualDo + "\n");
+                codigoAssembler.append(identacion + "br $salidaDoUntil" + contadorActualDo + "\n");
+                codigoAssembler.append(identacion + ")\n"); // Cierre del bloque loop
+                identacion = identacion.substring(2);
+                codigoAssembler.append(identacion + ")\n"); // Cierre del bloque doUntil
+                break;
+            case "Call":
+                ejecutar(nodo.getRight()); // parámetros
+                codigoAssembler.append(identacion + "call $" + nodo.getLeft().getRefSimbolo().getLexema() + "\n");
+                break;
             case "Mayor":
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());

@@ -1,13 +1,10 @@
 P {
     long X;
-    if (X>3L) {
-        X:= 4L;
-    } else {
-        X:= 5L;
-        if (X>4L) {
-            X:= 7L;
-        } else {
-            X:= 8L;
-        } endif;
-    } endif;
+    long Y;
+    long F(long X, long Y) {
+        X:= 1L;
+        Y:= 2L;
+        return (X);
+    };
+    F(Y->Y, 4L+5L->X);
 }

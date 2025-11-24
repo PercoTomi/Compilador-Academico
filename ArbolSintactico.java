@@ -41,6 +41,10 @@ public class ArbolSintactico {
         return right;
     }
 
+    public void setCategoria(String categoria) {
+        this.categoria = categoria;
+    }
+
     public void setUltimoDerecho(ArbolSintactico nuevoDerecho) {
         if(this.right == null) {
             this.right = nuevoDerecho;

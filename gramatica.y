@@ -231,6 +231,7 @@ funcion_lambda              : cabecera_funcion argumento_id_lambda ')'          
                                                                                                                 chequeo_anid_lambda($1.sval, $3);
                                                                                                                 ((ArbolSintactico)$1.obj).setUltimoDerecho( new ArbolSintactico((Simbolo)$2.obj) );
                                                                                                                 $$ = $1;
+                                                                                                                ((ArbolSintactico)$$.obj).setCategoria("CallLambda");
                                                                                                               }
                             | cabecera_funcion CTE ')'                                                        { enParamInvocacion = false;
                                                                                                                 restriccionCteFloat($2);
@@ -239,6 +240,7 @@ funcion_lambda              : cabecera_funcion argumento_id_lambda ')'          
                                                                                                                 System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó la invocación de una función lambda");
                                                                                                                 ((ArbolSintactico)$1.obj).setUltimoDerecho( new ArbolSintactico((Simbolo)$2.obj) );
                                                                                                                 $$ = $1;
+                                                                                                                ((ArbolSintactico)$$.obj).setCategoria("CallLambda");
                                                                                                               }
                             | cabecera_funcion '-' CTE ')'                                                    { enParamInvocacion = false;
                                                                                                                 restriccionCteFloat($3);
@@ -247,6 +249,7 @@ funcion_lambda              : cabecera_funcion argumento_id_lambda ')'          
                                                                                                                 System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó la invocación de una función lambda");
                                                                                                                 ((ArbolSintactico)$1.obj).setUltimoDerecho( new ArbolSintactico((Simbolo)$3.obj) );
                                                                                                                 $$ = $1;
+                                                                                                                ((ArbolSintactico)$$.obj).setCategoria("CallLambda");
                                                                                                               }
                             | cabecera_funcion TRUNC '(' CTE ')' ')'                                          { enParamInvocacion = false;
                                                                                                                 constantePositiva($4);
@@ -254,13 +257,15 @@ funcion_lambda              : cabecera_funcion argumento_id_lambda ')'          
                                                                                                                 System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó la invocación de una función lambda");
                                                                                                                 ((ArbolSintactico)$1.obj).setUltimoDerecho( new ArbolSintactico("Trunc", new ArbolSintactico((Simbolo)$4.obj), null) );
                                                                                                                 $$ = $1;
+                                                                                                                ((ArbolSintactico)$$.obj).setCategoria("CallLambda");
                                                                                                               }
                             | cabecera_funcion TRUNC '(' '-' CTE ')' ')'                                      { enParamInvocacion = false;
                                                                                                                 constanteNegativa($5); 
                                                                                                                 chequeo_anid_lambda($1.sval, $7);
                                                                                                                 System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $7.ival + ": Se detectó la invocación de una función lambda");
                                                                                                                 ((ArbolSintactico)$1.obj).setUltimoDerecho( new ArbolSintactico("Trunc", new ArbolSintactico((Simbolo)$5.obj), null) );
-                                                                                                                $$ = $1;                                                                                                              
+                                                                                                                $$ = $1;
+                                                                                                                ((ArbolSintactico)$$.obj).setCategoria("CallLambda");
                                                                                                               }
                             ;
 
@@ -286,17 +291,17 @@ argumentos_funcion          : listapinvocacion                              { $$
                                                                             }  
                             ;
 
-listapinvocacion            : listapinvocacion ',' pinvocacion              { $$ = $1; ((ArbolSintactico[])$$.obj)[funcionInvocadaActual.getPosParametro($3.sval)] = (ArbolSintactico)$3.obj; } //¿?
+listapinvocacion            : listapinvocacion ',' pinvocacion              { $$ = $1; ((ArbolSintactico[])$$.obj)[funcionInvocadaActual.getPosParametro($3.sval)] = (ArbolSintactico)$3.obj; }
                             | pinvocacion                                   { $$ = new ParserVal(new ArbolSintactico[funcionInvocadaActual.getCantidadParametros()]);
                                                                               ((ArbolSintactico[])$$.obj)[funcionInvocadaActual.getPosParametro($1.sval)] = (ArbolSintactico)$1.obj;
                                                                             } 
                             ;
 
-pinvocacion                 : expresion FLECHA ID                                                           { checkeoParametroDeInvocacion(((Simbolo)$3.obj).getLexema(), $3.ival); 
+pinvocacion                 : expresion FLECHA ID                                                           { checkeoParametroDeInvocacion(((Simbolo)$3.obj).getLexema(), $3.ival, (ArbolSintactico)$1.obj); 
                                                                                                               $$ = new ParserVal( (ArbolSintactico)$1.obj );
                                                                                                               $$.sval = ((Simbolo)$3.obj).getLexema();
                                                                                                             }                                                                     
-                            | cabecera_declaracion_lambda '{'  listasentenciasejecutables '}' FLECHA ID     { checkeoParametroDeInvocacion(((Simbolo)$6.obj).getLexema(), $6.ival);   
+                            | cabecera_declaracion_lambda '{'  listasentenciasejecutables '}' FLECHA ID     { checkeoParametroDeInvocacion(((Simbolo)$6.obj).getLexema(), $6.ival, (ArbolSintactico)$3.obj);   
                                                                                                               finFunc( $6, null);
                                                                                                               mapaFunciones.put( ((Simbolo)$6.obj).getLexema() + ":" + funcionInvocadaActual.getLexema(), (ArbolSintactico)$3.obj);
                                                                                                               tablaSimbolos.remove($1.sval);
@@ -528,7 +533,7 @@ private void chequeo_anid_lambda(String nombreLambda, ParserVal yyval) {
   }
 }
 
-// Esta función toma el Lexema de un identificado con la forma escrita por el programador (puede contener "."), busca y retorna de la tabla de símbolos el símbolo correspondiente, teniendo en cuenta los ámbitos.
+// Esta función toma el Lexema de un identificador con la forma escrita por el programador (puede contener "."), busca y retorna de la tabla de símbolos el símbolo correspondiente, teniendo en cuenta los ámbitos.
 private Simbolo checkearAlcance(String lexema, int nroLinea) {
 
   // AuxSA se vuelve una copia de StringAmbitos para ir recortándola
@@ -578,14 +583,17 @@ private Simbolo checkearAlcance(String lexema, int nroLinea) {
   }
 }
 
-private void checkeoParametroDeInvocacion(String lexemaParametro, int nroLinea) {
+private void checkeoParametroDeInvocacion(String lexemaParametroFormal, int nroLinea, ArbolSintactico arbolParametroReal) {
   if (!error()) {
     String lexemaFuncion = funcionInvocadaActual.getLexema();
-    if (!funcionInvocadaActual.existeParametro(lexemaParametro)) {
-      erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + nroLinea + ": el parámetro formal '" + lexemaParametro + "' no existe en la función '" + lexemaFuncion.substring(0, lexemaFuncion.indexOf(':')) + "'");    
+    Parametro parametroFormal = funcionInvocadaActual.getRefParametro(lexemaParametroFormal);
+    if (parametroFormal == null) {
+      erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + nroLinea + ": el parámetro formal '" + lexemaParametroFormal + "' no existe en la función '" + lexemaFuncion.substring(0, lexemaFuncion.indexOf(':')) + "'");    
+    } else if ((arbolParametroReal.getCategoria() != null || arbolParametroReal.getRefSimbolo().getCategoria().equals("Constante")) && parametroFormal.getPasaje().equals("CVR") ) {
+      erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + nroLinea + ": el parámetro real asociado al parámetro formal '" + lexemaParametroFormal + "' de la función '" + lexemaFuncion.substring(0, lexemaFuncion.indexOf(':')) + "' es una constante u expresión y no puede pasarse por Copia-Valor-Resultado (CVR)");
     }
   }
-  tablaSimbolos.remove(lexemaParametro);
+  tablaSimbolos.remove(lexemaParametroFormal);
 }
 
 private void restriccionCteFloat(ParserVal valCte) {
