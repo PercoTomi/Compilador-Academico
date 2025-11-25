@@ -42,4 +42,20 @@ public class SimboloFuncion extends Simbolo {
         }
         return -1; // No encontrado
     }
+
+    public Parametro getParametroEnPos(int posicion) {
+        if (posicion >= 0 && posicion < listaParametros.size()) {
+            return listaParametros.get(posicion);
+        }
+        return null; // Posición inválida
+    }
+
+    public boolean contieneLambda () {
+        for (Parametro parametro : listaParametros) {
+            if (parametro.getTipo().equals("Lambda")) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

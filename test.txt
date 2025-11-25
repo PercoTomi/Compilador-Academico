@@ -1,10 +1,8 @@
 P {
     long X;
-    long Y;
-    long F(long X, long Y) {
-        X:= 1L;
-        Y:= 2L;
-        return (X);
+    long F (cv long X) {
+        return(X+F(4L->X););
     };
-    F(Y->Y, 4L+5L->X);
+
+    X:= 4L+ F(trunc(4.0)->X);
 }

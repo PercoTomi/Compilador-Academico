@@ -167,15 +167,16 @@
  122         | '-' CTE
  123         | identificador
  124         | funcion
- 125         | TRUNC '(' CTE ')'
- 126         | TRUNC '(' '-' CTE ')'
+ 125         | funcion_lambda
+ 126         | TRUNC '(' CTE ')'
+ 127         | TRUNC '(' '-' CTE ')'
 
- 127  listaconstantes : listaconstantes ',' CTE
- 128                  | listaconstantes ',' '-' CTE
- 129                  | CTE
- 130                  | '-' CTE
- 131                  | listaconstantes CTE
- 132                  | listaconstantes '-' CTE
+ 128  listaconstantes : listaconstantes ',' CTE
+ 129                  | listaconstantes ',' '-' CTE
+ 130                  | CTE
+ 131                  | '-' CTE
+ 132                  | listaconstantes CTE
+ 133                  | listaconstantes '-' CTE
 
 state 0
 	$accept : . prog $end  (0)
@@ -250,11 +251,12 @@ state 2
 	.  error
 
 	funcion  goto 33
-	expresion  goto 34
-	identificador  goto 35
-	condicion  goto 36
-	cuerpocondicion  goto 37
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	expresion  goto 35
+	identificador  goto 36
+	condicion  goto 37
+	cuerpocondicion  goto 38
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -512,9 +514,10 @@ state 25
 	.  error
 
 	funcion  goto 33
+	funcion_lambda  goto 34
 	expresion  goto 65
 	identificador  goto 66
-	cabecera_funcion  goto 38
+	cabecera_funcion  goto 25
 	argumentos_funcion  goto 67
 	argumento_id_lambda  goto 68
 	listapinvocacion  goto 69
@@ -581,8 +584,8 @@ state 29
 
 
 state 30
-	factor : TRUNC . '(' CTE ')'  (125)
-	factor : TRUNC . '(' '-' CTE ')'  (126)
+	factor : TRUNC . '(' CTE ')'  (126)
+	factor : TRUNC . '(' '-' CTE ')'  (127)
 
 	'('  shift 77
 	.  error
@@ -600,10 +603,11 @@ state 31
 	.  error
 
 	funcion  goto 33
-	expresion  goto 34
-	identificador  goto 35
+	funcion_lambda  goto 34
+	expresion  goto 35
+	identificador  goto 36
 	cuerpocondicion  goto 78
-	cabecera_funcion  goto 38
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -622,6 +626,12 @@ state 33
 
 
 state 34
+	factor : funcion_lambda .  (125)
+
+	.  reduce 125
+
+
+state 35
 	cuerpocondicion : expresion . comparador expresion  (71)
 	cuerpocondicion : expresion .  (72)
 	expresion : expresion . '+' termino  (106)
@@ -656,7 +666,7 @@ state 34
 	comparador  goto 88
 
 
-state 35
+state 36
 	identificador : identificador . '.' ID  (86)
 	cabecera_funcion : identificador . '('  (94)
 	factor : identificador .  (123)
@@ -691,7 +701,7 @@ state 35
 	'/'  reduce 123
 
 
-state 36
+state 37
 	control : IF condicion . bloque_control ENDIF  (53)
 	control : IF condicion . bloque_control ELSE bloque_control_else ENDIF  (54)
 	control : IF condicion . bloque_control ELSE bloque_control_else  (56)
@@ -715,7 +725,7 @@ state 36
 	$$5  goto 60
 
 
-state 37
+state 38
 	condicion : cuerpocondicion . ')'  (68)
 	condicion : cuerpocondicion .  (70)
 
@@ -734,29 +744,6 @@ state 37
 	'{'  reduce 70
 	'}'  reduce 70
 	';'  reduce 70
-
-
-state 38
-	funcion : cabecera_funcion . argumentos_funcion ')'  (87)
-
-	error  shift 27
-	ID  shift 28
-	CTE  shift 29
-	TRUNC  shift 30
-	'('  shift 63
-	'-'  shift 32
-	.  error
-
-	funcion  goto 33
-	expresion  goto 65
-	identificador  goto 35
-	cabecera_funcion  goto 38
-	argumentos_funcion  goto 67
-	listapinvocacion  goto 69
-	pinvocacion  goto 70
-	cabecera_declaracion_lambda  goto 71
-	termino  goto 39
-	factor  goto 40
 
 
 state 39
@@ -814,9 +801,10 @@ state 41
 	.  error
 
 	funcion  goto 33
+	funcion_lambda  goto 34
 	expresion  goto 97
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -833,11 +821,12 @@ state 42
 	.  error
 
 	funcion  goto 33
-	expresion  goto 34
-	identificador  goto 35
+	funcion_lambda  goto 34
+	expresion  goto 35
+	identificador  goto 36
 	condicion  goto 98
-	cuerpocondicion  goto 37
-	cabecera_funcion  goto 38
+	cuerpocondicion  goto 38
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -857,9 +846,10 @@ state 43
 	.  error
 
 	funcion  goto 33
+	funcion_lambda  goto 34
 	expresion  goto 101
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -986,9 +976,10 @@ state 54
 	.  error
 
 	funcion  goto 33
+	funcion_lambda  goto 34
 	expresion  goto 105
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -1039,11 +1030,12 @@ state 59
 	.  error
 
 	funcion  goto 33
-	expresion  goto 34
-	identificador  goto 35
+	funcion_lambda  goto 34
+	expresion  goto 35
+	identificador  goto 36
 	condicion  goto 112
-	cuerpocondicion  goto 37
-	cabecera_funcion  goto 38
+	cuerpocondicion  goto 38
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -1089,8 +1081,8 @@ state 61
 state 62
 	funcion_lambda : cabecera_funcion TRUNC . '(' CTE ')' ')'  (91)
 	funcion_lambda : cabecera_funcion TRUNC . '(' '-' CTE ')' ')'  (92)
-	factor : TRUNC . '(' CTE ')'  (125)
-	factor : TRUNC . '(' '-' CTE ')'  (126)
+	factor : TRUNC . '(' CTE ')'  (126)
+	factor : TRUNC . '(' '-' CTE ')'  (127)
 
 	'('  shift 117
 	.  error
@@ -1222,8 +1214,9 @@ state 73
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	termino  goto 129
 	factor  goto 40
 
@@ -1239,8 +1232,9 @@ state 74
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	termino  goto 130
 	factor  goto 40
 
@@ -1255,8 +1249,9 @@ state 75
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	factor  goto 131
 
 
@@ -1270,14 +1265,15 @@ state 76
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	factor  goto 132
 
 
 state 77
-	factor : TRUNC '(' . CTE ')'  (125)
-	factor : TRUNC '(' . '-' CTE ')'  (126)
+	factor : TRUNC '(' . CTE ')'  (126)
+	factor : TRUNC '(' . '-' CTE ')'  (127)
 
 	CTE  shift 133
 	'-'  shift 134
@@ -1359,8 +1355,9 @@ state 86
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	termino  goto 137
 	factor  goto 40
 
@@ -1377,8 +1374,9 @@ state 87
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	termino  goto 139
 	factor  goto 40
 
@@ -1394,9 +1392,10 @@ state 88
 	.  error
 
 	funcion  goto 33
+	funcion_lambda  goto 34
 	expresion  goto 140
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -1462,8 +1461,9 @@ state 93
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	factor  goto 146
 
 
@@ -1479,8 +1479,9 @@ state 94
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	factor  goto 148
 
 
@@ -1496,8 +1497,9 @@ state 95
 	.  error
 
 	funcion  goto 33
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	funcion_lambda  goto 34
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	factor  goto 150
 
 
@@ -1612,13 +1614,13 @@ state 107
 
 
 state 108
-	listaconstantes : CTE .  (129)
+	listaconstantes : CTE .  (130)
 
-	.  reduce 129
+	.  reduce 130
 
 
 state 109
-	listaconstantes : '-' . CTE  (130)
+	listaconstantes : '-' . CTE  (131)
 
 	CTE  shift 157
 	.  error
@@ -1626,10 +1628,10 @@ state 109
 
 state 110
 	asignacion : listavariables '=' listaconstantes .  (44)
-	listaconstantes : listaconstantes . ',' CTE  (127)
-	listaconstantes : listaconstantes . ',' '-' CTE  (128)
-	listaconstantes : listaconstantes . CTE  (131)
-	listaconstantes : listaconstantes . '-' CTE  (132)
+	listaconstantes : listaconstantes . ',' CTE  (128)
+	listaconstantes : listaconstantes . ',' '-' CTE  (129)
+	listaconstantes : listaconstantes . CTE  (132)
+	listaconstantes : listaconstantes . '-' CTE  (133)
 
 	CTE  shift 158
 	','  shift 159
@@ -1659,11 +1661,12 @@ state 111
 	.  error
 
 	funcion  goto 33
-	expresion  goto 34
-	identificador  goto 35
+	funcion_lambda  goto 34
+	expresion  goto 35
+	identificador  goto 36
 	condicion  goto 161
-	cuerpocondicion  goto 37
-	cabecera_funcion  goto 38
+	cuerpocondicion  goto 38
+	cabecera_funcion  goto 25
 	termino  goto 39
 	factor  goto 40
 
@@ -1722,8 +1725,8 @@ state 116
 state 117
 	funcion_lambda : cabecera_funcion TRUNC '(' . CTE ')' ')'  (91)
 	funcion_lambda : cabecera_funcion TRUNC '(' . '-' CTE ')' ')'  (92)
-	factor : TRUNC '(' . CTE ')'  (125)
-	factor : TRUNC '(' . '-' CTE ')'  (126)
+	factor : TRUNC '(' . CTE ')'  (126)
+	factor : TRUNC '(' . '-' CTE ')'  (127)
 
 	CTE  shift 165
 	'-'  shift 166
@@ -1783,9 +1786,10 @@ state 123
 	.  error
 
 	funcion  goto 33
+	funcion_lambda  goto 34
 	expresion  goto 65
-	identificador  goto 35
-	cabecera_funcion  goto 38
+	identificador  goto 36
+	cabecera_funcion  goto 25
 	pinvocacion  goto 170
 	cabecera_declaracion_lambda  goto 71
 	termino  goto 39
@@ -1961,14 +1965,14 @@ state 132
 
 
 state 133
-	factor : TRUNC '(' CTE . ')'  (125)
+	factor : TRUNC '(' CTE . ')'  (126)
 
 	')'  shift 177
 	.  error
 
 
 state 134
-	factor : TRUNC '(' '-' . CTE ')'  (126)
+	factor : TRUNC '(' '-' . CTE ')'  (127)
 
 	CTE  shift 178
 	.  error
@@ -2269,20 +2273,20 @@ state 156
 
 
 state 157
-	listaconstantes : '-' CTE .  (130)
-
-	.  reduce 130
-
-
-state 158
-	listaconstantes : listaconstantes CTE .  (131)
+	listaconstantes : '-' CTE .  (131)
 
 	.  reduce 131
 
 
+state 158
+	listaconstantes : listaconstantes CTE .  (132)
+
+	.  reduce 132
+
+
 state 159
-	listaconstantes : listaconstantes ',' . CTE  (127)
-	listaconstantes : listaconstantes ',' . '-' CTE  (128)
+	listaconstantes : listaconstantes ',' . CTE  (128)
+	listaconstantes : listaconstantes ',' . '-' CTE  (129)
 
 	CTE  shift 190
 	'-'  shift 191
@@ -2290,7 +2294,7 @@ state 159
 
 
 state 160
-	listaconstantes : listaconstantes '-' . CTE  (132)
+	listaconstantes : listaconstantes '-' . CTE  (133)
 
 	CTE  shift 192
 	.  error
@@ -2342,7 +2346,7 @@ state 164
 
 state 165
 	funcion_lambda : cabecera_funcion TRUNC '(' CTE . ')' ')'  (91)
-	factor : TRUNC '(' CTE . ')'  (125)
+	factor : TRUNC '(' CTE . ')'  (126)
 
 	')'  shift 194
 	.  error
@@ -2350,7 +2354,7 @@ state 165
 
 state 166
 	funcion_lambda : cabecera_funcion TRUNC '(' '-' . CTE ')' ')'  (92)
-	factor : TRUNC '(' '-' . CTE ')'  (126)
+	factor : TRUNC '(' '-' . CTE ')'  (127)
 
 	CTE  shift 195
 	.  error
@@ -2451,13 +2455,13 @@ state 176
 
 
 state 177
-	factor : TRUNC '(' CTE ')' .  (125)
+	factor : TRUNC '(' CTE ')' .  (126)
 
-	.  reduce 125
+	.  reduce 126
 
 
 state 178
-	factor : TRUNC '(' '-' CTE . ')'  (126)
+	factor : TRUNC '(' '-' CTE . ')'  (127)
 
 	')'  shift 202
 	.  error
@@ -2556,22 +2560,22 @@ state 189
 
 
 state 190
-	listaconstantes : listaconstantes ',' CTE .  (127)
+	listaconstantes : listaconstantes ',' CTE .  (128)
 
-	.  reduce 127
+	.  reduce 128
 
 
 state 191
-	listaconstantes : listaconstantes ',' '-' . CTE  (128)
+	listaconstantes : listaconstantes ',' '-' . CTE  (129)
 
 	CTE  shift 210
 	.  error
 
 
 state 192
-	listaconstantes : listaconstantes '-' CTE .  (132)
+	listaconstantes : listaconstantes '-' CTE .  (133)
 
-	.  reduce 132
+	.  reduce 133
 
 
 state 193
@@ -2582,20 +2586,20 @@ state 193
 
 state 194
 	funcion_lambda : cabecera_funcion TRUNC '(' CTE ')' . ')'  (91)
-	factor : TRUNC '(' CTE ')' .  (125)
+	factor : TRUNC '(' CTE ')' .  (126)
 
 	')'  shift 211
-	error  reduce 125
-	FLECHA  reduce 125
-	'-'  reduce 125
-	'+'  reduce 125
-	'*'  reduce 125
-	'/'  reduce 125
+	error  reduce 126
+	FLECHA  reduce 126
+	'-'  reduce 126
+	'+'  reduce 126
+	'*'  reduce 126
+	'/'  reduce 126
 
 
 state 195
 	funcion_lambda : cabecera_funcion TRUNC '(' '-' CTE . ')' ')'  (92)
-	factor : TRUNC '(' '-' CTE . ')'  (126)
+	factor : TRUNC '(' '-' CTE . ')'  (127)
 
 	')'  shift 212
 	.  error
@@ -2642,9 +2646,9 @@ state 201
 
 
 state 202
-	factor : TRUNC '(' '-' CTE ')' .  (126)
+	factor : TRUNC '(' '-' CTE ')' .  (127)
 
-	.  reduce 126
+	.  reduce 127
 
 
 state 203
@@ -2723,9 +2727,9 @@ state 209
 
 
 state 210
-	listaconstantes : listaconstantes ',' '-' CTE .  (128)
+	listaconstantes : listaconstantes ',' '-' CTE .  (129)
 
-	.  reduce 128
+	.  reduce 129
 
 
 state 211
@@ -2736,15 +2740,15 @@ state 211
 
 state 212
 	funcion_lambda : cabecera_funcion TRUNC '(' '-' CTE ')' . ')'  (92)
-	factor : TRUNC '(' '-' CTE ')' .  (126)
+	factor : TRUNC '(' '-' CTE ')' .  (127)
 
 	')'  shift 219
-	error  reduce 126
-	FLECHA  reduce 126
-	'-'  reduce 126
-	'+'  reduce 126
-	'*'  reduce 126
-	'/'  reduce 126
+	error  reduce 127
+	FLECHA  reduce 127
+	'-'  reduce 127
+	'+'  reduce 127
+	'*'  reduce 127
+	'/'  reduce 127
 
 
 state 213
@@ -2829,4 +2833,4 @@ state 221
 
 
 37 terminals, 45 nonterminals
-133 grammar rules, 222 states
+134 grammar rules, 222 states

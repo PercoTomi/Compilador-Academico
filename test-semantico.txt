@@ -1,1 +1,0 @@
-ERROR SEMÁNTICO EN LÍNEA 9: el parámetro real asociado al parámetro formal 'X' de la función 'F' es una constante u expresión y no puede pasarse por Copia-Valor-Resultado (CVR)
