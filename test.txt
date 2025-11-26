@@ -1,8 +1,7 @@
 P {
     long X;
-    long F (cv long X) {
-        return(X+F(4L->X););
-    };
-
-    X:= 4L+ F(trunc(4.0)->X);
+    do {
+        X:=X+1L;
+        print (X);
+    } until (X>10L);
 }

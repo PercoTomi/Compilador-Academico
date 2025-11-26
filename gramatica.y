@@ -65,10 +65,9 @@ sentenciaejecutable         : asignacion                                      { 
                             ;
 
 declaracion                 : tipo listaIDs                                   { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables");}
-                            | tipo id_funcion {stringAmbitos.append(":"+((Simbolo)$2.obj).getLexema()); stackTipoFuncActual.push($1.sval); enDeclaracionParam = true;} parametros_declaracion_f {enDeclaracionParam = false; stackParametrosActuales.push(parametrosActuales); parametrosActuales = new ArrayList<>(); enFunc++;} '{' listasentencias '}' {  
-                                                                                                                                                                                                                                                                    finFunc( $8, ((Simbolo)$2.obj) ); 
+                            | tipo id_funcion {String idFuncRaw = ((Simbolo)$2.obj).getLexema(); renombrarVariable($2); stringAmbitos.append(":"+idFuncRaw); stackTipoFuncActual.push($1.sval); enDeclaracionParam = true;} parametros_declaracion_f {enDeclaracionParam = false; stackParametrosActuales.push(parametrosActuales); cambiarASimboloFuncion((Simbolo)$2.obj); parametrosActuales = new ArrayList<>(); enFunc++;} '{' listasentencias '}' {  
+                                                                                                                                                                                                                                                                    finFunc($8); 
                                                                                                                                                                                                                                                                     quitarAmbito(); 
-                                                                                                                                                                                                                                                                    renombrarVariable($2); 
                                                                                                                                                                                                                                                                     System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $8.ival + ": Se detectó una declaración de función");
                                                                                                                                                                                                                                                                     if (!error()) {
                                                                                                                                                                                                                                                                       mapaFunciones.put(((Simbolo)$2.obj).getLexema(), (ArbolSintactico)$7.obj);
@@ -328,7 +327,7 @@ pinvocacion                 : expresion FLECHA ID                               
                                                                                                               }
                                                                                                             }                                                                     
                             | cabecera_declaracion_lambda '{'  listasentenciasejecutables '}' FLECHA ID     { if (!error()) {
-                                                                                                                finFunc( $6, null);
+                                                                                                                finFunc($6);
                                                                                                                 tablaSimbolos.remove($1.sval);
                                                                                                                 checkeoParametroDeInvocacion(((Simbolo)$6.obj).getLexema(), $6.ival, (ArbolSintactico)$3.obj);  
                                                                                                                 $$ = new ParserVal(new ArbolSintactico( "DeclaracionLambda", (ArbolSintactico)$3.obj , null));
@@ -530,7 +529,7 @@ private void finIf(ParserVal yyval) {
   }
 }
 
-private void finFunc(ParserVal yyval, Simbolo simboloID) {
+private void finFunc(ParserVal yyval) {
   if (returnsFunc > 0 && (!huboIfEnFunc || sinRet)) { 
     erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + yyval.ival + ": La función no tiene sentencia return en todos sus caminos de ejecución");
   } else if (returnsFunc < 0) {
@@ -539,10 +538,12 @@ private void finFunc(ParserVal yyval, Simbolo simboloID) {
   enFunc--;
   returnsFunc = 1;
   huboIfEnFunc = false;
+}
 
-  // Creación del símbolo de función
+private void cambiarASimboloFuncion (Simbolo simboloID) {
   if (simboloID != null) {
     tablaSimbolos.remove(simboloID.getLexema());
+    // Creación del símbolo de función
     Simbolo nuevoSimbolo = new SimboloFuncion(stackTipoFuncActual.pop(), "Funcion", simboloID.getLexema(), stackParametrosActuales.pop());
     tablaSimbolos.put(simboloID.getLexema(), nuevoSimbolo);
   }
