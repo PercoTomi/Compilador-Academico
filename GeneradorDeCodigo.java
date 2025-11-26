@@ -51,7 +51,7 @@ public class GeneradorDeCodigo {
         codigoAssembler.append(identacion + "(global $aux_float (mut f64) (f64.const 0.0))\n");
 
         // Mensaje de error para overflow
-        String mensajeError = "Error: Overflow en suma.\n";
+        String mensajeError = "Error: Overflow en la operación.\n";
         overflowErrorLen = mensajeError.getBytes().length;
         overflowErrorOffset = memoryOffset;
         dataSection.append(identacion + "(data (i32.const " + overflowErrorOffset + ") \"" + mensajeError.replace("\n", "\\n") + "\")\n");
@@ -177,6 +177,39 @@ public class GeneradorDeCodigo {
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());
                 codigoAssembler.append(identacion + "i64.sub\n");
+                // --- INICIO CHEQUEO OVERFLOW ---
+                // 1. Guarda el resultado en la variable auxiliar para no perderlo de la pila
+                codigoAssembler.append(identacion + "global.set $aux_overflow\n");
+
+                // 2. Chequo del Limite Superior (> 2147483647)
+                codigoAssembler.append(identacion + "global.get $aux_overflow\n");
+                codigoAssembler.append(identacion + "i64.const 2147483647\n");
+                codigoAssembler.append(identacion + "i64.gt_s\n"); // ¿Es mayor con signo?
+                codigoAssembler.append(identacion + "(if\n");
+                codigoAssembler.append(identacion + "  (then\n");
+                codigoAssembler.append(identacion + "    i32.const " + overflowErrorOffset + "\n");
+                codigoAssembler.append(identacion + "    i32.const " + overflowErrorLen + "\n");
+                codigoAssembler.append(identacion + "    call $print_string\n");
+                codigoAssembler.append(identacion + "    unreachable\n");
+                codigoAssembler.append(identacion + "  )\n");
+                codigoAssembler.append(identacion + ")\n");
+
+                // 3. Chequeo del Limite Inferior (< -2147483648)
+                codigoAssembler.append(identacion + "global.get $aux_overflow\n");
+                codigoAssembler.append(identacion + "i64.const -2147483648\n");
+                codigoAssembler.append(identacion + "i64.lt_s\n"); // ¿Es menor con signo?
+                codigoAssembler.append(identacion + "(if\n");
+                codigoAssembler.append(identacion + "  (then\n");
+                codigoAssembler.append(identacion + "    i32.const " + overflowErrorOffset + "\n");
+                codigoAssembler.append(identacion + "    i32.const " + overflowErrorLen + "\n");
+                codigoAssembler.append(identacion + "    call $print_string\n");
+                codigoAssembler.append(identacion + "    unreachable\n");
+                codigoAssembler.append(identacion + "  )\n");
+                codigoAssembler.append(identacion + ")\n");
+
+                // 4. Se devuelve el resultado a la pila para que el programa continúe
+                codigoAssembler.append(identacion + "global.get $aux_overflow\n");
+                // --- FIN CHEQUEO OVERFLOW ---
                 break;
             case "Multiplicacion":
                 ejecutar(nodo.getLeft());

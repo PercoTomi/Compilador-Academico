@@ -154,8 +154,7 @@ public class Compilador {
             codigoAssembler = generador.generarCodigo();
             System.out.println("\n" + "CÓDIGO ASSEMBLER GENERADO:");
             System.out.println(codigoAssembler);
-            //Crea el archivo
-
+            //Crea el archivo assembler
             Files.write(archivoAssembler, codigoAssembler.getBytes());
         }
     }

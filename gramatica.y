@@ -32,8 +32,11 @@ bloque_sentencias           : '{' listasentencias '}'                   { $$ = $
                             | listasentencias                           {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": faltan ambas llaves del bloque de sentencias");}
                             ;
 
-listasentencias             : listasentencias sentencia                 { if (!error()) { if ($1.obj != null) { ((ArbolSintactico)$1.obj).setUltimoDerecho(new ArbolSintactico("Sentencia", ((ArbolSintactico)$2.obj) , null )); $$ = $1; }
-                                                                                                                                    else if ($2.obj != null) { $$= new ParserVal(new ArbolSintactico("Sentencia", ((ArbolSintactico)$2.obj), null)); } } }
+listasentencias             : listasentencias sentencia                 { if (!error()) {
+                                                                            if ($1.obj != null && $2.obj != null) { ((ArbolSintactico)$1.obj).setUltimoDerecho(new ArbolSintactico("Sentencia", ((ArbolSintactico)$2.obj) , null )); $$ = $1; }
+                                                                            else if ($2.obj != null) { $$= new ParserVal(new ArbolSintactico("Sentencia", ((ArbolSintactico)$2.obj), null)); } 
+                                                                          } 
+                                                                        }
                             | sentencia                                 { if (!error()) { if ($1.obj != null) { $$ = new ParserVal(new ArbolSintactico("Sentencia", ((ArbolSintactico)$1.obj), null)); }} }
                             ;
 
@@ -43,7 +46,8 @@ sentencia                   : sentenciaejecutable ';'                   { $$ = $
                             | declaracion                               {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta ; al final de la declaración");}
                             ;
 
-listasentenciasejecutables  : listasentenciasejecutables sentenciaejecutable ';'  { if (!error()) { ((ArbolSintactico)$1.obj).setUltimoDerecho(new ArbolSintactico("Sentencia", ((ArbolSintactico)$2.obj) , null ));
+listasentenciasejecutables  : listasentenciasejecutables sentenciaejecutable ';'  { if (!error()) {
+                                                                                    ((ArbolSintactico)$1.obj).setUltimoDerecho(new ArbolSintactico("Sentencia", ((ArbolSintactico)$2.obj) , null ));
                                                                                     $$ = $1;
                                                                                     }
                                                                                   }
@@ -563,7 +567,12 @@ private void renombrarVariable(ParserVal yyval) {
   yyval.obj = tablaSimbolos.get(lexemaViejo);
   String lexemaNuevo = lexemaViejo + stringAmbitos.toString();
   ((Simbolo)yyval.obj).setLexema(lexemaNuevo);
-  tablaSimbolos.put(lexemaNuevo, ((Simbolo)yyval.obj));
+  if (tablaSimbolos.containsKey(lexemaNuevo)) {
+    erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + yyval.ival + ": La variable '" + ((Simbolo)yyval.obj).getLexema().substring(0, ((Simbolo)yyval.obj).getLexema().indexOf(":")) + "' ya ha sido declarada en el ámbito actual");
+    yyval.obj = tablaSimbolos.get(lexemaNuevo);
+  } else {
+    tablaSimbolos.put(lexemaNuevo, ((Simbolo)yyval.obj));
+  }
   tablaSimbolos.remove(lexemaViejo);
 }
 

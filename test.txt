@@ -1,7 +1,3 @@
 P {
-    long X;
-    do {
-        X:=X+1L;
-        print (X);
-    } until (X>10L);
+    long F() {return(4L);};
 }

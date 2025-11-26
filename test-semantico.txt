@@ -1,0 +1,1 @@
+ERROR SEMÁNTICO EN LÍNEA 0: La variable 'F' ya ha sido declarada en el ámbito actual
