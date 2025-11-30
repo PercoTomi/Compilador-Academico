@@ -18,9 +18,10 @@ public class Compilador {
         Map<String, Simbolo> tablaSimbolos = new HashMap<>();
         ArbolSintactico arbolSintactico = new ArbolSintactico("Vacio", null, null);
         Map<String, ArbolSintactico> mapaFunciones = new HashMap<>();
+        int funcLambdaDeclaradas = 0;
 
 
-        String path = "test.txt"; 
+        String path = "test.txt";
         
         if (Files.size(Paths.get(path)) == 0) {
             System.err.println("Error: El archivo está vacío");
@@ -38,10 +39,10 @@ public class Compilador {
         Path archivoSemantico = null;
         Path archivoWarnings = null;
 
-        ArrayList<String> erroresLexicos = new ArrayList<>();
-        ArrayList<String> erroresSintacticos = new ArrayList<>();
-        ArrayList<String> erroresSemanticos = new ArrayList<>();
-        ArrayList<String> warnings = new ArrayList<>();
+        ArrayList<String> erroresLexicos;
+        ArrayList<String> erroresSintacticos;
+        ArrayList<String> erroresSemanticos;
+        ArrayList<String> warnings;
 
         try {
             // Convertir a Path absoluto
@@ -83,7 +84,14 @@ public class Compilador {
             e.printStackTrace();
         }
         
-        Parser parser = new Parser(tablaSimbolos, path, erroresLexicos, erroresSintacticos, erroresSemanticos, warnings, arbolSintactico, mapaFunciones);
+        Parser parser = new Parser(tablaSimbolos, path, arbolSintactico, mapaFunciones);
+        erroresLexicos = parser.getErroresLexicos();
+        erroresSintacticos = parser.getErroresSintacticos();
+        erroresSemanticos = parser.getErroresSemanticos();
+        warnings = parser.getWarnings();
+        funcLambdaDeclaradas = parser.getFuncLambdaDeclaradas();
+        
+
         System.out.println(parser.yyparse());
 
         // Imprimir todos los errores léxicos, luego los sintácticos y por último cargar ambos en los archivos correspondientes
@@ -136,7 +144,7 @@ public class Compilador {
 
         // IMPRESION DE TODAS LAS FUNCIONES EN mapaFunciones
 
-        System.out.println("\n" + "MAPA DE FUNCIONES [RECORDAR BORRAR EN ENTREGA]:");
+        System.out.println("\n" + "MAPA DE FUNCIONES [RECORDAR BORRAR EN ENTREGA FINAL]:");
 
         for (String key : mapaFunciones.keySet()) {
             System.out.println("Función: " + key);
@@ -147,14 +155,14 @@ public class Compilador {
 
 
         // GENERACION DE CÓDIGO ASSEMBLER
-        GeneradorDeCodigo generador = new GeneradorDeCodigo(tablaSimbolos, mapaFunciones, arbolSintactico, archivoAssembler);
+        GeneradorDeCodigo generador = new GeneradorDeCodigo(tablaSimbolos, mapaFunciones, arbolSintactico, archivoAssembler, funcLambdaDeclaradas);
         String codigoAssembler;
         
         if (!arbolSintactico.getCategoria().equals("Vacio")) {
             codigoAssembler = generador.generarCodigo();
             System.out.println("\n" + "CÓDIGO ASSEMBLER GENERADO:");
             System.out.println(codigoAssembler);
-            //Crea el archivo assembler
+            //Crea el archivo
             Files.write(archivoAssembler, codigoAssembler.getBytes());
         }
     }

@@ -1,7 +1,8 @@
-import java.util.Map;
 import Simbolos.*;
 import Simbolos.Auxiliares.Parametro;
 import java.nio.file.Path;
+import java.util.Map;
+import java.util.Stack;
 
 public class GeneradorDeCodigo {
     private Map<String, Simbolo> tablaSimbolos;
@@ -10,9 +11,12 @@ public class GeneradorDeCodigo {
     private StringBuilder codigoAssembler;
     private String identacion = "  ";
     private int contadorControl = 0;
-    private StringBuilder stringAuxCVR = new StringBuilder();
+    private Stack<StringBuilder> stackStringAuxCVR = new Stack<>();
     private int contadorPosParametro = -1;
     private String lexemaFuncionInvocadaActual = null;
+    private int funcLambdaDeclaradas = 0;
+    private int contadorLambda = 0;
+    private int marcadorSeccionLambdas = 0;
 
     private StringBuilder dataSection = new StringBuilder();
     private int memoryOffset = 0;
@@ -26,11 +30,12 @@ public class GeneradorDeCodigo {
     private int recursiveCallErrorOffset = 0;
     private int recursiveCallErrorLen = 0;
 
-    public GeneradorDeCodigo(Map<String, Simbolo> tablaSimbolos, Map<String, ArbolSintactico> mapaFunciones, ArbolSintactico arbolSintactico, Path archivoAssembler) {
+    public GeneradorDeCodigo(Map<String, Simbolo> tablaSimbolos, Map<String, ArbolSintactico> mapaFunciones, ArbolSintactico arbolSintactico, Path archivoAssembler, int funcLambdaDeclaradas) {
         this.tablaSimbolos = tablaSimbolos;
         this.mapaFunciones = mapaFunciones;
         this.arbolSintactico = arbolSintactico;
         this.codigoAssembler = new StringBuilder();
+        this.funcLambdaDeclaradas = funcLambdaDeclaradas;
     }
 
     public String generarCodigo() {
@@ -45,10 +50,17 @@ public class GeneradorDeCodigo {
         // Import de la función para imprimir strings (recibe offset y length)
         codigoAssembler.append(identacion + "(import \"env\" \"print_string\" (func $print_string (param i32 i32)))\n");
 
+        codigoAssembler.append(identacion + ";; variables auxiliares para chequeo de errores \n");
         // Variable global auxiliar para chequear overflow sin perder el valor de la pila
         codigoAssembler.append(identacion + "(global $aux_overflow (mut i64) (i64.const 0))\n");
         // Variable global auxiliar para chequear decimales en Trunc
         codigoAssembler.append(identacion + "(global $aux_float (mut f64) (f64.const 0.0))\n");
+
+        codigoAssembler.append(identacion + ";; Declaraciones de tipo de función lambda y de su tabla \n");
+        // Declaración del tipo funcLambda
+        codigoAssembler.append(identacion + "(type $funcLambda (func (param i64) (result i64)))\n");
+        // Tabla para funciones lambda
+        codigoAssembler.append(identacion + "(table " + funcLambdaDeclaradas + " funcref)\n");
 
         // Mensaje de error para overflow
         String mensajeError = "Error: Overflow en la operación.\n";
@@ -69,36 +81,32 @@ public class GeneradorDeCodigo {
         dataSection.append(identacion + "(data (i32.const " + recursiveCallErrorOffset + ") \"" + mensajeErrorRecursion.replace("\n", "\\n") + "\")\n");
         memoryOffset += recursiveCallErrorLen;
 
+        
         // Por cada variable en la tabla de Simbolos, generar código de declaración en webAssembly
-        boolean variableProgInsertada = true;
+        codigoAssembler.append(identacion + ";; Declaración de variables globales \n");
         for (String key : tablaSimbolos.keySet()) {
             Simbolo simbolo = tablaSimbolos.get(key);
-            
-            if (variableProgInsertada)  
-                variableProgInsertada = false; 
-            else if (simbolo.getCategoria().equals("Identificador")) 
+            if (simbolo.getCategoria().equals("Identificador")) 
                 codigoAssembler.append(identacion + "(global $" + simbolo.getLexema() + " (mut i64) (i64.const 0))\n");                
         }
+        
+        codigoAssembler.append(identacion+ ";; Espacio reservado para la declaración de funciones Lambda\n");
+        marcadorSeccionLambdas = codigoAssembler.length();
 
         // Por cada función en el mapa de funciones, generar código de declaración de función en webAssembly
+        codigoAssembler.append(identacion + ";; Declaración de funciones estándar\n");
         for (String key : mapaFunciones.keySet()) {
             ArbolSintactico arbolFuncion = mapaFunciones.get(key);
             SimboloFuncion simboloFuncion = (SimboloFuncion) tablaSimbolos.get(key);
-            if (!simboloFuncion.contieneLambda()) {
-                codigoAssembler.append(identacion + "(func $" + key + " ");
-                // Parámetros
-                for (int i = 1; i <= simboloFuncion.getCantidadParametros(); i++) {
-                    codigoAssembler.append("(param i64) ");
-                }
-                codigoAssembler.append(" (result i64) \n");
-                identacion += "  ";
-                // Cuerpo de la función
-                ejecutar(arbolFuncion);
-                identacion = identacion.substring(2);
+            codigoAssembler.append(identacion + "(func $" + key + " (result i64) \n");
+            identacion += "  ";
+            // Cuerpo de la función
+            ejecutar(arbolFuncion);
+            identacion = identacion.substring(2);
 
-                codigoAssembler.append(identacion + ")\n"); // Cierre de la función
-                codigoAssembler.append(identacion + "(global $flag_funcion_activa_" + key + " (mut i32) (i32.const 0))\n");
-            }
+            codigoAssembler.append(identacion + ")\n"); // Cierre de la función
+            codigoAssembler.append(identacion + "(global $flag_funcion_activa_" + key + " (mut i32) (i32.const 0))\n");
+
         }
             
         codigoAssembler.append(identacion + "(func $main (export \"main\") \n"); // Inicio de la función main
@@ -140,6 +148,7 @@ public class GeneradorDeCodigo {
                 ejecutar(nodo.getRight());
                 codigoAssembler.append(identacion + "i64.add\n");
                 // --- INICIO CHEQUEO OVERFLOW ---
+                codigoAssembler.append(identacion + ";; INICIO CHEQUEO OVERFLOW \n");
                 // 1. Guarda el resultado en la variable auxiliar para no perderlo de la pila
                 codigoAssembler.append(identacion + "global.set $aux_overflow\n");
 
@@ -170,14 +179,16 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + ")\n");
 
                 // 4. Se devuelve el resultado a la pila para que el programa continúe
+                codigoAssembler.append(identacion + ";; FIN CHEQUEO OVERFLOW \n");
+
                 codigoAssembler.append(identacion + "global.get $aux_overflow\n");
-                // --- FIN CHEQUEO OVERFLOW ---
                 break;
             case "Resta":
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());
                 codigoAssembler.append(identacion + "i64.sub\n");
                 // --- INICIO CHEQUEO OVERFLOW ---
+                codigoAssembler.append(identacion + ";; INICIO CHEQUEO OVERFLOW \n");
                 // 1. Guarda el resultado en la variable auxiliar para no perderlo de la pila
                 codigoAssembler.append(identacion + "global.set $aux_overflow\n");
 
@@ -208,8 +219,9 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + ")\n");
 
                 // 4. Se devuelve el resultado a la pila para que el programa continúe
+                codigoAssembler.append(identacion + ";; FIN CHEQUEO OVERFLOW \n");
+
                 codigoAssembler.append(identacion + "global.get $aux_overflow\n");
-                // --- FIN CHEQUEO OVERFLOW ---
                 break;
             case "Multiplicacion":
                 ejecutar(nodo.getLeft());
@@ -276,7 +288,10 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + ")\n"); // Cierre del bloque doUntil
                 break;
             case "Call":
+                stackStringAuxCVR.push(new StringBuilder());
                 lexemaFuncionInvocadaActual = nodo.getLeft().getRefSimbolo().getLexema();
+
+                codigoAssembler.append(identacion + ";; Inicio de chequeo de llamada recursiva\n");
                 codigoAssembler.append(identacion + "global.get $flag_funcion_activa_" + lexemaFuncionInvocadaActual + "\n");
                 codigoAssembler.append(identacion + "(if\n");
                 codigoAssembler.append(identacion + "  (then\n");
@@ -286,10 +301,18 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "    unreachable\n");
                 codigoAssembler.append(identacion + "  )\n");
                 codigoAssembler.append(identacion + ")\n");
+                codigoAssembler.append(identacion + ";; Fin de chequeo de llamada recursiva\n");
                 codigoAssembler.append(identacion + "i32.const 1\n");
                 codigoAssembler.append(identacion + "global.set $flag_funcion_activa_" + lexemaFuncionInvocadaActual + "\n");
+                
+                // Se guarda el contadorPosParametro actual y se resetea para la nueva función (en caso de llamados anidados por declaración de funciones Lambda)
+                int contadorPosParametroActual = contadorPosParametro;
+                contadorPosParametro = -1;
                 ejecutar(nodo.getRight()); // parámetros
                 codigoAssembler.append(identacion + "call $" + nodo.getLeft().getRefSimbolo().getLexema() + "\n");
+
+                contadorPosParametro = contadorPosParametroActual;
+                StringBuilder stringAuxCVR = stackStringAuxCVR.pop();
                 if (stringAuxCVR.length() > 0) {
                     codigoAssembler.append(stringAuxCVR.toString());
                     stringAuxCVR.setLength(0); // Resetear la variable auxiliar después de usarla
@@ -297,19 +320,57 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "i32.const 0\n");
                 codigoAssembler.append(identacion + "global.set $flag_funcion_activa_" + lexemaFuncionInvocadaActual + "\n");
                 break;
+            case "CallLambda":
+                // Deja en la pila el argumento de la función lambda
+                ejecutar(nodo.getRight());
+                // Apila el índice de la función lambda en la tabla y lo pasa a i32
+                codigoAssembler.append(identacion + "global.get $" + nodo.getLeft().getRefSimbolo().getLexema() + "\n");
+                codigoAssembler.append(identacion + "i32.wrap_i64\n");
+
+                // Invoca la función lambda indirectamente
+                codigoAssembler.append(identacion + "call_indirect (type $funcLambda)\n");
+                break;
             case "ListaParametros":
                 contadorPosParametro++;
                 ejecutar(nodo.getLeft());
                 SimboloFuncion funcionInvocada = (SimboloFuncion) tablaSimbolos.get(lexemaFuncionInvocadaActual);
                 Parametro parametroFormal = funcionInvocada.getParametroEnPos(contadorPosParametro);
+                codigoAssembler.append(identacion + "global.set $" + parametroFormal.getLexema() + "\n");
                 if (parametroFormal.getPasaje().equals("CVR")) {
-                    stringAuxCVR.append(identacion + "global.get $" + parametroFormal.getLexema() + "\n");
-                    stringAuxCVR.append(identacion + "global.set $" + nodo.getLeft().getRefSimbolo().getLexema() + "\n");
+                    stackStringAuxCVR.peek().append(identacion + "global.get $" + parametroFormal.getLexema() + "\n");
+                    if (nodo.getLeft().getRefSimbolo() != null) 
+                        stackStringAuxCVR.peek().append(identacion + "global.set $" + nodo.getLeft().getRefSimbolo().getLexema() + "\n");
+                    else 
+                        stackStringAuxCVR.peek().append(identacion + "local.set 0\n");
                 }
                 if (nodo.getRight() != null) {
                     ejecutar(nodo.getRight());
                 }
                 contadorPosParametro--;
+                break;
+            case "DeclaracionLambda":
+                int inicioMarcador = codigoAssembler.length();
+                codigoAssembler.append("  (func $lambda_func_" + contadorLambda + " (param i64) (result i64) \n");
+                int contadorLambdaActual = contadorLambda;
+                contadorLambda++;
+                String identacionAux = identacion;
+                identacion = "    ";
+                ejecutar(nodo.getLeft());
+                identacion = identacionAux;
+                codigoAssembler.append("  )\n");
+                codigoAssembler.append(" (elem declare func $lambda_func_" + contadorLambdaActual+ ")\n");
+                int finMarcador = codigoAssembler.length();
+                String funcionLambda = codigoAssembler.substring(inicioMarcador, finMarcador);
+                codigoAssembler.delete(inicioMarcador, finMarcador);
+                codigoAssembler.insert(marcadorSeccionLambdas, funcionLambda);
+                marcadorSeccionLambdas += funcionLambda.length();
+                
+                // Insertar la función lambda en la tabla
+                codigoAssembler.append(identacion + ";; Registrar lambda en tabla\n");
+                codigoAssembler.append(identacion + "i32.const " + contadorLambdaActual + "   ;; Indice en la tabla\n");
+                codigoAssembler.append(identacion + "ref.func $lambda_func_" + contadorLambdaActual + " ;; Referencia a la funcion\n");
+                codigoAssembler.append(identacion + "table.set 0 \n");
+                codigoAssembler.append(identacion + "i32.const " + contadorLambdaActual + "   ;; Indice en la tabla a guardar en parámetro formal\n");                
                 break;
             case "Return":
                 ejecutar(nodo.getLeft());
@@ -374,7 +435,7 @@ public class GeneradorDeCodigo {
                 ArbolSintactico hijo = nodo.getLeft();
                 Simbolo simboloHijo = hijo.getRefSimbolo();
                 
-                if (simboloHijo.getCategoria().equals("CadenaML")) {
+                if (simboloHijo != null && simboloHijo.getCategoria().equals("CadenaML")) {
                     String textoRaw = simboloHijo.getLexema();
                     String textoEscapado = textoRaw
                         .replace("\\", "\\\\")
@@ -430,7 +491,10 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "i64.eq\n");
                 break;
             case "":    // Es un nodo hoja
-                if (nodo.getRefSimbolo().getCategoria().equals("Constante")) { // Es una constante
+                if (nodo.getRefSimbolo() == null) {
+                    codigoAssembler.append(identacion + "local.get 0\n");
+                }
+                else if (nodo.getRefSimbolo().getCategoria().equals("Constante")) { // Es una constante
                     codigoAssembler.append(identacion + "i64.const " + ((SimboloLong)nodo.getRefSimbolo()).getValor() + "\n");
                 }
                 else { // Es un identificador

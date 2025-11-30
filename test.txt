@@ -1,3 +1,10 @@
 P {
-    long F() {return(4L);};
+   long A;
+
+   long F(lambda L) {
+      return(L(4L));
+   };
+
+   print (1L+F( (long B) {print(B); return(1L);} ));
+
 }

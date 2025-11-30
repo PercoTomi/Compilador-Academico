@@ -90,14 +90,16 @@ listaparametros             : listaparametros ',' parametro_formal
 
 parametro_formal            : CV tipo ID                             { ((Simbolo)$3.obj).setTipo($2.sval);
                                                                        renombrarVariable($3); 
+                                                                       if ($2.sval.equals("Lambda")) {
+                                                                          erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $2.ival + ": el tipo 'Lambda' no puede utilizar la semántica de pasaje por Copia-Valor (CV)");
+                                                                       }
                                                                        parametrosActuales.add(new Parametro(((Simbolo)$3.obj), "CV"));
                                                                      }                          
                             | tipo ID                                { ((Simbolo)$2.obj).setTipo($1.sval);
                                                                        renombrarVariable($2);
                                                                        if ($1.sval.equals("Lambda")) {
                                                                           parametrosActuales.add(new Parametro(((Simbolo)$2.obj), "CV"));
-                                                                       }
-                                                                       parametrosActuales.add(new Parametro(((Simbolo)$2.obj), "CVR"));
+                                                                       } else parametrosActuales.add(new Parametro(((Simbolo)$2.obj), "CVR"));
                                                                      }
                             | CV tipo                                { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del parámetro");
                                                                      }
@@ -331,6 +333,7 @@ pinvocacion                 : expresion FLECHA ID                               
                                                                                                               }
                                                                                                             }                                                                     
                             | cabecera_declaracion_lambda '{'  listasentenciasejecutables '}' FLECHA ID     { if (!error()) {
+                                                                                                                funcLambdaDeclaradas++;
                                                                                                                 finFunc($6);
                                                                                                                 tablaSimbolos.remove($1.sval);
                                                                                                                 checkeoParametroDeInvocacion(((Simbolo)$6.obj).getLexema(), $6.ival, (ArbolSintactico)$3.obj);  
@@ -436,12 +439,8 @@ listaconstantes             : listaconstantes ',' CTE               { constanteP
 
 %%
 
-public Parser(Map<String, Simbolo> tablaSimbolos, String path, ArrayList<String> erroresLexicos, ArrayList<String> erroresSintacticos, ArrayList<String> erroresSemanticos, ArrayList<String> warnings, ArbolSintactico arbolSintactico, Map<String, ArbolSintactico> mapaFunciones) {
+public Parser(Map<String, Simbolo> tablaSimbolos, String path, ArbolSintactico arbolSintactico, Map<String, ArbolSintactico> mapaFunciones) {
   this.tablaSimbolos = tablaSimbolos;
-  this.erroresLexicos = erroresLexicos;
-  this.erroresSintacticos = erroresSintacticos;
-  this.erroresSemanticos = erroresSemanticos;
-  this.warnings = warnings;
   this.lexer = new Lexico(tablaSimbolos,path, erroresLexicos, warnings);
   this.arbolSintactico = arbolSintactico;
   this.mapaFunciones = mapaFunciones;
@@ -453,6 +452,27 @@ private void yyerror(String s) {
 
 private boolean error() {
   return (!erroresLexicos.isEmpty() || !erroresSintacticos.isEmpty() || !erroresSemanticos.isEmpty());
+}
+
+
+public ArrayList<String> getErroresSintacticos(){
+  return erroresSintacticos;
+}
+
+public ArrayList<String> getErroresSemanticos(){
+  return erroresSemanticos;
+}
+
+public ArrayList<String> getErroresLexicos(){
+  return erroresLexicos;
+}
+
+public ArrayList<String> getWarnings(){
+  return warnings;
+}
+
+public int getFuncLambdaDeclaradas(){
+  return funcLambdaDeclaradas;
 }
 
 private void constanteNegativa(ParserVal valCte) {

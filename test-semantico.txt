@@ -1,1 +1,1 @@
-ERROR SEMÁNTICO EN LÍNEA 0: La variable 'F' ya ha sido declarada en el ámbito actual
+ERROR SEMÁNTICO EN LÍNEA 8: La variable 'lambda:B' no ha sido declarada en el ámbito actual y tampoco está al alcance
