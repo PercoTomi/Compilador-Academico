@@ -1,10 +1,19 @@
 P {
-   long A;
 
-   long F(lambda L) {
-      return(L(4L));
+   long F(lambda L1) {
+      return(L1(4L));
    };
 
-   print (1L+F( (long B) {print(B); return(1L);} ));
+   long H(lambda L1) {
+      return(L1(4L));
+   };
+
+   print (1L+F( (long B) {
+         print(B);
+         B:= H((long C){return(1000L);} -> L1);
+         print(B);
+         return(B);
+      }->L1
+      ));
 
 }

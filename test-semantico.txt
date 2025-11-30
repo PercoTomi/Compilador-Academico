@@ -1,1 +1,0 @@
-ERROR SEMÁNTICO EN LÍNEA 8: La variable 'lambda:B' no ha sido declarada en el ámbito actual y tampoco está al alcance

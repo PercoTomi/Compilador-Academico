@@ -141,7 +141,10 @@ public class GeneradorDeCodigo {
                 break;
             case "Asig":
                 ejecutar(nodo.getRight());
-                codigoAssembler.append(identacion +"global.set $" + nodo.getLeft().getRefSimbolo().getLexema() + "\n");
+                if (nodo.getLeft().getRefSimbolo() != null)
+                    codigoAssembler.append(identacion +"global.set $" + nodo.getLeft().getRefSimbolo().getLexema() + "\n");
+                else 
+                    codigoAssembler.append(identacion +"local.set 0\n");
                 break;
             case "Suma":
                 ejecutar(nodo.getLeft());
@@ -349,7 +352,6 @@ public class GeneradorDeCodigo {
                 contadorPosParametro--;
                 break;
             case "DeclaracionLambda":
-                int inicioMarcador = codigoAssembler.length();
                 codigoAssembler.append("  (func $lambda_func_" + contadorLambda + " (param i64) (result i64) \n");
                 int contadorLambdaActual = contadorLambda;
                 contadorLambda++;
@@ -358,19 +360,15 @@ public class GeneradorDeCodigo {
                 ejecutar(nodo.getLeft());
                 identacion = identacionAux;
                 codigoAssembler.append("  )\n");
-                codigoAssembler.append(" (elem declare func $lambda_func_" + contadorLambdaActual+ ")\n");
+                codigoAssembler.append("  (elem (i32.const " + contadorLambdaActual + ") $lambda_func_" + contadorLambdaActual+ ")\n");
                 int finMarcador = codigoAssembler.length();
+                int inicioMarcador = codigoAssembler.indexOf("  (func $lambda_func_" + contadorLambdaActual);
                 String funcionLambda = codigoAssembler.substring(inicioMarcador, finMarcador);
                 codigoAssembler.delete(inicioMarcador, finMarcador);
                 codigoAssembler.insert(marcadorSeccionLambdas, funcionLambda);
                 marcadorSeccionLambdas += funcionLambda.length();
                 
-                // Insertar la función lambda en la tabla
-                codigoAssembler.append(identacion + ";; Registrar lambda en tabla\n");
-                codigoAssembler.append(identacion + "i32.const " + contadorLambdaActual + "   ;; Indice en la tabla\n");
-                codigoAssembler.append(identacion + "ref.func $lambda_func_" + contadorLambdaActual + " ;; Referencia a la funcion\n");
-                codigoAssembler.append(identacion + "table.set 0 \n");
-                codigoAssembler.append(identacion + "i32.const " + contadorLambdaActual + "   ;; Indice en la tabla a guardar en parámetro formal\n");                
+                codigoAssembler.append(identacion + "i64.const " + contadorLambdaActual + "   ;; Indice en la tabla a guardar en parámetro formal\n");                
                 break;
             case "Return":
                 ejecutar(nodo.getLeft());

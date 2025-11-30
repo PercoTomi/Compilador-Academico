@@ -353,8 +353,12 @@ cabecera_declaracion_lambda : '(' tipo ID ')' { enFunc++;
                                                   erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $4.ival + ": el tipo 'Lambda' no puede ser utilizado como el tipo del parámetro en la declaración de funciones Lambda");
                                                 }
                                                 String lexema = ((SimboloLong)$3.obj).getLexema();
-                                                tablaSimbolos.put(lexema,new SimboloLong("Long", "Identificador", "lambda:" + lexema, 0L));
-                                                $$ = new ParserVal(lexema);
+                                                if (tablaSimbolos.containsKey("lambda:" + lexema)) {
+                                                  erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $3.ival + ": la variable '" + lexema + "' ya ha sido declarada");
+                                                }
+                                                tablaSimbolos.remove(lexema);
+                                                tablaSimbolos.put("lambda:" + lexema,new SimboloLong("Long", "Identificador", "lambda:" + lexema, 0L));
+                                                $$ = new ParserVal("lambda:" + lexema);
                                               }
                             ;                           
 

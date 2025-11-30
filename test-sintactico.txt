@@ -1,1 +1,0 @@
-||================ ANALIZADOR SINTÁCTICO: Error: syntax error

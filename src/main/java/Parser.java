@@ -730,7 +730,7 @@ final static String yyrule[] = {
 "listaconstantes : listaconstantes '-' CTE",
 };
 
-//#line 441 "gramatica.y"
+//#line 445 "gramatica.y"
 
 public Parser(Map<String, Simbolo> tablaSimbolos, String path, ArbolSintactico arbolSintactico, Map<String, ArbolSintactico> mapaFunciones) {
   this.tablaSimbolos = tablaSimbolos;
@@ -1672,7 +1672,6 @@ case 99:
                                                                                                                 tablaSimbolos.remove(val_peek(5).sval);
                                                                                                                 checkeoParametroDeInvocacion(((Simbolo)val_peek(0).obj).getLexema(), val_peek(0).ival, (ArbolSintactico)val_peek(3).obj);  
                                                                                                                 yyval = new ParserVal(new ArbolSintactico( "DeclaracionLambda", (ArbolSintactico)val_peek(3).obj , null));
-                                                                                                                ((ArbolSintactico)yyval.obj).imprimirArbol();
                                                                                                                 yyval.sval = ((Simbolo)val_peek(0).obj).getLexema();
                                                                                                               }
                                                                                                             }
@@ -1704,12 +1703,16 @@ case 105:
                                                   erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + val_peek(0).ival + ": el tipo 'Lambda' no puede ser utilizado como el tipo del parámetro en la declaración de funciones Lambda");
                                                 }
                                                 String lexema = ((SimboloLong)val_peek(1).obj).getLexema();
-                                                tablaSimbolos.put(lexema,new SimboloLong("Long", "Identificador", "lambda:" + lexema, 0L));
-                                                yyval = new ParserVal(lexema);
+                                                if (tablaSimbolos.containsKey("lambda:" + lexema)) {
+                                                  erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + val_peek(1).ival + ": la variable '" + lexema + "' ya ha sido declarada");
+                                                }
+                                                tablaSimbolos.remove(lexema);
+                                                tablaSimbolos.put("lambda:" + lexema,new SimboloLong("Long", "Identificador", "lambda:" + lexema, 0L));
+                                                yyval = new ParserVal("lambda:" + lexema);
                                               }
 break;
 case 106:
-//#line 361 "gramatica.y"
+//#line 365 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(1).ival + ": Se detectó una expresión desde una suma");
                                                                       if (!error()) {
                                                                         yyval = new ParserVal(new ArbolSintactico("Suma", (ArbolSintactico)val_peek(2).obj, (ArbolSintactico)val_peek(0).obj));
@@ -1717,103 +1720,103 @@ case 106:
                                                                     }
 break;
 case 107:
-//#line 366 "gramatica.y"
+//#line 370 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(1).ival + ": Se detectó una expresión desde una resta");
                                                                       if (!error()) { yyval = new ParserVal(new ArbolSintactico("Resta", (ArbolSintactico)val_peek(2).obj, (ArbolSintactico)val_peek(0).obj)); }
                                                                     }
 break;
 case 108:
-//#line 369 "gramatica.y"
+//#line 373 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la izquierda de '+'"); }
 break;
 case 109:
-//#line 370 "gramatica.y"
+//#line 374 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la derecha de '+'"); }
 break;
 case 110:
-//#line 371 "gramatica.y"
+//#line 375 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la izquierda de '-'"); }
 break;
 case 111:
-//#line 372 "gramatica.y"
+//#line 376 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la derecha de '-'"); }
 break;
 case 112:
-//#line 373 "gramatica.y"
+//#line 377 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(0).ival + ": Se detectó una expresión desde un término");    
                                                                       yyval = val_peek(0);
                                                                     }
 break;
 case 113:
-//#line 378 "gramatica.y"
+//#line 382 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(1).ival + ": Se detectó un término desde una multiplicación");
                                                                       if (!error()) { yyval = new ParserVal(new ArbolSintactico("Multiplicacion", (ArbolSintactico)val_peek(2).obj, (ArbolSintactico)val_peek(0).obj)); }
                                                                     }
 break;
 case 114:
-//#line 381 "gramatica.y"
+//#line 385 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(1).ival + ": Se detectó un término desde una división");
                                                                       if (!error()) { yyval = new ParserVal(new ArbolSintactico("Division", (ArbolSintactico)val_peek(2).obj, (ArbolSintactico)val_peek(0).obj)); }
                                                                     }
 break;
 case 115:
-//#line 384 "gramatica.y"
+//#line 388 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la izquierda de '*'"); }
 break;
 case 116:
-//#line 385 "gramatica.y"
+//#line 389 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la derecha de '*'"); }
 break;
 case 117:
-//#line 386 "gramatica.y"
+//#line 390 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la izquierda de '/'"); }
 break;
 case 118:
-//#line 387 "gramatica.y"
+//#line 391 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta operando a la derecha de '/'"); }
 break;
 case 119:
-//#line 388 "gramatica.y"
+//#line 392 "gramatica.y"
 { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(2).ival + ": falta operador entre operandos o falta de comparador en condición"); }
 break;
 case 120:
-//#line 389 "gramatica.y"
+//#line 393 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(0).ival + ": Se detectó un término desde un factor");
                                                                       yyval = val_peek(0);
                                                                     }
 break;
 case 121:
-//#line 394 "gramatica.y"
+//#line 398 "gramatica.y"
 { constantePositiva(val_peek(0)); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(0).ival + ": Se detectó un factor desde una constante");
                                                                       restriccionCteFloat(val_peek(0));
                                                                       if (!error()) { yyval = new ParserVal(new ArbolSintactico((Simbolo)val_peek(0).obj)); }
                                                                     }
 break;
 case 122:
-//#line 398 "gramatica.y"
+//#line 402 "gramatica.y"
 { constanteNegativa(val_peek(0)); System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(0).ival + ": Se detectó un factor desde una constante negativa");
                                                                       restriccionCteFloat(val_peek(0));
                                                                       if (!error()) { yyval = new ParserVal(new ArbolSintactico((Simbolo)val_peek(0).obj)); }
                                                                     }
 break;
 case 123:
-//#line 402 "gramatica.y"
+//#line 406 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(0).ival + ": Se detectó un factor desde un identificador");
                                                                       if (!error()) { yyval = new ParserVal(new ArbolSintactico(checkearAlcance(val_peek(0).sval, val_peek(0).ival))); }
                                                                     }
 break;
 case 124:
-//#line 405 "gramatica.y"
+//#line 409 "gramatica.y"
 { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(0).ival + ": Se detectó un factor desde una función");
                                                                       yyval = val_peek(0);
                                                                     }
 break;
 case 125:
-//#line 408 "gramatica.y"
+//#line 412 "gramatica.y"
 { if(enFunc==0) {erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + val_peek(0).ival + ": Invocacion de funcion lambda fuera de una función");} else {yyval = val_peek(0);}}
 break;
 case 126:
-//#line 409 "gramatica.y"
+//#line 413 "gramatica.y"
 { constantePositiva(val_peek(1)); 
                                                                       if (enParamInvocacion) {
                                                                         System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(3).ival + ": Se detectó la función Trunc en uno de los parámetros reales de la invocación");
@@ -1826,7 +1829,7 @@ case 126:
                                                                     }
 break;
 case 127:
-//#line 419 "gramatica.y"
+//#line 423 "gramatica.y"
 { constanteNegativa(val_peek(1)); 
                                                                       if (enParamInvocacion) {
                                                                         System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + val_peek(4).ival + ": Se detectó la función Trunc en uno de los parámetros reales de la invocación");
@@ -1839,30 +1842,30 @@ case 127:
                                                                     }
 break;
 case 128:
-//#line 431 "gramatica.y"
+//#line 435 "gramatica.y"
 { constantePositiva(val_peek(0)); restriccionCteFloat(val_peek(0)); yyval = val_peek(2); ((ArrayList<Simbolo>)yyval.obj).add((Simbolo)val_peek(0).obj); yyval.ival = val_peek(0).ival; }
 break;
 case 129:
-//#line 432 "gramatica.y"
+//#line 436 "gramatica.y"
 { constanteNegativa(val_peek(0)); restriccionCteFloat(val_peek(0)); yyval = val_peek(3); ((ArrayList<Simbolo>)yyval.obj).add((Simbolo)val_peek(0).obj); yyval.ival = val_peek(0).ival; }
 break;
 case 130:
-//#line 433 "gramatica.y"
+//#line 437 "gramatica.y"
 { constantePositiva(val_peek(0)); restriccionCteFloat(val_peek(0)); yyval = new ParserVal(new ArrayList<Simbolo>()); ((ArrayList<Simbolo>)yyval.obj).add((Simbolo)val_peek(0).obj); yyval.ival = val_peek(0).ival; }
 break;
 case 131:
-//#line 434 "gramatica.y"
+//#line 438 "gramatica.y"
 { constanteNegativa(val_peek(0)); restriccionCteFloat(val_peek(0)); yyval = new ParserVal(new ArrayList<Simbolo>()); ((ArrayList<Simbolo>)yyval.obj).add((Simbolo)val_peek(0).obj); yyval.ival = val_peek(0).ival; }
 break;
 case 132:
-//#line 435 "gramatica.y"
+//#line 439 "gramatica.y"
 { constantePositiva(val_peek(0)); restriccionCteFloat(val_peek(0)); erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(1).ival + ": falta ',' entre constantes"); constantePositiva(val_peek(0)); restriccionCteFloat(val_peek(0)); }
 break;
 case 133:
-//#line 436 "gramatica.y"
+//#line 440 "gramatica.y"
 { constanteNegativa(val_peek(0)); restriccionCteFloat(val_peek(0)); erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + val_peek(2).ival + ": falta ',' entre constantes"); constanteNegativa(val_peek(0)); restriccionCteFloat(val_peek(0)); }
 break;
-//#line 1763 "Parser.java"
+//#line 1767 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

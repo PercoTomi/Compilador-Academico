@@ -85,14 +85,15 @@ public class Compilador {
         }
         
         Parser parser = new Parser(tablaSimbolos, path, arbolSintactico, mapaFunciones);
+        
+        
+        System.out.println(parser.yyparse());
+        
         erroresLexicos = parser.getErroresLexicos();
         erroresSintacticos = parser.getErroresSintacticos();
         erroresSemanticos = parser.getErroresSemanticos();
         warnings = parser.getWarnings();
         funcLambdaDeclaradas = parser.getFuncLambdaDeclaradas();
-        
-
-        System.out.println(parser.yyparse());
 
         // Imprimir todos los errores léxicos, luego los sintácticos y por último cargar ambos en los archivos correspondientes
         for (String error : erroresLexicos) {
@@ -155,6 +156,7 @@ public class Compilador {
 
 
         // GENERACION DE CÓDIGO ASSEMBLER
+        
         GeneradorDeCodigo generador = new GeneradorDeCodigo(tablaSimbolos, mapaFunciones, arbolSintactico, archivoAssembler, funcLambdaDeclaradas);
         String codigoAssembler;
         
