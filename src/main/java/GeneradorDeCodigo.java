@@ -278,8 +278,8 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "(loop $loopDoUntil" + contadorControl + "\n");
                 ejecutar(nodo.getRight()); // cuerpo
                 ejecutar(nodo.getLeft()); // condición
-                codigoAssembler.append(identacion + "br_if $loopDoUntil" + contadorActualDo + "\n");
-                codigoAssembler.append(identacion + "br $salidaDoUntil" + contadorActualDo + "\n");
+                codigoAssembler.append(identacion + "br_if $salidaDoUntil" + contadorActualDo + "\n");
+                codigoAssembler.append(identacion + "br $loopDoUntil" + contadorActualDo + "\n");
                 codigoAssembler.append(identacion + ")\n"); // Cierre del bloque loop
                 identacion = identacion.substring(2);
                 codigoAssembler.append(identacion + ")\n"); // Cierre del bloque doUntil
@@ -429,7 +429,7 @@ public class GeneradorDeCodigo {
                 Simbolo simboloHijo = hijo.getRefSimbolo();
                 
                 if (simboloHijo != null && simboloHijo.getCategoria().equals("CadenaML")) {
-                    String textoRaw = simboloHijo.getLexema();
+                    String textoRaw = ((SimboloCteString)simboloHijo).getValor();
                     String textoEscapado = textoRaw
                         .replace("\\", "\\\\")
                         .replace("\"", "\\\"")
@@ -456,32 +456,32 @@ public class GeneradorDeCodigo {
             case "Mayor":
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());
-                codigoAssembler.append(identacion + "i64.le_s\n");
+                codigoAssembler.append(identacion + "i64.gt_s\n");
                 break;
             case "Menor":
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());
-                codigoAssembler.append(identacion + "i64.ge_s\n");
+                codigoAssembler.append(identacion + "i64.lt_s\n");
                 break;
             case "MayorIgual":
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());
-                codigoAssembler.append(identacion + "i64.lt_s\n");
+                codigoAssembler.append(identacion + "i64.ge_s\n");
                 break;
             case "MenorIgual":
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());
-                codigoAssembler.append(identacion + "i64.gt_s\n");
+                codigoAssembler.append(identacion + "i64.le_s\n");
                 break;
             case "Igual":
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());
-                codigoAssembler.append(identacion + "i64.ne\n");
+                codigoAssembler.append(identacion + "i64.eq\n");
                 break;
             case "Distinto":
                 ejecutar(nodo.getLeft());
                 ejecutar(nodo.getRight());
-                codigoAssembler.append(identacion + "i64.eq\n");
+                codigoAssembler.append(identacion + "i64.ne\n");
                 break;
             case "":    // Es un nodo hoja
                 if (nodo.getRefSimbolo() == null) {

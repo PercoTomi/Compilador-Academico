@@ -127,7 +127,7 @@ public class Lexico {
         };
 
         this.matrizIndicesAS = new int[][] {
-            {0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 11, 11, 11, 0, 100, 3, 0, 11, 100, 0, 0, 100,11},
+            {0, 0, 0, 3, 3, 3, 0, 0, 0, 0, 11, 11, 11, 0, 100, 3, 0, 0, 100, 0, 0, 100,11},
             {0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1,1},
             {101, 101, 101, 101, 101, 101, 101, 6, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101, 101,101},
             {4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4},
@@ -438,11 +438,13 @@ public class Lexico {
     public class AS9 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
+            cadena.append(charLeido);
             String lexema = cadena.toString();
             // Verificar si el lexema no está en la tabla de símbolos
             if(!tablaDeSimbolos.containsKey(lexema)) {
+                    String valorSinAmpersand = lexema.substring(1, lexema.length() - 1); // Remover el ampersand inicial y final
                     // Si no está, crear un nuevo símbolo String y agregarlo a la tabla
-                    Simbolo nuevoSimbolo = new SimboloCteString("String", "CadenaML", lexema, lexema);
+                    Simbolo nuevoSimbolo = new SimboloCteString("String", "CadenaML", lexema, valorSinAmpersand);
                     tablaDeSimbolos.put(lexema, nuevoSimbolo);
                     yylval.obj = nuevoSimbolo; // asignar el símbolo creado a yylval
                 } else {

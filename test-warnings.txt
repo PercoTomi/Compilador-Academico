@@ -1,2 +1,0 @@
-||---------------- ANALIZADOR LÉXICO: Warning en línea 28 - El identificador 'COMPARARYDEVOLVERMAYOR' excede el límite de 20 caracteres. Se truncará a: 'COMPARARYDEVOLVERMAY'
-||---------------- ANALIZADOR LÉXICO: Warning en línea 42 - El identificador 'COMPARARYDEVOLVERMAYOR' excede el límite de 20 caracteres. Se truncará a: 'COMPARARYDEVOLVERMAY'

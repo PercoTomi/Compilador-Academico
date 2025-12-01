@@ -1,0 +1,1 @@
+ERROR SEMÁNTICO EN LÍNEA 3: No está permitida la invocación de funciones sin utilizar su retorno

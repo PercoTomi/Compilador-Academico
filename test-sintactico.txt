@@ -1,0 +1,2 @@
+||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea 3: No se especifica el parametro formal al que corresponde el parámetro real
+||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea 3: falta ; al final de la sentencia ejecutable
