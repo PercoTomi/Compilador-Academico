@@ -11,15 +11,28 @@ public class Compilador {
     public static void main(String[] args) throws Exception {
         /*if (args.length == 0) {
             System.err.println("Error: Debes proporcionar la ruta del archivo como argumento.");
-            System.err.println("Uso: java -jar Compilador.jar <ruta_archivo>");
+            System.err.println("Uso: java -jar Compilador.jar <ruta_archivo> [--verbose|-v]");
             System.exit(1);
+        }
+
+        String path = args[0];*/
+        
+        // Verificar si el usuario quiere modo verbose
+        boolean verbose = false;
+        /*if (args.length >= 2) {
+            if (args[1].equals("--verbose") || args[1].equals("-v")) {
+                verbose = true;
+            } else {
+                System.err.println("Error: Argumento no reconocido: " + args[1]);
+                System.err.println("Uso: java -jar Compilador.jar <ruta_archivo> [--verbose|-v]");
+                System.exit(1);
+            }
         }*/
 
         Map<String, Simbolo> tablaSimbolos = new HashMap<>();
         ArbolSintactico arbolSintactico = new ArbolSintactico("Vacio", null, null);
         Map<String, ArbolSintactico> mapaFunciones = new HashMap<>();
         int funcLambdaDeclaradas = 0;
-
 
         String path = "test.txt";
         
@@ -85,10 +98,12 @@ public class Compilador {
         }
         
         Parser parser = new Parser(tablaSimbolos, path, arbolSintactico, mapaFunciones);
-        
+        if (verbose) {
+            parser.setVerbose(true);
+        }
         
         System.out.println(parser.yyparse());
-        
+
         erroresLexicos = parser.getErroresLexicos();
         erroresSintacticos = parser.getErroresSintacticos();
         erroresSemanticos = parser.getErroresSemanticos();

@@ -23,6 +23,7 @@ public class Lexico {
     private boolean eof = false; // indica si se ha llegado al final del archivo
     private ArrayList<String> erroresLexicos;
     private ArrayList<String> warnings;
+    private boolean verbose = false; // Variable para controlar los prints
 
 
     public Lexico(Map<String, Simbolo> tablaDeSimbolos, String path, ArrayList<String> erroresLexicos, ArrayList<String> warnings) {
@@ -49,6 +50,10 @@ public class Lexico {
         return true; // si se cargó correctamente
     }
     
+    public void setVerbose(boolean verbose) {
+        this.verbose = verbose;
+    }
+
     public int yylex(ParserVal yylval) {
         this.yylval = yylval; // actualizar la referencia de yylval
         int estadoActual = 0; // resetear al estado inicial
@@ -95,13 +100,13 @@ public class Lexico {
             }
         }
         if (idToken == 257) 
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: ID, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
+            if (verbose) System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: ID, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
         else if (idToken == 258) 
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: CTE, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
+            if (verbose) System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: CTE, Lexema: " + cadena.toString() + " , Línea: " + lineaActual);
         else if (idToken == 0)
-            System.out.println("||---------------- ANALIZADOR LÉXICO: FIN DE ARCHIVO ALCANZADO");
+            if (verbose) System.out.println("||---------------- ANALIZADOR LÉXICO: FIN DE ARCHIVO ALCANZADO");
         else if (idToken != 277)
-            System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: " + cadena.toString() + " , Línea: " + lineaActual);
+            if (verbose) System.out.println("||---------------- ANALIZADOR LÉXICO: TOKEN IDENTIFICADO - idToken: " + idToken + ", Categoria: " + cadena.toString() + " , Línea: " + lineaActual);
         return idToken;
     }
 
