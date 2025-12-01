@@ -102,8 +102,11 @@ public class GeneradorDeCodigo {
             identacion += "  ";
             // Cuerpo de la función
             ejecutar(arbolFuncion);
+            // Se añade unreachable para que WebAssembly no tire error al existir funciones sin return general pero con return en todos sus caminos
+            codigoAssembler.append(identacion + "unreachable\n");
             identacion = identacion.substring(2);
 
+        
             codigoAssembler.append(identacion + ")\n"); // Cierre de la función
             codigoAssembler.append(identacion + "(global $flag_funcion_activa_" + key + " (mut i32) (i32.const 0))\n");
 
@@ -237,44 +240,35 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "i64.div_s\n");
                 break;
             case "If":
-                contadorControl++;
-                codigoAssembler.append(identacion + "(block $then" + contadorControl + "\n");
-                identacion += "  ";
                 ejecutar(nodo.getLeft()); // condición
-                codigoAssembler.append(identacion + "br_if $then" + contadorControl + "\n");
+                codigoAssembler.append(identacion + "(if \n");
+                identacion += "  ";
                 ejecutar(nodo.getRight()); // cuerpo
+                identacion = identacion.substring(2);
+                codigoAssembler.append(identacion + ") \n");
                 break;
             case "IfElse":
-                contadorControl++;
-                codigoAssembler.append(identacion + "(block $else" + contadorControl + "\n");
-                identacion += "  ";
-                codigoAssembler.append(identacion + "(block $then" + contadorControl + "\n");
-                identacion += "  ";
                 ejecutar(nodo.getLeft()); // condición
-                codigoAssembler.append(identacion + "br_if $then" + contadorControl + "\n");
+                codigoAssembler.append(identacion + "(if \n");
+                identacion += "  ";
                 ejecutar(nodo.getRight()); // cuerpo
+                identacion = identacion.substring(2);
+                codigoAssembler.append(identacion + ") \n");
                 break;
             case "CuerpoIf":
                 ejecutar(nodo.getLeft());
-                identacion = identacion.substring(2);
-                codigoAssembler.append(identacion + ")\n"); // Cierre del bloque then
-                if (nodo.getRight() != null) {
-                    ejecutar(nodo.getRight());
-                    identacion = identacion.substring(2);
-                    codigoAssembler.append(identacion + ")\n"); // Cierre del bloque else
-                }
                 break;
             case "CuerpoIfElse":
-                int contadorActual = contadorControl;
-                ejecutar(nodo.getLeft());
-                codigoAssembler.append(identacion + "br $else" + contadorActual + "\n");
+                codigoAssembler.append(identacion + "(then \n");
+                identacion += "  ";
+                ejecutar(nodo.getLeft()); // sentencias del then
                 identacion = identacion.substring(2);
-                codigoAssembler.append(identacion + ")\n"); // Cierre del bloque then
-                if (nodo.getRight() != null) {
-                    ejecutar(nodo.getRight());
-                    identacion = identacion.substring(2);
-                    codigoAssembler.append(identacion + ")\n"); // Cierre del bloque else
-                }
+                codigoAssembler.append(identacion + ") \n");
+                codigoAssembler.append(identacion + "(else \n");
+                identacion += "  ";
+                ejecutar(nodo.getRight()); // sentencias del else
+                identacion = identacion.substring(2);
+                codigoAssembler.append(identacion + ") \n");
                 break;
             case "DoUntil":
                 contadorControl++;
@@ -372,6 +366,7 @@ public class GeneradorDeCodigo {
                 break;
             case "Return":
                 ejecutar(nodo.getLeft());
+                codigoAssembler.append(identacion + "return\n");
                 break;
             case "Trunc":
                 // 1. Cargar la constante float en la pila

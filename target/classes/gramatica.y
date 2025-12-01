@@ -128,6 +128,7 @@ asignacion                  : identificador ASIG expresion                      
                                                                                             if (!error()) { $$ = new ParserVal( new ArbolSintactico("Asig", new ArbolSintactico(checkearAlcance($1.sval, $1.ival)), (ArbolSintactico)$3.obj) ); }
                                                                                           }
                             | listavariables '=' listaconstantes                          { System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación múltiple");
+                            
                                                                                             if(((ArrayList<Simbolo>)$1.obj).size() >= ((ArrayList<Simbolo>)$3.obj).size() && !error()) {  
                                                                                               $$ = new ParserVal(generarAsigMultiple((ArrayList<Simbolo>)$1.obj, (ArrayList<Simbolo>)$3.obj));
                                                                                             }
@@ -294,7 +295,7 @@ funcion_lambda              : cabecera_funcion argumento_id_lambda ')'          
                                                                                                               }
                             ;
 
-argumento_id_lambda         : identificador                                                     {$$ = new ParserVal(checkearAlcance($1.sval, $1.ival).getLexema() );} 
+argumento_id_lambda         : identificador                                                     {$$ = new ParserVal(checkearAlcance($1.sval, $1.ival) );} 
                             ;
 
 cabecera_funcion            : identificador '('                                                 { enParamInvocacion = true; 
