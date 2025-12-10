@@ -1,0 +1,56 @@
+PROGRAMACOMPLETO
+{
+    long A, B, C, RESULTADO;
+    
+    A := 10L;
+    B := 20L;
+    
+    long FACTORIAL(cv long N)
+    {
+        long ACUM, I;
+        ACUM := 1L;
+        I := 1L;
+        do
+        {
+            ACUM := ACUM * I;
+            I := I + 1L;
+        }
+        until (I > N);
+        return(ACUM);
+    };
+    
+    long APLICAROPERACION(cv long VALOR, lambda OP)
+    {
+        return(OP(VALOR));
+    };
+    
+    long COMPARARYDEVOLVERMAYOR(long X, long Y)
+    {
+        if (X >= Y)
+            return(X);
+        else
+            return(Y);
+        endif;
+    };
+    
+    print(&Factorial de 5:&);
+    RESULTADO := FACTORIAL(5L -> N);
+    print(RESULTADO);
+    
+    print(&Mayor entre A y B:&);
+    RESULTADO := COMPARARYDEVOLVERMAYOR(A -> X, B -> Y);
+    print(RESULTADO);
+    
+    print(&Lambda duplicar:&);
+    RESULTADO := APLICAROPERACION(15L -> VALOR, (long X) { return(X * 2L); } -> OP);
+    print(RESULTADO);
+    
+    print(&Lambda cuadrado:&);
+    RESULTADO := APLICAROPERACION(7L -> VALOR, (long X) { return(X * X); } -> OP);
+    print(RESULTADO);
+    
+    A, B, C = 100L, 200L, 300L;
+    print(A);
+    print(B);
+    print(C);
+}

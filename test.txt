@@ -1,0 +1,19 @@
+PARAM {
+
+    long SUMA(long A, long B) { 
+
+                  A := 3L;
+
+                                                      return (A);
+
+    };
+
+ 
+
+    long A;
+
+                  A := SUMA(4L -> A, 5L -> B);
+
+  
+
+}

@@ -1,0 +1,45 @@
+PROGRAMAANIDAMIENTO
+{
+    long I, J, K;
+    I := 1L;
+    
+    print(&IF anidado dentro de DO-UNTIL&);
+    do
+    {
+        print(&NUEVA ITERACIÓN DEL DO - VALOR DE "I" A CONTINUACIÓN&);
+        print(I);
+        if (I > 5L)
+        {
+            print(&Mayor que 5&);
+            if (I > 8L)
+                print(&Mayor que 8&);
+            else
+                print(&Entre 5 y 8&);
+            endif;
+        }
+        else
+            print(&Menor o igual a 5&);
+        endif;
+        I := I + 1L;
+    }
+    until (I > 10L);
+    
+    print(&DO-UNTIL anidado dentro de IF&);
+    J := 0L;
+    if (J < 10L)
+    {
+        do
+        {
+            J := J + 1L;
+            K := 0L;
+            do
+            {
+                K := K + 1L;
+                print(K);
+            }
+            until (K >= 3L);
+        }
+        until (J >= 2L);
+    }
+    endif;
+}

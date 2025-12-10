@@ -1,0 +1,22 @@
+PROGRAMAALCANCE
+{
+    long RESULTADO;
+    
+    long FUNCION1(cv long X)
+    {
+        long VARLOCAL;
+        VARLOCAL := X * 2L;
+        return(VARLOCAL);
+    };
+    
+    long FUNCION2(cv long Y)
+    {
+        long VARLOCAL;
+        VARLOCAL := Y + 10L;
+        
+        @ ERROR: Acceso a variable de otro ámbito
+        RESULTADO := FUNCION1.VARLOCAL;
+        
+        return(VARLOCAL);
+    };
+}

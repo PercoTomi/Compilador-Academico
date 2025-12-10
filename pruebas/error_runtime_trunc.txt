@@ -1,0 +1,14 @@
+PROGRAMATRUNC
+{
+    long RESULTADO;
+    
+    @ Función auxiliar que recibe un parámetro y lo retorna
+    long FUNCIONAUX(cv long PARAM)
+    {
+        return(PARAM);
+    };
+    
+    @ Error en tiempo de ejecución: Pérdida de precisión al truncar
+    @ El valor 3.14 tiene parte decimal, por lo que TRUNC debería dar error
+    RESULTADO := FUNCIONAUX(trunc(3.14) -> PARAM);
+}

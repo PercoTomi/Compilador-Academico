@@ -1,0 +1,14 @@
+PROGRAMARECURSIVO
+{
+    long RESULTADO;
+    
+    @ Error en tiempo de ejecución: Llamada recursiva no permitida
+    
+    long FACTORIAL(cv long N)
+    {
+        @ Esto debería fallar dado que la función se llama a sí misma
+        return(N * FACTORIAL(N-1L->N));
+    };
+    
+    RESULTADO := FACTORIAL(5L->N);
+}

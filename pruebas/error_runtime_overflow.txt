@@ -1,0 +1,8 @@
+PROGRAMARUNTIMEERRORS
+{
+    long A, RESULTADO;
+    
+    @ Error en tiempo de ejecución: Overflow en suma
+    A := 2147483647L;
+    RESULTADO := A + 1L;
+}
