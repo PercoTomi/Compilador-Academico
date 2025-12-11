@@ -57,8 +57,8 @@ public class GeneradorDeCodigo {
         codigoAssembler.append(identacion + "(global $aux_float (mut f64) (f64.const 0.0))\n");
 
         codigoAssembler.append(identacion + ";; Declaraciones de tipo de función lambda y de su tabla \n");
-        // Declaración del tipo funcLambda
-        codigoAssembler.append(identacion + "(type $funcLambda (func (param i64) (result i64)))\n");
+        // Declaración del tipo funcLambda 
+        codigoAssembler.append(identacion + "(type $funcLambda (func (param i64)))\n");
         // Tabla para funciones lambda
         codigoAssembler.append(identacion + "(table " + funcLambdaDeclaradas + " funcref)\n");
 
@@ -158,9 +158,9 @@ public class GeneradorDeCodigo {
                 // 1. Guarda el resultado en la variable auxiliar para no perderlo de la pila
                 codigoAssembler.append(identacion + "global.set $aux_overflow\n");
 
-                // 2. Chequo del Limite Superior (> 2147483647)
+                // 2. Chequo del Limite Superior (> INT32_MAX)
                 codigoAssembler.append(identacion + "global.get $aux_overflow\n");
-                codigoAssembler.append(identacion + "i64.const 2147483647\n");
+                codigoAssembler.append(identacion + "i64.const " + Compilador.INT32_MAX + "\n");
                 codigoAssembler.append(identacion + "i64.gt_s\n"); // ¿Es mayor con signo?
                 codigoAssembler.append(identacion + "(if\n");
                 codigoAssembler.append(identacion + "  (then\n");
@@ -171,9 +171,9 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "  )\n");
                 codigoAssembler.append(identacion + ")\n");
 
-                // 3. Chequeo del Limite Inferior (< -2147483648)
+                // 3. Chequeo del Limite Inferior (< INT32_MIN)
                 codigoAssembler.append(identacion + "global.get $aux_overflow\n");
-                codigoAssembler.append(identacion + "i64.const -2147483648\n");
+                codigoAssembler.append(identacion + "i64.const " + Compilador.INT32_MIN + "\n");
                 codigoAssembler.append(identacion + "i64.lt_s\n"); // ¿Es menor con signo?
                 codigoAssembler.append(identacion + "(if\n");
                 codigoAssembler.append(identacion + "  (then\n");
@@ -198,9 +198,9 @@ public class GeneradorDeCodigo {
                 // 1. Guarda el resultado en la variable auxiliar para no perderlo de la pila
                 codigoAssembler.append(identacion + "global.set $aux_overflow\n");
 
-                // 2. Chequo del Limite Superior (> 2147483647)
+                // 2. Chequo del Limite Superior (> INT32_MAX)
                 codigoAssembler.append(identacion + "global.get $aux_overflow\n");
-                codigoAssembler.append(identacion + "i64.const 2147483647\n");
+                codigoAssembler.append(identacion + "i64.const " + Compilador.INT32_MAX + "\n");
                 codigoAssembler.append(identacion + "i64.gt_s\n"); // ¿Es mayor con signo?
                 codigoAssembler.append(identacion + "(if\n");
                 codigoAssembler.append(identacion + "  (then\n");
@@ -211,9 +211,9 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "  )\n");
                 codigoAssembler.append(identacion + ")\n");
 
-                // 3. Chequeo del Limite Inferior (< -2147483648)
+                // 3. Chequeo del Limite Inferior (< INT32_MIN)
                 codigoAssembler.append(identacion + "global.get $aux_overflow\n");
-                codigoAssembler.append(identacion + "i64.const -2147483648\n");
+                codigoAssembler.append(identacion + "i64.const " + Compilador.INT32_MIN + "\n");
                 codigoAssembler.append(identacion + "i64.lt_s\n"); // ¿Es menor con signo?
                 codigoAssembler.append(identacion + "(if\n");
                 codigoAssembler.append(identacion + "  (then\n");
@@ -350,7 +350,7 @@ public class GeneradorDeCodigo {
                 contadorPosParametro--;
                 break;
             case "DeclaracionLambda":
-                codigoAssembler.append("  (func $lambda_func_" + contadorLambda + " (param i64) (result i64) \n");
+                codigoAssembler.append("  (func $lambda_func_" + contadorLambda + " (param i64) \n");
                 int contadorLambdaActual = contadorLambda;
                 contadorLambda++;
                 String identacionAux = identacion;
@@ -399,9 +399,9 @@ public class GeneradorDeCodigo {
                 // 5. Si no hubo error, recuperar el valor
 
                 // --- INICIO CHEQUEO OVERFLOW TRUNC ---
-                // Chequeo del Limite Superior (> 2147483647.0)
+                // Chequeo del Limite Superior (> INT32_MAX.0)
                 codigoAssembler.append(identacion + "global.get $aux_float\n");
-                codigoAssembler.append(identacion + "f64.const 2147483647.0\n");
+                codigoAssembler.append(identacion + "f64.const " + Compilador.INT32_MAX + ".0\n");
                 codigoAssembler.append(identacion + "f64.gt\n"); 
                 codigoAssembler.append(identacion + "(if\n");
                 codigoAssembler.append(identacion + "  (then\n");
@@ -412,9 +412,9 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "  )\n");
                 codigoAssembler.append(identacion + ")\n");
 
-                // Chequeo del Limite Inferior (< -2147483648.0)
+                // Chequeo del Limite Inferior (< INT32_MIN.0)
                 codigoAssembler.append(identacion + "global.get $aux_float\n");
-                codigoAssembler.append(identacion + "f64.const -2147483648.0\n");
+                codigoAssembler.append(identacion + "f64.const " + Compilador.INT32_MIN + ".0\n");
                 codigoAssembler.append(identacion + "f64.lt\n"); 
                 codigoAssembler.append(identacion + "(if\n");
                 codigoAssembler.append(identacion + "  (then\n");

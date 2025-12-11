@@ -13,6 +13,17 @@ import Simbolos.SimboloFuncion;
 import Simbolos.SimboloLong;
 
 public class Compilador {
+    // Rango de enteros de 32 bits con signo
+    public static final long INT32_MAX = 2147483647L;
+    public static final long INT32_MIN = -2147483648L;
+    
+    // Rango de punto flotante de precisión simple (float)
+    public static final float FLOAT_MAX = 3.40282347E+38f;
+    public static final float FLOAT_MIN = 1.17549435E-38f;
+    
+    // Límite de caracteres para identificadores
+    public static final int MAX_ID_LENGTH = 20;
+
     public static void main(String[] args) throws Exception {
         /*if (args.length == 0) {
             System.err.println("Error: Debes proporcionar la ruta del archivo como argumento.");
@@ -118,23 +129,23 @@ public class Compilador {
 
         // Imprimir todos los errores léxicos, luego los sintácticos y por último cargar ambos en los archivos correspondientes
         for (String error : erroresLexicos) {
-            System.out.println("Error léxico: " + error);
+            System.out.println(error);
         }
         for (String error : erroresSintacticos) {
-            System.out.println("Error sintáctico: " + error);
+            System.out.println(error);
         }
         for (String error : erroresSemanticos) {
-            System.out.println("Error semántico: " + error);
+            System.out.println(error);
         }
         for (String warning : warnings) {
-            System.out.println("Warning: " + warning);
+            System.out.println(warning);
         }
         Files.write(archivoLexico, erroresLexicos);
         Files.write(archivoSintactico, erroresSintacticos);
         Files.write(archivoSemantico, erroresSemanticos);
         Files.write(archivoWarnings, warnings);
 
-        System.out.println("\n" + "TABLA DE SÍMBOLOS:");
+        System.out.println(System.lineSeparator() + "TABLA DE SÍMBOLOS:");
 
         //ELIMINACION DE SIMBOLOS CON RANGOS NO VALIDOS
 
@@ -154,7 +165,7 @@ public class Compilador {
             
         // IMPRESION DEL ARBOL SINTACTICO
 
-        System.out.println("\n" + "ÁRBOL SINTÁCTICO:");
+        System.out.println(System.lineSeparator() + "ÁRBOL SINTÁCTICO:");
 
         if (!arbolSintactico.getCategoria().equals("Vacio")) {
             arbolSintactico.imprimirArbol();
@@ -167,7 +178,7 @@ public class Compilador {
         // IMPRESION DE TODAS LAS FUNCIONES EN mapaFunciones
 
         if (verbose) {
-            System.out.println("\n" + "MAPA DE FUNCIONES:");
+            System.out.println(System.lineSeparator() + "MAPA DE FUNCIONES:");
     
             for (String key : mapaFunciones.keySet()) {
                 System.out.println("Función: " + key);

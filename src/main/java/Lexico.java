@@ -255,10 +255,10 @@ public class Lexico {
     public class AS1 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            if (cadena.length() > 20) {
+            if (cadena.length() > Compilador.MAX_ID_LENGTH) {
                 String cadenaCompleta = cadena.toString();
-                cadena.setLength(20);
-                warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + cadenaCompleta + "' excede el límite de 20 caracteres. Se truncará a: '" + cadena.toString() + "'");
+                cadena.setLength(Compilador.MAX_ID_LENGTH);
+                warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + cadenaCompleta + "' excede el límite de " + Compilador.MAX_ID_LENGTH + " caracteres. Se truncará a: '" + cadena.toString() + "'");
             }
             posicionActual--;
 
@@ -297,8 +297,8 @@ public class Lexico {
             try {
                 cte = Long.parseLong(lexema);
             } catch (NumberFormatException e) {
-                cte = 2147483647L;
-                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango\n");
+                cte = Compilador.INT32_MAX;
+                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
             }
             
             if (!charLeido.equals("L")) {
@@ -308,16 +308,16 @@ public class Lexico {
                 } else {
                     posicionActual--;
                     charLeido = "L";
-                    erroresLexicos.add("Error léxico en linea " + lineaActual + ": Sufijo 'L' faltante en constante long \n");
+                    erroresLexicos.add("Error léxico en linea " + lineaActual + ": Sufijo 'L' faltante en constante long " + System.lineSeparator());
                 }
             }
             
             lexema+= charLeido;
             cadena.append(charLeido);
 
-            if (cte > 2147483648L) {
-                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango\n");
-                cte = 2147483647L;
+            if (cte > Compilador.INT32_MAX + 1) {
+                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
+                cte = Compilador.INT32_MAX;
             }
 
             // Verificar si el lexema no está en la tabla de símbolos
@@ -399,7 +399,7 @@ public class Lexico {
             posicionActual--;
             idToken = mapaTokens.getOrDefault(cadena.toString(), 256); // si no se encuentra en el mapa entonces es un error
             if (idToken == 256) {
-                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Palabra reservada no válida\n");
+                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Palabra reservada no válida" + System.lineSeparator());
                 idToken = 256;
             }
             else {
@@ -418,9 +418,9 @@ public class Lexico {
             posicionActual--;
             if (!lexema.equals(".")) {
                 cte = Float.parseFloat(lexema);
-                // sin cte es mayor a 3.40282347E38 o menor a 1.17549435E-38 error
-                if (cte > 3.40282347E+38 || cte < 1.17549435E-38) {
-                    erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango\n");
+                // sin cte es mayor a FLOAT_MAX o menor a FLOAT_MIN error
+                if (cte > Compilador.FLOAT_MAX || cte < Compilador.FLOAT_MIN) {
+                    erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
                 }
                 else{
                     // Verificar si el lexema no está en la tabla de símbolos
@@ -486,7 +486,7 @@ public class Lexico {
     public class AS100 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            erroresLexicos.add("Error léxico en linea " + lineaActual + ": caractér no valido\n");
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": caractér no valido" + System.lineSeparator());
             idToken = 256;
         }
     }
@@ -495,7 +495,7 @@ public class Lexico {
     public class AS101 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un '='\n");
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un '='" + System.lineSeparator());
             idToken = 256;
             posicionActual--;
         }
@@ -506,7 +506,7 @@ public class Lexico {
     public class AS103 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba \"+\" ó \"-\"\n");
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba \"+\" ó \"-\"" + System.lineSeparator());
             idToken = 256;
             posicionActual--;
         }
@@ -516,7 +516,7 @@ public class Lexico {
     public class AS104 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un dígito\n");
+            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un dígito" + System.lineSeparator());
             idToken = 256;
             posicionActual--;
         }

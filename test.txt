@@ -1,19 +1,18 @@
 PARAM {
-
-    long SUMA(long A, long B) { 
-
-                  A := 3L;
-
-                                                      return (A);
-
-    };
-
  
-
-    long A;
-
-                  A := SUMA(4L -> A, 5L -> B);
-
-  
-
+          	long FUNA(long A, lambda X){
+                                          
+                         	long V;
+                         	V := X(3L);
+                         	return (A);
+                            
+          	};
+ 
+          	long AA;
+             
+          	AA := 2L;
+             
+          	print(FUNA(AA -> A, (long LL) {print(&en lambda&);print(LL);} -> X));
+             
+          	print(AA);
 }
