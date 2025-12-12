@@ -15,14 +15,11 @@
 
 
 
-%token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF //LEXERROR
+%token ID CTE ASIG IF ELSE ENDIF MAYORIG MENORIG IGUAL DISTINTO LONG RETURN DO UNTIL CV FLECHA PRINT CADENAML TRUNC LAMBDA EOF
 
 %%
 prog                        : ID {stringAmbitos.append(":"+((Simbolo)$1.obj).getLexema());} bloque_sentencias {quitarAmbito();} EOF   {if (!error() && erroresSemanticos.isEmpty() && $3.obj != null && $3.obj != null) { arbolSintactico.adoptarNodoIntermedio((ArbolSintactico)$3.obj);}}
                             | bloque_sentencias EOF                     {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $1.ival + ": falta el nombre del programa");} 
-                            //| ID '{' error ';' listasentencias '}' EOF  {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
-                            //| ID '{' listasentencias error '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
-                            //| ID '{' listasentencias error ';' listasentencias '}' EOF      {erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico: el programa no es válido");}
                             ;
 
 bloque_sentencias           : '{' listasentencias '}'                   { $$ = $2; $$.ival = $3.ival; }          
@@ -73,7 +70,7 @@ sentenciaejecutable         : asignacion                                      { 
                             ;
 
 declaracion                 : tipo listaIDs                                   { if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables");}
-                            | tipo id_funcion {String idFuncRaw = ((Simbolo)$2.obj).getLexema(); renombrarVariable($2); stringAmbitos.append(":"+idFuncRaw); stackTipoFuncActual.push($1.sval); enDeclaracionParam = true;} parametros_declaracion_f {enDeclaracionParam = false; stackParametrosActuales.push(parametrosActuales); cambiarASimboloFuncion((Simbolo)$2.obj); parametrosActuales = new ArrayList<>(); enFunc++;} '{' listasentencias '}' {  
+                            | tipo id_funcion {String idFuncRaw = ((Simbolo)$2.obj).getLexema(); renombrarVariable($2); stringAmbitos.append(":"+idFuncRaw); stackTipoFuncActual.push($1.sval); enDeclaracionParam = true;} parametros_declaracion_f {enDeclaracionParam = false; stackParametrosActuales.push(parametrosActuales); cambiarASimboloFuncion((Simbolo)$2.obj); parametrosActuales = new ArrayList<>(); inicioFunc();} '{' listasentencias '}' {  
                                                                                                                                                                                                                                                                     finFunc($8); 
                                                                                                                                                                                                                                                                     quitarAmbito(); 
                                                                                                                                                                                                                                                                     if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $8.ival + ": Se detectó una declaración de función");
@@ -82,7 +79,6 @@ declaracion                 : tipo listaIDs                                   { 
                                                                                                                                                                                                                                                                     }
                                                                                                                                                                                                                                                                     $$.ival = $8.ival;
                                                                                                                                                                                                                                                                   }
-                            //| LEXERROR listaIDs
                             ;
 
 parametros_declaracion_f    : '(' listaparametros ')'
@@ -503,7 +499,6 @@ termino                     : termino '*' factor                    { if (verbos
                             | factor                                { if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un término desde un factor");
                                                                       $$ = $1; 
                                                                     }
-                            //| termino error factor                  { erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operador/comparador entre término y factor"); }
                             | termino CTE                           { constantePositiva($2); restriccionCteFloat($2); erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error sintáctico en línea " + $2.ival + ": falta operador/comparador entre término y constante"); }
                             ;
 
@@ -597,6 +592,14 @@ private Simbolo funcionInvocadaActual = null;
 private int funcLambdaDeclaradas = 0;
 private boolean verbose = false;  
 
+// Stacks para guardar el contexto en funciones anidadas
+private Stack<Integer> stackNivel = new Stack<>();
+private Stack<Integer> stackReturnsIf = new Stack<>();
+private Stack<Integer> stackReturnsFunc = new Stack<>();
+private Stack<Boolean> stackSinRet = new Stack<>();
+private Stack<Boolean> stackHuboIfEnFunc = new Stack<>();
+private Stack<Stack<Boolean>> stackHuboRetStack = new Stack<>();
+
 public Parser(Map<String, Simbolo> tablaSimbolos, String path, ArbolSintactico arbolSintactico, Map<String, ArbolSintactico> mapaFunciones) {
   this.tablaSimbolos = tablaSimbolos;
   this.lexer = new Lexico(tablaSimbolos,path, erroresLexicos, warnings);
@@ -686,6 +689,26 @@ private void chequeoSentenciaReturn(ParserVal yyval) {
   }
 }
 
+private void inicioFunc() {
+  // Guardar estado actual en los stacks
+  stackNivel.push(nivel);
+  stackReturnsIf.push(returnsIf);
+  stackReturnsFunc.push(returnsFunc);
+  stackSinRet.push(sinRet);
+  stackHuboIfEnFunc.push(huboIfEnFunc);
+  stackHuboRetStack.push(huboRetStack);
+  
+  // Reiniciar variables para la nueva función
+  nivel = -1;
+  returnsIf = 0;
+  returnsFunc = 1;
+  sinRet = false;
+  huboIfEnFunc = false;
+  huboRetStack = new Stack<>();
+  
+  enFunc++;
+}
+
 private void inicioIf() {
   if(enFunc > 0 && !enDo) {
     huboIfEnFunc = true;
@@ -723,8 +746,24 @@ private void finFunc(ParserVal yyval) {
     erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + yyval.ival + ": Se han detectado multiples sentencias de retorno en la función");
   }
   enFunc--;
-  returnsFunc = 1;
-  huboIfEnFunc = false;
+  
+  // Restaurar estado previo desde los stacks
+  if (!stackNivel.isEmpty()) {
+    nivel = stackNivel.pop();
+    returnsIf = stackReturnsIf.pop();
+    returnsFunc = stackReturnsFunc.pop();
+    sinRet = stackSinRet.pop();
+    huboIfEnFunc = stackHuboIfEnFunc.pop();
+    huboRetStack = stackHuboRetStack.pop();
+  } else {
+    // Reseteo por defecto si no hay contexto previo
+    nivel = -1;
+    returnsIf = 0;
+    returnsFunc = 1;
+    sinRet = false;
+    huboIfEnFunc = false;
+    huboRetStack = new Stack<>();
+  }
 }
 
 private void cambiarASimboloFuncion (Simbolo simboloID) {
@@ -761,7 +800,12 @@ private void renombrarVariable(ParserVal yyval) {
 
 private void chequeo_anid_lambda(String nombreLambda, ParserVal yyval) {
   if (nombreLambda.contains(".")) {
-    erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + yyval.ival + ": Se ha intentado invocar una función lambda perteneciente a otro ámbito");
+    //Si el ámbito de la lambda no es padre del ámbito actual, tira error
+    String ambitoVarActual = (":" + nombreLambda.substring(0, nombreLambda.lastIndexOf("."))).replace(".", ":");
+    // P.F.F2.L() ->  ambitoVarActual = :P:F:F2
+    if (!stringAmbitos.toString().contains(ambitoVarActual)) {
+    erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + yyval.ival + ": Se ha intentado invocar una función lambda perteneciente a un ámbito no accesible");
+    }
   }
 }
 

@@ -802,6 +802,14 @@ private Simbolo funcionInvocadaActual = null;
 private int funcLambdaDeclaradas = 0;
 private boolean verbose = false;  
 
+// Stacks para guardar el contexto en funciones anidadas
+private Stack<Integer> stackNivel = new Stack<>();
+private Stack<Integer> stackReturnsIf = new Stack<>();
+private Stack<Integer> stackReturnsFunc = new Stack<>();
+private Stack<Boolean> stackSinRet = new Stack<>();
+private Stack<Boolean> stackHuboIfEnFunc = new Stack<>();
+private Stack<Stack<Boolean>> stackHuboRetStack = new Stack<>();
+
 public Parser(Map<String, Simbolo> tablaSimbolos, String path, ArbolSintactico arbolSintactico, Map<String, ArbolSintactico> mapaFunciones) {
   this.tablaSimbolos = tablaSimbolos;
   this.lexer = new Lexico(tablaSimbolos,path, erroresLexicos, warnings);
@@ -891,6 +899,26 @@ private void chequeoSentenciaReturn(ParserVal yyval) {
   }
 }
 
+private void inicioFunc() {
+  // Guardar estado actual en los stacks
+  stackNivel.push(nivel);
+  stackReturnsIf.push(returnsIf);
+  stackReturnsFunc.push(returnsFunc);
+  stackSinRet.push(sinRet);
+  stackHuboIfEnFunc.push(huboIfEnFunc);
+  stackHuboRetStack.push(huboRetStack);
+  
+  // Reiniciar variables para la nueva función
+  nivel = -1;
+  returnsIf = 0;
+  returnsFunc = 1;
+  sinRet = false;
+  huboIfEnFunc = false;
+  huboRetStack = new Stack<>();
+  
+  enFunc++;
+}
+
 private void inicioIf() {
   if(enFunc > 0 && !enDo) {
     huboIfEnFunc = true;
@@ -928,8 +956,24 @@ private void finFunc(ParserVal yyval) {
     erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + yyval.ival + ": Se han detectado multiples sentencias de retorno en la función");
   }
   enFunc--;
-  returnsFunc = 1;
-  huboIfEnFunc = false;
+  
+  // Restaurar estado previo desde los stacks
+  if (!stackNivel.isEmpty()) {
+    nivel = stackNivel.pop();
+    returnsIf = stackReturnsIf.pop();
+    returnsFunc = stackReturnsFunc.pop();
+    sinRet = stackSinRet.pop();
+    huboIfEnFunc = stackHuboIfEnFunc.pop();
+    huboRetStack = stackHuboRetStack.pop();
+  } else {
+    // Reseteo por defecto si no hay contexto previo
+    nivel = -1;
+    returnsIf = 0;
+    returnsFunc = 1;
+    sinRet = false;
+    huboIfEnFunc = false;
+    huboRetStack = new Stack<>();
+  }
 }
 
 private void cambiarASimboloFuncion (Simbolo simboloID) {
@@ -966,7 +1010,12 @@ private void renombrarVariable(ParserVal yyval) {
 
 private void chequeo_anid_lambda(String nombreLambda, ParserVal yyval) {
   if (nombreLambda.contains(".")) {
-    erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + yyval.ival + ": Se ha intentado invocar una función lambda perteneciente a otro ámbito");
+    //Si el ámbito de la lambda no es padre del ámbito actual, tira error
+    String ambitoVarActual = (":" + nombreLambda.substring(0, nombreLambda.lastIndexOf("."))).replace(".", ":");
+    // P.F.F2.L() ->  ambitoVarActual = :P:F:F2
+    if (!stringAmbitos.toString().contains(ambitoVarActual)) {
+    erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + yyval.ival + ": Se ha intentado invocar una función lambda perteneciente a un ámbito no accesible");
+    }
   }
 }
 
@@ -1087,7 +1136,7 @@ private ArbolSintactico generarAsigMultiple(ArrayList<Simbolo> listaVariables, A
   } 
   return arbolRetorno;
 }
-//#line 1019 "Parser.java"
+//#line 1068 "Parser.java"
 //###############################################################
 // method: yylexdebug : check lexer state
 //###############################################################
@@ -1370,7 +1419,7 @@ case 28:
 break;
 case 29:
 //#line 76 "gramatica.y"
-{enDeclaracionParam = false; stackParametrosActuales.push(parametrosActuales); cambiarASimboloFuncion((Simbolo)val_peek(2).obj); parametrosActuales = new ArrayList<>(); enFunc++;}
+{enDeclaracionParam = false; stackParametrosActuales.push(parametrosActuales); cambiarASimboloFuncion((Simbolo)val_peek(2).obj); parametrosActuales = new ArrayList<>(); inicioFunc();}
 break;
 case 30:
 //#line 76 "gramatica.y"
@@ -2134,7 +2183,7 @@ case 148:
 //#line 565 "gramatica.y"
 { yyval = val_peek(2); ((ArrayList<Simbolo>)yyval.obj).addAll( ((ArrayList<Simbolo>)val_peek(0).obj) ); yyval.ival = val_peek(0).ival; }
 break;
-//#line 2061 "Parser.java"
+//#line 2110 "Parser.java"
 //########## END OF USER-SUPPLIED ACTIONS ##########
     }//switch
     //#### Now let's reduce... ####

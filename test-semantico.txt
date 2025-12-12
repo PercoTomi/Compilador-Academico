@@ -1,1 +1,0 @@
-ERROR SEMÁNTICO EN LÍNEA 6: Las funciones Lambda no devuelven valor y no pueden usarse en expresiones
