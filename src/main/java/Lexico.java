@@ -1,6 +1,8 @@
 import Simbolos.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.io.IOException;
-import java.lang.reflect.Array;
+import java.io.PushbackReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -9,8 +11,8 @@ import java.util.Map;
 import java.util.ArrayList;
 
 public class Lexico {
-    private String buffer; //buffer de entrada que contiene el código fuente
-    private int posicionActual; // posición actual en el buffer
+    private PushbackReader reader; // reader para leer el archivo carácter por carácter
+    private char ultimoCaracterLeido; // último carácter leído, para poder devolverlo si es necesario
     private int idToken;
     private Map<String,Simbolo> tablaDeSimbolos; // referencia a la tabla de simbolos en la clase Compilador
     private int[][] matrizDeTransiciones; // matriz que indica a qué estado ir en cada transición
@@ -27,27 +29,44 @@ public class Lexico {
 
 
     public Lexico(Map<String, Simbolo> tablaDeSimbolos, String path, ArrayList<String> erroresLexicos, ArrayList<String> warnings) {
-        this.buffer = new String("");
-        this.posicionActual = 0;
         this.tablaDeSimbolos = tablaDeSimbolos;
         this.erroresLexicos = erroresLexicos;
         this.warnings = warnings;
         cargarMatrices();
         cargarMapas();
-        this.lineaActual = 1; // comenzamos en la línea 1
-        this.cargarBuffer(path);
+        this.lineaActual = 1;
+        this.abrirArchivo(path);
     }
 
-    // a continuación el método cargarBuffer recibe un archivo txt como parámetro, lo convierte en array de strigs y lo asigna al buffer
-    private boolean cargarBuffer(String path) {
+    // Abre el archivo y crea el PushbackReader para lectura carácter por carácter
+    private boolean abrirArchivo(String path) {
         try {
-            this.buffer = new String(Files.readAllBytes(Paths.get(path)));
-            this.posicionActual = 0;
+            this.reader = new PushbackReader(new BufferedReader(new FileReader(path)), 1);
         } catch (IOException e) {
             e.printStackTrace();
-            return false; // si hubo un error al cargar el archivo
+            return false;
         }
-        return true; // si se cargó correctamente
+        return true;
+    }
+    
+    // Devuelve el último carácter leído al stream para ser leído nuevamente
+    private void devolverCaracter() {
+        try {
+            reader.unread(ultimoCaracterLeido);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    // Método para cerrar el reader cuando se termine de usar
+    public void cerrar() {
+        try {
+            if (reader != null) {
+                reader.close();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     
     public void setVerbose(boolean verbose) {
@@ -55,46 +74,51 @@ public class Lexico {
     }
 
     public int yylex(ParserVal yylval) {
-        this.yylval = yylval; // actualizar la referencia de yylval
-        int estadoActual = 0; // resetear al estado inicial
-        StringBuilder cadena = new StringBuilder("") ;
-        idToken = 0; // en caso de que no se lea implica EOF
+        this.yylval = yylval;
+        int estadoActual = 0;
+        StringBuilder cadena = new StringBuilder("");
+        idToken = 0;
 
-        while (estadoActual >= 0 && posicionActual < buffer.length()) {
-            char c = buffer.charAt(posicionActual); // leer el caracter actual directamente
-            String charLeido = String.valueOf(c);
-            posicionActual++;
+        try {
+            int charInt=0;
+            while (estadoActual >= 0 && (charInt = reader.read()) != -1) {
+                char c = (char) charInt;
+                ultimoCaracterLeido = c; // guardar para posible devolución
+                String charLeido = String.valueOf(c);
 
-            // IDENTIFICACIÓN DE LA COLUMNA //
-            int columna = mapaColumnas.getOrDefault(charLeido, -1); // obtener la columna correspondiente
-            if (columna == -1) {
-                if(Character.isUpperCase(c)) { // mayúsculas
-                    columna = 0;
-                } else if(Character.isLowerCase(c)) { // minúsculas
-                    columna = 1;
-                } else if(Character.isDigit(c)) { // digito
-                    columna = 2;
-                } else if ("(){}_,;".contains(charLeido)) { // Caracter especial
-                    columna = 15;
-                } else {
-                    columna = 21; // otros
+                // IDENTIFICACIÓN DE LA COLUMNA //
+                int columna = mapaColumnas.getOrDefault(charLeido, -1); // obtener la columna correspondiente
+                if (columna == -1) {
+                    if(Character.isUpperCase(c)) { // mayúsculas
+                        columna = 0;
+                    } else if(Character.isLowerCase(c)) { // minúsculas
+                        columna = 1;
+                    } else if(Character.isDigit(c)) { // digito
+                        columna = 2;
+                    } else if ("(){}_,;".contains(charLeido)) { // Caracter especial
+                        columna = 15;
+                    } else {
+                        columna = 21; // otros
+                    }
                 }
-            }
 
-            // FIN IDENTIFICACIÓN DE LA COLUMNA //
-            mapaAS.get(matrizIndicesAS[estadoActual][columna]).ejecutar(cadena, charLeido);
-            estadoActual = matrizDeTransiciones[estadoActual][columna];
+                // FIN IDENTIFICACIÓN DE LA COLUMNA //
+
+                mapaAS.get(matrizIndicesAS[estadoActual][columna]).ejecutar(cadena, charLeido);
+                estadoActual = matrizDeTransiciones[estadoActual][columna];
+            }
+            
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-
-        if (idToken == 0 & cadena.length() != 0) { //aca tengo que cambiar el isEmpty
+        if (idToken == 0 && cadena.length() != 0) {
             idToken = 256; 
         }
-        if (posicionActual >= buffer.length() && idToken == 0) {
+        if (idToken == 0) {
             if (eof) {
                 idToken = 0; // EOF
-            }
-            else {
+            } else {
                 idToken = 277;
                 eof = true;
             }
@@ -260,7 +284,7 @@ public class Lexico {
                 cadena.setLength(Compilador.MAX_ID_LENGTH);
                 warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - El identificador '" + cadenaCompleta + "' excede el límite de " + Compilador.MAX_ID_LENGTH + " caracteres. Se truncará a: '" + cadena.toString() + "'");
             }
-            posicionActual--;
+            devolverCaracter();
 
             String lexemaOriginal = cadena.toString();
             
@@ -306,7 +330,7 @@ public class Lexico {
                     charLeido = ".E";
                     warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - La constante ingresada no contenía '.' anterior al sufijo 'F' por lo que ha sido corregido a: '" + cadena.toString() + ".F'");
                 } else {
-                    posicionActual--;
+                    devolverCaracter();
                     charLeido = "L";
                     erroresLexicos.add("Error léxico en linea " + lineaActual + ": Sufijo 'L' faltante en constante long " + System.lineSeparator());
                 }
@@ -350,7 +374,7 @@ public class Lexico {
     public class AS4 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            posicionActual--;
+            devolverCaracter();
             idToken = mapaTokens.get(cadena.toString());
             yylval.sval = cadena.toString();
             yylval.ival = lineaActual;
@@ -396,7 +420,7 @@ public class Lexico {
             }
 
 
-            posicionActual--;
+            devolverCaracter();
             idToken = mapaTokens.getOrDefault(cadena.toString(), 256); // si no se encuentra en el mapa entonces es un error
             if (idToken == 256) {
                 erroresLexicos.add("Error léxico en linea " + lineaActual + ": Palabra reservada no válida" + System.lineSeparator());
@@ -415,7 +439,7 @@ public class Lexico {
         public void ejecutar(StringBuilder cadena, String charLeido) {
             String lexema = cadena.toString();
             Float cte = 0f;
-            posicionActual--;
+            devolverCaracter();
             if (!lexema.equals(".")) {
                 cte = Float.parseFloat(lexema);
                 // sin cte es mayor a FLOAT_MAX o menor a FLOAT_MIN error
@@ -497,10 +521,9 @@ public class Lexico {
         public void ejecutar(StringBuilder cadena, String charLeido) {
             erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un '='" + System.lineSeparator());
             idToken = 256;
-            posicionActual--;
+            devolverCaracter();
         }
     }
-
 
     //AS103: Error: Se esperaba "+" ó "-"
     public class AS103 implements AccionSemantica {
@@ -508,7 +531,7 @@ public class Lexico {
         public void ejecutar(StringBuilder cadena, String charLeido) {
             erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba \"+\" ó \"-\"" + System.lineSeparator());
             idToken = 256;
-            posicionActual--;
+            devolverCaracter();
         }
     }
 
@@ -518,7 +541,7 @@ public class Lexico {
         public void ejecutar(StringBuilder cadena, String charLeido) {
             erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un dígito" + System.lineSeparator());
             idToken = 256;
-            posicionActual--;
+            devolverCaracter();
         }
     }
 

@@ -1,14 +1,1 @@
-PARAM {
-	long FUNA(long A, lambda X){						
-		long V;
-		X(3L);
-		return (A);
-							
-		long FUNB (long B) {
-			return(B);
-			X(4L);
-			FUNA.X(4L);
-
-		};
-	};
-}
+P
