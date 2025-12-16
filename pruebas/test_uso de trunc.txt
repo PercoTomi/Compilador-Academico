@@ -1,0 +1,15 @@
+@ Uso válido de TRUNC
+PROGRAMA
+{
+    long FUNC(cv long X)
+    {
+        return(X * 2L);
+    };
+    
+    long R;
+    R := FUNC(trunc(3.99) -> X);
+    print(R);
+    
+    R := FUNC(trunc(-2.5) -> X);
+    print(R);
+}

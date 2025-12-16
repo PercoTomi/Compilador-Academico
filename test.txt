@@ -1,1 +1,17 @@
-P
+@ Función con múltiples parámetros en diferente orden
+PROGRAMA
+{
+    long CALCULAR(cv long A, cv long B, cv long C)
+    {
+        return(A * B + C);
+    };
+    
+    long R;
+    @ Parámetros en orden normal
+    R := CALCULAR(2L -> A, 3L -> B, 4L -> C);
+    print(R);
+    
+    @ Parámetros en orden diferente
+    R := CALCULAR(4L -> C, 2L -> A, 3L -> B);
+    print(R);
+}

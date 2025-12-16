@@ -1,0 +1,27 @@
+@ Prueba de todas las operaciones aritméticas
+PROGRAMA
+{
+    long A, B, C;
+    A := 10L;
+    B := 3L;
+    
+    C := A + B;
+    print(C);
+    
+    C := A - B;
+    print(C);
+    
+    C := A * B;
+    print(C);
+    
+    C := A / B;
+    print(C);
+    
+    @ Constantes negativas
+    C := -5L;
+    print(C);
+    
+    @ Expresiones complejas
+    C := (A + B) * (A - B);
+    print(C);
+}

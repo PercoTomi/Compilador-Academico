@@ -1,0 +1,29 @@
+@ Diferencia entre CV y CVR
+PROGRAMA
+{
+    long FUNCCV(cv long X)
+    {
+        X := X + 1L;
+        return(X);
+    };
+    
+    long FUNCCVR(long X)
+    {
+        X := X + 1L;
+        return(X);
+    };
+    
+    long A, R;
+    
+    @ Con CV, A no cambia
+    A := 10L;
+    R := FUNCCV(A -> X);
+    print(A);
+    print(R);
+    
+    @ Con CVR, A cambia
+    A := 10L;
+    R := FUNCCVR(A -> X);
+    print(A);
+    print(R);
+}

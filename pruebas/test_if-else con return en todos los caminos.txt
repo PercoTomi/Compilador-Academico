@@ -1,0 +1,30 @@
+@ IF anidados con returns en todos los caminos
+PROGRAMA
+{
+    long CLASIFICAR(cv long X)
+    {
+        if (X > 0L)
+        {
+            if (X > 100L)
+                return(3L);
+            else
+                return(2L);
+            endif;
+        }
+        else
+        {
+            if (X < -100L)
+                return(-3L);
+            else
+                return(-2L);
+            endif;
+        }
+        endif;
+    };
+    
+    long R;
+    R := CLASIFICAR(50L -> X);
+    print(R);
+    R := CLASIFICAR(-150L -> X);
+    print(R);
+}

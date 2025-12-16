@@ -1,0 +1,21 @@
+@ Acceso con notación de punto a ámbitos padres
+PROGRAMA
+{
+    long FUNC1(cv long X)
+    {
+        long VARLOCAL;
+        VARLOCAL := X * 2L;
+        
+        long FUNC2(cv long Y)
+        {
+            @ Acceso a variable del padre usando punto
+            return(Y + FUNC1.VARLOCAL);
+        };
+        
+        return(FUNC2(X -> Y));
+    };
+    
+    long R;
+    R := FUNC1(5L -> X);
+    print(R);
+}

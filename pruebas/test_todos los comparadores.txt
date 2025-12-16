@@ -1,0 +1,31 @@
+@ Prueba de todos los comparadores
+PROGRAMA
+{
+    long A, B;
+    A := 5L;
+    B := 10L;
+    
+    if (A > B)
+        print(&Mayor&);
+    endif;
+    
+    if (A < B)
+        print(&Menor&);
+    endif;
+    
+    if (A >= B)
+        print(&Mayor o igual&);
+    endif;
+    
+    if (A <= B)
+        print(&Menor o igual&);
+    endif;
+    
+    if (A == B)
+        print(&Igual&);
+    endif;
+    
+    if (A != B)
+        print(&Distinto&);
+    endif;
+}

@@ -147,7 +147,7 @@ public class Lexico {
             { -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, 7, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, -1, -1, -1, 9, -1, -1 },
             { -1, -1, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 9, -1, -1 },
-            { -1, -1, -1, -1, -1, 10, 10, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
+            { 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10 },
             { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { -1, -1, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1 },
             { 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, -1, 12, 12, 12, 12, 12 },
@@ -165,8 +165,8 @@ public class Lexico {
             {4, 4, 4, 4, 4, 4, 4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4},
             {2, 2, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 2, 2, 2, 2, 2, 2},
             {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 10, 8, 8},
-            {103, 103, 103, 103, 103, 0, 0, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103, 103},
-            {104, 104, 0, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104, 104},
+            {12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12, 12},
+            {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
             {8, 8, 0, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8},
             {5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 5},
             {0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7},
@@ -253,10 +253,9 @@ public class Lexico {
         mapaAS.put(9, new AS9());
         mapaAS.put(10, new AS10());
         mapaAS.put(11, new AS11());
+        mapaAS.put(12, new AS12());
         mapaAS.put(100, new AS100());
         mapaAS.put(101, new AS101());
-        mapaAS.put(103, new AS103());
-        mapaAS.put(104, new AS104());
     }
 
     //------------------------------------------------------------------------------------------------//
@@ -322,7 +321,7 @@ public class Lexico {
                 cte = Long.parseLong(lexema);
             } catch (NumberFormatException e) {
                 cte = Compilador.INT32_MAX;
-                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
+                erroresLexicos.add("ERROR LÉXICO EN LÍNEA " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
             }
             
             if (!charLeido.equals("L")) {
@@ -332,7 +331,7 @@ public class Lexico {
                 } else {
                     devolverCaracter();
                     charLeido = "L";
-                    erroresLexicos.add("Error léxico en linea " + lineaActual + ": Sufijo 'L' faltante en constante long " + System.lineSeparator());
+                    erroresLexicos.add("ERROR LÉXICO EN LÍNEA " + lineaActual + ": Sufijo 'L' faltante en constante long " + System.lineSeparator());
                 }
             }
             
@@ -340,7 +339,7 @@ public class Lexico {
             cadena.append(charLeido);
 
             if (cte > Compilador.INT32_MAX + 1) {
-                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
+                erroresLexicos.add("ERROR LÉXICO EN LÍNEA " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
                 cte = Compilador.INT32_MAX;
             }
 
@@ -423,7 +422,7 @@ public class Lexico {
             devolverCaracter();
             idToken = mapaTokens.getOrDefault(cadena.toString(), 256); // si no se encuentra en el mapa entonces es un error
             if (idToken == 256) {
-                erroresLexicos.add("Error léxico en linea " + lineaActual + ": Palabra reservada no válida" + System.lineSeparator());
+                erroresLexicos.add("ERROR LÉXICO EN LÍNEA " + lineaActual + ": Palabra reservada no válida" + System.lineSeparator());
                 idToken = 256;
             }
             else {
@@ -437,6 +436,13 @@ public class Lexico {
     public class AS8 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
+            // Si el caracter no es un dígito y la cadena termina con +/-, falta el exponente
+            String ultimoChar = String.valueOf(cadena.charAt(cadena.length() - 1));
+            if (ultimoChar.equals("+") || ultimoChar.equals("-")) {
+                warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - Faltó el exponente después del signo en la constante flotante. Se agregó '1' automáticamente.");
+                cadena.append("1");
+            }
+            
             String lexema = cadena.toString();
             Float cte = 0f;
             devolverCaracter();
@@ -444,7 +450,7 @@ public class Lexico {
                 cte = Float.parseFloat(lexema);
                 // sin cte es mayor a FLOAT_MAX o menor a FLOAT_MIN error
                 if (cte > Compilador.FLOAT_MAX || cte < Compilador.FLOAT_MIN) {
-                    erroresLexicos.add("Error léxico en linea " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
+                    erroresLexicos.add("ERROR LÉXICO EN LÍNEA " + lineaActual + ": Constante fuera de rango" + System.lineSeparator());
                 }
                 else{
                     // Verificar si el lexema no está en la tabla de símbolos
@@ -506,11 +512,25 @@ public class Lexico {
         }
     }
 
+    // AS12: Si el caracter es + o -, lo agrega a la cadena. Sino, muestra warning, agrega "+" y devuelve el caracter
+    public class AS12 implements AccionSemantica {
+        @Override
+        public void ejecutar(StringBuilder cadena, String charLeido) {
+            if (charLeido.equals("+") || charLeido.equals("-")) {
+                cadena.append(charLeido);
+            } else {
+                warnings.add("||---------------- ANALIZADOR LÉXICO: Warning en línea " + lineaActual + " - Faltaba el signo '+' o '-' en la constante flotante. Se agregó '+' automáticamente.");
+                cadena.append("+");
+                devolverCaracter();
+            }
+        }
+    }
+
     // AS100: Error: caractér no válido
     public class AS100 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            erroresLexicos.add("Error léxico en linea " + lineaActual + ": caractér no valido" + System.lineSeparator());
+            erroresLexicos.add("ERROR LÉXICO EN LÍNEA " + lineaActual + ": caractér no valido" + System.lineSeparator());
             idToken = 256;
         }
     }
@@ -519,31 +539,10 @@ public class Lexico {
     public class AS101 implements AccionSemantica {
         @Override
         public void ejecutar(StringBuilder cadena, String charLeido) {
-            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un '='" + System.lineSeparator());
+            erroresLexicos.add("ERROR LÉXICO EN LÍNEA " + lineaActual + ": Se esperaba un '='" + System.lineSeparator());
             idToken = 256;
             devolverCaracter();
         }
     }
-
-    //AS103: Error: Se esperaba "+" ó "-"
-    public class AS103 implements AccionSemantica {
-        @Override
-        public void ejecutar(StringBuilder cadena, String charLeido) {
-            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba \"+\" ó \"-\"" + System.lineSeparator());
-            idToken = 256;
-            devolverCaracter();
-        }
-    }
-
-    //AS104: Error: Se esperaba un dígito
-    public class AS104 implements AccionSemantica {
-        @Override
-        public void ejecutar(StringBuilder cadena, String charLeido) {
-            erroresLexicos.add("Error léxico en linea " + lineaActual + ": Se esperaba un dígito" + System.lineSeparator());
-            idToken = 256;
-            devolverCaracter();
-        }
-    }
-
 
 }

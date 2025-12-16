@@ -1,0 +1,21 @@
+@ IF y DO con sentencia única (sin llaves)
+PROGRAMA
+{
+    long A, I;
+    A := 5L;
+    I := 0L;
+    
+    if (A > 0L)
+        print(A);
+    endif;
+    
+    if (A > 0L)
+        print(&Positivo&);
+    else
+        print(&No positivo&);
+    endif;
+    
+    do
+        I := I + 1L;
+    until (I > 3L);
+}

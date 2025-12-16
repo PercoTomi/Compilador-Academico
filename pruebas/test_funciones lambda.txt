@@ -1,0 +1,22 @@
+@ Caso completo de funciones Lambda
+PROGRAMA
+{
+    long APLICAR(cv long VALOR, lambda OPERACION)
+    {
+        OPERACION(VALOR);
+        return(VALOR);
+    };
+    
+    long A, R;
+    A := 5L;
+    
+    @ Lambda que imprime
+    R := APLICAR(A -> VALOR, (long X) { print(X); } -> OPERACION);
+    
+    @ Lambda con múltiples sentencias
+    R := APLICAR(A -> VALOR, (long X) { 
+        print(&Valor recibido:&);
+        print(X);
+        print(&Fin de lambda&);
+    } -> OPERACION);
+}

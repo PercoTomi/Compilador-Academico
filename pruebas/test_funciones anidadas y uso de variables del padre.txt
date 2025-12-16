@@ -1,0 +1,25 @@
+@ Funciones anidadas con acceso a variables del padre
+PROGRAMA
+{
+    long VAREXT;
+    VAREXT := 100L;
+    
+    long FUNCPADRE(cv long X)
+    {
+        long VARPADRE;
+        VARPADRE := X + VAREXT;
+        
+        long FUNCHIJA(cv long Y)
+        {
+            long VARHIJA;
+            VARHIJA := Y + VARPADRE;
+            return(VARHIJA);
+        };
+        
+        return(FUNCHIJA(VARPADRE -> Y));
+    };
+    
+    long R;
+    R := FUNCPADRE(10L -> X);
+    print(R);
+}

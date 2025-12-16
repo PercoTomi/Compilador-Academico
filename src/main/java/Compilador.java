@@ -129,7 +129,7 @@ public class Compilador {
 
         // Imprimir todos los errores léxicos, luego los sintácticos y por último cargar ambos en los archivos correspondientes
         for (String error : erroresLexicos) {
-            System.out.println(error);
+            System.out.print(error);
         }
         for (String error : erroresSintacticos) {
             System.out.println(error);
@@ -146,10 +146,6 @@ public class Compilador {
         Files.write(archivoWarnings, warnings);
 
         System.out.println(System.lineSeparator() + "TABLA DE SÍMBOLOS:");
-
-        //ELIMINACION DE SIMBOLOS CON RANGOS NO VALIDOS
-
-        //tablaSimbolos.remove("2147483648L");
 
         for (String key : tablaSimbolos.keySet()) {
             Simbolo simbolo = tablaSimbolos.get(key);
