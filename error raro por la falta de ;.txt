@@ -1,8 +1,0 @@
-PROGRAMA
-{
-    long B
-    long A
-    B := 1L
-    A := 1L
-    print(A)
-}

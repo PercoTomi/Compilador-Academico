@@ -1,21 +1,22 @@
-@ Acceso con notación de punto a ámbitos padres
+@ DO-UNTIL anidados
 PROGRAMA
 {
-    long FUNC1(cv long X)
-    {
-        long VARLOCAL;
-        VARLOCAL := X * 2L;
-        
-        long FUNC2(cv long Y)
-        {
-            @ Acceso a variable del padre usando punto
-            return(Y + FUNC1.VARLOCAL);
-        };
-        
-        return(FUNC2(X -> Y));
-    };
+    long I, J, SUMA;
+    I := 1L;
+    SUMA := 0L;
     
-    long R;
-    R := FUNC1(5L -> X);
-    print(R);
+    do
+    {
+        J := 1L;
+        do
+        {
+            SUMA := SUMA + I * J;
+            J := J + 1L;
+        }
+        until (J > 3L);
+        I := I + 1L;
+    }
+    until (I > 3L);
+    
+    print(SUMA);
 }

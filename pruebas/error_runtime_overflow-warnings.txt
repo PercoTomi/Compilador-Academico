@@ -1,0 +1,1 @@
+||---------------- ANALIZADOR LÉXICO: Warning en línea 1 - El identificador 'PROGRAMARUNTIMEERRORS' excede el límite de 20 caracteres. Se truncará a: 'PROGRAMARUNTIMEERROR'

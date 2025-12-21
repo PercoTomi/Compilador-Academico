@@ -59,18 +59,18 @@ listasentenciasejecutables  : listasentenciasejecutables sentenciaejecutable ';'
 
 sentenciaejecutable         : asignacion                                      { $$ = $1; }
                             | control                                         { $$ = $1; }  
-                            | funcion                                         { erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $1.ival + ": No está permitida la invocación de funciones sin utilizar su retorno"); }
+                            | funcion                                         { erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $1.ival + ": No está permitida la invocación de funciones sin utilizar su retorno"); $$.ival = $1.ival; }
                             | print                                           { if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $1.ival + ": Se detectó un print");
                                                                                 $$ = $1;
                                                                               }
-                            | funcion_lambda                                  { if(enFunc==0) {erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $1.ival + ": No está permitida la invocación de función lambda fuera de una función");} 
+                            | funcion_lambda                                  { if(enFunc==0) {erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $1.ival + ": No está permitida la invocación de función lambda fuera de una función"); $$.ival = $1.ival; } 
                                                                                 else { $$ = $1; }
                                                                               }
                             | sentencia_return                                {chequeoSentenciaReturn($1); $$ = $1;}
                             ;
 
-declaracion                 : tipo listaIDs                                   { if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables"); $$.ival = $2.ival; }
-                            | tipo id_funcion {String idFuncRaw = ((Simbolo)$2.obj).getLexema(); renombrarVariable($2); stringAmbitos.append(":"+idFuncRaw); stackTipoFuncActual.push($1.sval); enDeclaracionParam = true;} parametros_declaracion_f {enDeclaracionParam = false; stackParametrosActuales.push(parametrosActuales); cambiarASimboloFuncion((Simbolo)$2.obj); parametrosActuales = new ArrayList<>(); inicioFunc();} '{' listasentencias '}' {  
+declaracion                 : tipo listaIDs                                   {if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $2.ival + ": Se detectó una declaración de variables"); $$.ival = $2.ival; }
+                            | tipo id_funcion { String idFuncRaw = ((Simbolo)$2.obj).getLexema(); renombrarVariable($2); stringAmbitos.append(":"+idFuncRaw); stackTipoFuncActual.push($1.sval); enDeclaracionParam = true;} parametros_declaracion_f {enDeclaracionParam = false; stackParametrosActuales.push(parametrosActuales); cambiarASimboloFuncion((Simbolo)$2.obj); parametrosActuales = new ArrayList<>(); inicioFunc();} '{' listasentencias '}' {  
                                                                                                                                                                                                                                                                     finFunc($8); 
                                                                                                                                                                                                                                                                     quitarAmbito(); 
                                                                                                                                                                                                                                                                     if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $8.ival + ": Se detectó una declaración de función");
@@ -136,6 +136,7 @@ asignacion                  : identificador ASIG expresion                      
                                                                                             if (!error()) { 
                                                                                               $$ = new ParserVal( new ArbolSintactico("Asig", new ArbolSintactico(simboloAAsignar), (ArbolSintactico)$3.obj) );
                                                                                             }
+                                                                                            $$.ival = $3.ival;
                                                                                           }
                             | listavariables '=' listaconstantes                          { if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó una asignación múltiple");
                                                                                             if (((ArrayList<Simbolo>)$1.obj).size() >= ((ArrayList<Simbolo>)$3.obj).size()) {
@@ -147,8 +148,9 @@ asignacion                  : identificador ASIG expresion                      
                                                                                               erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $3.ival + ": La cantidad de constantes en la asignación múltiple es mayor a la cantidad de variables");
                                                                                               $$ = new ParserVal(new ArbolSintactico("ErrorAsigMultiple", null, null ));
                                                                                             }
+                                                                                            $$.ival = $3.ival;
                                                                                           }
-                            | listavariables '=' listavariables                           {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $2.ival + ": No se permite la asignación múltiple utilizando variables en el lado derecho");}
+                            | listavariables '=' listavariables                           {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $2.ival + ": No se permite la asignación múltiple utilizando variables en el lado derecho"); $$.ival = $2.ival; }
                             | listavariables '=' lista_expresiones                        { erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $2.ival + ": No se permite la asignación múltiple utilizando variables en el lado derecho");
                                                                                             if (((ArrayList<Simbolo>)$1.obj).size() >= ((ArrayList<Simbolo>)$3.obj).size()) {
                                                                                               if(!error()) {  
@@ -156,18 +158,21 @@ asignacion                  : identificador ASIG expresion                      
                                                                                               }
                                                                                             }
                                                                                             else erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $3.ival + ": La cantidad de elementos en la derecha de la asignación múltiple es mayor a la cantidad de variables del lado izquierdo");
+                                                                                            $$.ival = $2.ival;
                                                                                           }
                             ;
 
 bloque_control_estructura   : '{' listasentenciasejecutables '}'              { $$ = $2; $$.ival = $3.ival; }
-                            | sentenciaejecutable ';'                         { if (!error()) { $$ = new ParserVal(new ArbolSintactico("Sentencia", ((ArbolSintactico)$1.obj), null)); } $$.ival = $2.ival; }
+                            | sentenciaejecutable ';'                         { $$ = $1; $$.ival = $2.ival; }
                             | '{''}'                                          { $$.obj = null; $$.ival = $2.ival; }
                             ;
 
 bloque_control              : {inicioIf();} bloque_control_estructura {finIf($2); $$ = $2; }
                             ;
 
-inicio_do                   : DO {enDo=true;}
+inicio_do                   : DO '{' listasentenciasejecutables '}'   { $$ = $3; $$.ival = $4.ival; }
+                            | DO '{' '}'                               { $$.obj = null; $$.ival = $3.ival; }
+                            | DO sentenciaejecutable ';'              { $$ = $2; $$.ival = $3.ival; }
                             ;
 
 bloque_control_else         : {sinRetIf.push(sinRet);} bloque_control {if(sinRetIf.pop()) {sinRet=true;} $$ = $2; }
@@ -186,11 +191,13 @@ control                     : IF condicion bloque_control ENDIF                 
                                                                                                       huboRetStack.push(true);
                                                                                                   }
                                                                                                 } 
-                            | inicio_do bloque_control UNTIL condicion                          { enDo=false;
-                                                                                                  if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");
-                                                                                                  if (!error()) { $$ = new ParserVal(new ArbolSintactico("DoUntil", (ArbolSintactico)$4.obj, (ArbolSintactico)$2.obj));  }  $$.ival = $4.ival;
+                            | inicio_do UNTIL condicion                                         { if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $3.ival + ": Se detectó un bloque DO UNTIL");
+                                                                                                  if (!error()) { $$ = new ParserVal(new ArbolSintactico("DoUntil", (ArbolSintactico)$3.obj, (ArbolSintactico)$1.obj));  }  $$.ival = $3.ival;
                                                                                                 }
-
+                            | DO sentenciaejecutable UNTIL condicion                            { if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $4.ival + ": Se detectó un bloque DO UNTIL");
+                                                                                                  if (!error()) { $$ = new ParserVal(new ArbolSintactico("DoUntil", (ArbolSintactico)$4.obj, (ArbolSintactico)$2.obj));  }  $$.ival = $4.ival;
+                                                                                                  erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $4.ival + ": falta ';' en la sentencia ejecutable dentro del bloque DO");
+                                                                                                }
                             | IF condicion bloque_control ELSE bloque_control_else              {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $5.ival + ": falta la palabra ENDIF al final del bloque IF-ELSE"); $$.ival = $5.ival;}
                             | IF condicion bloque_control                                       {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $2.ival + ": falta la palabra ENDIF al final del bloque IF"); $$.ival = $3.ival;}
                             | IF condicion bloque_control ELSE ENDIF                            {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $5.ival + ": falta el cuerpo en el bloque ELSE"); $$.ival = $5.ival;}
@@ -198,12 +205,9 @@ control                     : IF condicion bloque_control ENDIF                 
                             | IF condicion ENDIF                                                {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $3.ival + ": falta el cuerpo en el bloque IF"); $$.ival = $3.ival;}
                             | IF condicion ELSE ENDIF                                           {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $4.ival + ": falta el cuerpo en los bloques IF y ELSE"); $$.ival = $4.ival;}
                             
-                            | DO UNTIL condicion                                                {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $1.ival + ": falta de cuerpo en iteracion"); $$.ival = $1.ival;}
-                            | inicio_do bloque_control condicion                                { enDo=false;
-                                                                                                  erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $3.ival + ": falta la palabra UNTIL en la iteracion"); $$.ival = $3.ival;
-                                                                                                }
+                            | DO UNTIL condicion                                                {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $3.ival + ": falta de cuerpo en iteracion"); $$.ival = $3.ival;}
+                            | inicio_do condicion                                               { erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $2.ival + ": falta la palabra UNTIL en la iteracion"); $$.ival = $2.ival; }
                             ;
-                            
 
 print                       : PRINT '(' argumento_print ')'                { if ($3.obj instanceof ArbolSintactico) { $$ = new ParserVal (new ArbolSintactico("Print", (ArbolSintactico)$3.obj, null)); } $$.ival = $4.ival; }
                             | PRINT '(' ')'                                {erroresSintacticos.add("ERROR SINTÁCTICO EN LÍNEA " + $3.ival + ": falta de argumento en sentencia print");  $$.ival = $3.ival; }
@@ -330,8 +334,8 @@ funcion_lambda              : cabecera_funcion argumento_id_lambda ')'          
                                                                                                                 if ($1.obj != null && ((Simbolo)((ArbolSintactico)$1.obj).getLeft().getRefSimbolo()).getTipo() != "Lambda") {
                                                                                                                   erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $6.ival + ": La función '" + $1.sval + "' no es una función Lambda");
                                                                                                                 }
-                                                                                                                constantePositiva($4);
                                                                                                                 chequeo_anid_lambda($1.sval, $6);
+                                                                                                                constantePositiva($4);
                                                                                                                 if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $6.ival + ": Se detectó la invocación de una función lambda");
                                                                                                                 if (!error() && $1.obj != null) {
                                                                                                                   ((ArbolSintactico)$1.obj).setUltimoDerecho( new ArbolSintactico("Trunc", new ArbolSintactico((Simbolo)$4.obj), null) );
@@ -344,8 +348,8 @@ funcion_lambda              : cabecera_funcion argumento_id_lambda ')'          
                                                                                                                 if ($1.obj != null && ((Simbolo)((ArbolSintactico)$1.obj).getLeft().getRefSimbolo()).getTipo() != "Lambda") {
                                                                                                                   erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $7.ival + ": La función '" + $1.sval + "' no es una función Lambda");
                                                                                                                 }
-                                                                                                                constanteNegativa($5);
                                                                                                                 chequeo_anid_lambda($1.sval, $7);
+                                                                                                                constanteNegativa($5);
                                                                                                                 if (verbose) System.out.println("||================ ANALIZADOR SINTÁCTICO: Linea " + $7.ival + ": Se detectó la invocación de una función lambda");
                                                                                                                 if (!error() && $1.obj != null) {
                                                                                                                   ((ArbolSintactico)$1.obj).setUltimoDerecho( new ArbolSintactico("Trunc", new ArbolSintactico((Simbolo)$5.obj), null) );
@@ -420,7 +424,7 @@ listapinvocacion            : listapinvocacion ',' pinvocacion              { $$
 
 pinvocacion                 : expresion FLECHA ID                                                           { checkeoParametroDeInvocacion(((Simbolo)$3.obj).getLexema(), $3.ival, (ArbolSintactico)$1.obj);
                                                                                                               Parametro parametroActual = ((SimboloFuncion)funcionInvocadaActual).getRefParametro(((Simbolo)$3.obj).getLexema());
-                                                                                                              if (parametroActual.getTipo().equals("Lambda")) {
+                                                                                                              if (parametroActual != null && parametroActual.getTipo().equals("Lambda")) {
                                                                                                                 erroresSemanticos.add("ERROR SEMÁNTICO EN LÍNEA " + $3.ival + ": No se puede pasar una expresión como parámetro real a un parámetro formal de tipo 'Lambda'");
                                                                                                               }
                                                                                                               if (!error()) {
@@ -625,7 +629,6 @@ public void setVerbose(boolean verbose) {
 }
 
 private void yyerror(String s) {
-    erroresSintacticos.add("||================ ANALIZADOR SINTÁCTICO: Error: " + s);
 }
 
 private boolean error() {

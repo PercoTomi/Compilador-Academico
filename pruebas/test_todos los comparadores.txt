@@ -25,7 +25,7 @@ PROGRAMA
         print(&Igual&);
     endif;
     
-    if (A != B)
+    if (A =! B)
         print(&Distinto&);
     endif;
 }

@@ -1,8 +1,13 @@
-import Simbolos.*;
-import Simbolos.Auxiliares.Parametro;
 import java.nio.file.Path;
 import java.util.Map;
 import java.util.Stack;
+
+import Simbolos.Auxiliares.Parametro;
+import Simbolos.Simbolo;
+import Simbolos.SimboloCteFloat;
+import Simbolos.SimboloCteString;
+import Simbolos.SimboloFuncion;
+import Simbolos.SimboloLong;
 
 public class GeneradorDeCodigo {
     private Map<String, Simbolo> tablaSimbolos;
@@ -258,19 +263,25 @@ public class GeneradorDeCodigo {
             case "CuerpoIf":
                 codigoAssembler.append(identacion + "(then \n");
                 identacion += "  ";
-                ejecutar(nodo.getLeft());
+                if (nodo.getLeft() != null) {
+                    ejecutar(nodo.getLeft());
+                }
                 identacion = identacion.substring(2);
                 codigoAssembler.append(identacion + ") \n");
                 break;
             case "CuerpoIfElse":
                 codigoAssembler.append(identacion + "(then \n");
                 identacion += "  ";
-                ejecutar(nodo.getLeft()); // sentencias del then
+                if (nodo.getLeft() != null) {
+                    ejecutar(nodo.getLeft());
+                }
                 identacion = identacion.substring(2);
                 codigoAssembler.append(identacion + ") \n");
                 codigoAssembler.append(identacion + "(else \n");
                 identacion += "  ";
-                ejecutar(nodo.getRight()); // sentencias del else
+                if (nodo.getRight() != null) {
+                    ejecutar(nodo.getRight()); // sentencias del else
+                }
                 identacion = identacion.substring(2);
                 codigoAssembler.append(identacion + ") \n");
                 break;
@@ -280,7 +291,9 @@ public class GeneradorDeCodigo {
                 codigoAssembler.append(identacion + "(block $salidaDoUntil" + contadorControl + "\n");
                 identacion += "  ";
                 codigoAssembler.append(identacion + "(loop $loopDoUntil" + contadorControl + "\n");
-                ejecutar(nodo.getRight()); // cuerpo
+                if (nodo.getRight() != null) {
+                    ejecutar(nodo.getRight()); // cuerpo
+                }
                 ejecutar(nodo.getLeft()); // condición
                 codigoAssembler.append(identacion + "br_if $salidaDoUntil" + contadorActualDo + "\n");
                 codigoAssembler.append(identacion + "br $loopDoUntil" + contadorActualDo + "\n");

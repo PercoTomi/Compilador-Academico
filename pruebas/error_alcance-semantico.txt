@@ -1,0 +1,1 @@
+ERROR SEMÁNTICO EN LÍNEA 18: 'FUNCION1.VARLOCAL' no está al alcance desde el ámbito actual

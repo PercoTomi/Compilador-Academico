@@ -21,7 +21,6 @@ PROGRAMA
     C := -5L;
     print(C);
     
-    @ Expresiones complejas
-    C := (A + B) * (A - B);
+    C := A + B * A - B;
     print(C);
 }

@@ -7,9 +7,9 @@ PROGRAMA
     };
     
     long R;
-    R := FUNC(trunc(3.99) -> X);
+    R := FUNC(trunc(3.0F+2) -> X);
     print(R);
     
-    R := FUNC(trunc(-2.5) -> X);
+    R := FUNC(trunc(-2.0) -> X);
     print(R);
 }
